@@ -1,0 +1,94 @@
+
+/** CSS Reset - Credits to Eric Meyer*/
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outline:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse; border-spacing:0}
+/*
+ * blue #1BA1E2
+ * lime #8CBF26   8cbf26
+ * orange #F09609
+ * teal #00ABA9;
+ *  border-style: none;
+ * green 339933 
+ */
+  body {
+    background-color: #353535;
+    font-family: SegoeWPLight, helvetica, sans-serif;
+    color: #FFFFFF;
+    font-size: 100%;
+    text-shadow: 0 -1px 0 #888888;
+  }
+  #container {
+    margin: 5px;
+    min-width: 640px;
+  }
+  .item {
+    display: inline-block;
+    white-space: nowrap;
+    margin: 5px;
+    padding: 0.2em;
+    width: 161px;
+    height: 100px;
+    overflow: hidden;
+  }
+/*  */
+  .folder {
+    background-color: #1BA1E2;
+    position: relative;
+    
+  }
+  .folder h2{
+    position: absolute;
+    bottom: 5px;
+    left : 5px;
+    font-size: 130%;
+  }
+  .folder h3{
+    position: absolute;
+    top: 5px;
+    right : 5px;
+    font-size: 130%;    
+  }
+/* */
+.upper{
+    background-color: #F09609;
+    position: relative;
+    
+}
+ .upper h2{
+    position: absolute;
+    bottom: 5px;
+    left : 5px;
+    font-size: 130%;
+ }
+/*  */
+  .file {
+    background-color: #00ABA9;
+    font-size: 100%;
+    text-shadow: 0 -1px 0 #888888;
+  }
+  .file a {
+    text-decoration: none;
+    color: #FFFFFF;
+  }
+  .title {
+    width: 210px;
+    height: 80px;
+    display: block;
+    overflow: hidden;
+    white-space: normal;
+  }
+  .comment {
+    font-size: 60%;
+  }
+/*  */
+  #navi {
+    position: relative;
+    width: 100%;
+    height: 60px;
+  }
+  #breadcrumbs{
+    position : absolute;
+    right: 5px;
+  }
+  #title{
+    font-size: 48px;
+  }
