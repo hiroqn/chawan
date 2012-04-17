@@ -7,8 +7,7 @@
 // @run-at        document-start
 // @version       0.1.0
 // ==/UserScript==
-//http://cdn2.www.st-hatena.com/users/hi/*/profile.gif
-//http://b.st-hatena.com/images/loading.gif
+
 var first=Date.now(),dominit,domed,searched,setted;
 /** TODO jQuery もこっちに書くべき？
  * libraries underscore & backbone
@@ -144,27 +143,80 @@ var util={
     },
     wLog:function(){// <div id="log" style="position: fixed;bottom: 2%;right:
                     // 2%;z-index: 10;width: 15%;"></div>
-      
+    },
+    isUsable:function(){
+      return _.all(arguments,function(obj){
+        return Boolean(obj);
+      });
     }
 };
 var config = {};
-function editComment(url,comment){
-  return http.post({
-    url:'http://b.hatena.ne.jp/'+config.id+'/add.edit.json',
-    data:{
-      url:url,
-      comment:comment,
-      from:'inplace',
-      rks:config.rks
-    }
+var hatena = {
+    editComment:function(){
+      return http.post({
+        url:'http://b.hatena.ne.jp/'+config.id+'/add.edit.json',
+        data:{
+          url:url,
+          comment:comment,
+          from:'inplace',
+          rks:config.rks
+        }
+      });
+    },
+    destroyBookmark:function(url){
+      return http.post({
+        url:'http://b.hatena.ne.jp/'+config.id+'/add.delete',
+        data:{
+          url:url,
+          rks:config.rks
+        }
+      });
+    }    
+};
+function initialize(callbacks) {
+  var localData,result = window.location.href.match(/^http.*\/([^\/]+)\/tags\.json(#.+)?$/),searchDataDfd,myNameDfd;
+  config.id = (result && result[1]);
+  if(!util.isUsable(config.id,JSON,localStorage)){
+    callbacks.onError('Environmental error');
+    return false;
+  }
+  searchDataDfd = http.post({url:"http://b.hatena.ne.jp/" + config.id + "/search.data"});
+  (myNameDfd=http.get({url:"http://b.hatena.ne.jp/my.name"})).done(function(res){
+    var conf=JSON.parse(res.responseText);
+    config.rkm=conf.rkm;
+    config.rks=conf.rks;
+    config.bookmarkCount=conf.bookmark_count;
+    config.login=true;
   });
+  document.addEventListener('DOMContentLoaded', function(e) {
+    dominit=Date.now();                                                     /** timer */
+    util.addStyle(RESOURCE.CSS);
+    var tagText=$('pre').text();
+    document.title='?Chawan';   // set title
+    $('body').empty().append(Backbone.View.prototype.make('div',{"id":"container"})); // clear
+    callbacks.ready(localData);
+    config.tags=JSON.parse(tagText);// save tag
+    domed=Date.now();                                                     /** timer */
+    searchDataDfd.done(function(res){
+      searched=Date.now();                                                     /** timer */
+      callbacks.dataset(res.responseText);
+      config.text=res.responseText;
+      setted=Date.now();                                                     /** timer */
+// alert('dominit:'+(dominit-first)+'\n domed' +(domed-first)+'\n
+// searched'+(searched-first)+ '\n setted'+(setted-first));
+    });
+    $.when(myNameDfd,searchDataDfd).fail(function(res){
+      callbacks.onError('not login');
+      config.login=false;
+      });
+  }, false);
 }
-
 /*
  * *ここからコピペ
  */
 //TODO hover ,edit comment
 var RESOURCE = {
+    CSS:'',
   BMTPL : '<div class="file item"  title="<%- title +"\n"+ comment %>"><div class="title"><a href="<%- url %>" target="_blank"> <%- title %><\/a><\/div><span class="comment"><%- comment %><\/span><span class="others"> <\/span><\/div>',
   FLDTPL : '<div class="folder item" data-name="<%- name %>"><h2><%- name %><\/h2><h3><%- count %><\/h3><\/div>',
   NAVITPL : '<span id="title">?Chawan<\/span><span id="breadcrumbs"><%- list %><\/span>'
@@ -419,43 +471,7 @@ initialize({
  * *ここまでコピペ
  */
 
-function initialize(callbacks) {
-//var result = url.match(/^http.*\/([^\/]+)\/profile\.gif$/);
- var localData,result = window.location.href.match(/^http.*\/([^\/]+)\/tags\.json(#.+)?$/),searchDfd,myDfd;
- config.id = (result && result[1]);
- if(!(config.id || !Boolean(JSON && localStorage))){
-   callbacks.onError('Environmental error');
-   return false;
- }
- var loginError=function(res){callbacks.onError('not login');config.login=false;};
- searchDfd = http.post({url:"http://b.hatena.ne.jp/" + config.id + "/search.data"});
- myDfd=http.get({url:"http://b.hatena.ne.jp/my.name"});
- myDfd.then(function(res){
-   var conf=JSON.parse(res.responseText);
-   config.rkm=conf.rkm;
-   config.rks=conf.rks;
-   config.bookmarkCount=conf.bookmark_count;
-   config.login=true;
- },loginError);
- 
- document.addEventListener('DOMContentLoaded', function(e) {
-   dominit=Date.now();                                                     /** timer */
-   util.addStyle(RESOURCE.CSS);
-   var tagText=$('pre').text();
-   document.title='?Chawan';   // set title
-   $('body').empty().append(Backbone.View.prototype.make('div',{"id":"container"})); // clear
-   callbacks.ready(localData);
-   config.tags=JSON.parse(tagText);// save tag
-   domed=Date.now();                                                     /** timer */
-   searchDfd.then(function(res){
-     searched=Date.now();                                                     /** timer */
-     callbacks.dataset(res.responseText);
-     config.text=res.responseText;
-     setted=Date.now();                                                     /** timer */
-//alert('dominit:'+(dominit-first)+'\n domed' +(domed-first)+'\n searched'+(searched-first)+ '\n setted'+(setted-first));
-   },loginError)
- }, false);
-}
+
 RESOURCE.CSS=(<><![CDATA[
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outline:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse; border-spacing:0}
   body {
