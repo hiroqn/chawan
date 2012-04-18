@@ -193,7 +193,7 @@ function initialize(callbacks) {
     util.addStyle(RESOURCE.CSS);
     var tagText=$('pre').text();
     document.title='?Chawan';   // set title
-    $('body').empty().append(Backbone.View.prototype.make('div',{"id":"container"})); // clear
+    $('body').empty(); // clear
     callbacks.ready(localData);
     config.tags=JSON.parse(tagText);// save tag
     domed=Date.now();                                                     /** timer */
