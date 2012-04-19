@@ -70,7 +70,23 @@ body {
   font-size: 48px;
 }
 .editer {
-  
+  width: 647px;
+  height: 400px;
+}
+.editer-input {
+
+}
+.editer-wrapper {
+  bottom: 0;
+  display: none;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 200;
+}
+.modal-enable .editer-wrapper {
+  display: block;
 }
 .overlay {
   background: none repeat scroll 0 0 rgba(0, 0, 0, 0.5);
@@ -82,7 +98,10 @@ body {
   top: 0;
   z-index: 100;
 }
-/*  */
+.modal-enable .overlay {
+  display: block;
+}
+/* 150:243 */
 .item {
   display: inline-block;
   white-space: nowrap;

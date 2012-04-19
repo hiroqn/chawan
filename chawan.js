@@ -4,7 +4,26 @@ var RESOURCE = {
   FLDTPL : '<div class="folder item" data-name="<%- name %>"><h2><%- name %><\/h2><h3><%- count %><\/h3><\/div>',
   NAVITPL : '<span id="title">?Chawan<\/span><span id="breadcrumbs"><%- list %><\/span>'
 };
+RESOURCE.editerTMPL = (<><![CDATA[
+<div class="editer">
+  <h1><%- title %></h1>
+  <h2><%- url %></h2>
+  <textarea class="editer-input"><%- comment %></textarea>
+  <button class="submit">submit</button>
+</div>
+]]></>).toString();
 
+RESOURCE.bookmarkTMPL = (<><![CDATA[
+<div class="file item"  title="<%- title +' '+ comment %>">
+  <div class="title">
+    <a href="<%- url %>" target="_blank"> <%- title %><\/a>
+  <\/div>
+  <span class="comment"><%- comment %>
+  <\/span>
+  <span class="others">
+  <\/span>
+<\/div>
+]]></>).toString();
 var TreeMgr = function() {
   var Folder, Bookmark, TreeMgr, tagParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g;
   /** Folder */
@@ -32,12 +51,16 @@ var TreeMgr = function() {
           + _.reduce(this.folders, function(memo, folder) {
             return folder.getBookmarkCount() + memo;
           }, 0);
+    },
+    takeBookmark: function(bookmark) {
+      var index=this.bookmarks.indexOf(bookmark);
+      return index == -1 ? false : (this.bookmarks.splice(index,1),true);
     }
   });
   /** Bookmark */
-  Bookmark = function(title, comment, url, others) {//TODO bookmark need parent
+  Bookmark = function(title, comment, url, others) {// TODO bookmark need parent
     this.title = title;
-    // this.comment = comment;
+    this.comment = comment;
     this.url = url;
     this.tagParser(comment);
   }
@@ -47,7 +70,7 @@ var TreeMgr = function() {
       this.hierarchy = _.map(comment.match(tagParam), function(str) {
         return str.slice(2, -1).split('/');
       });
-      this.comment = comment.replace(tagParam, '');
+      // this.comment = comment.replace(tagParam, '');
     }
   });
   Bookmark.createByText = function(texts) {
@@ -124,8 +147,19 @@ var NaviView = Backbone.View.extend({
 });
 var EditerView = Backbone.View.extend({
   tagName: 'div',
-  class: 'editer',
+  "class": 'editer',
+  events: {
+    "click .submit":'submit'
+  }, 
+  tmpl:_.template(RESOURCE.editerTMPL),
   initialize: function(options) {
+    this.render();
+  },
+  render: function() {
+    this.$el.html(tmpl(this.model));
+    return this;
+  },
+  submit: function(){
     
   }
 })
@@ -222,12 +256,10 @@ var AppView = Backbone.View.extend({
   modal:function(){
     if(this.model.get('isModal')){
       this.$el.addClass('modal-enable');
-      this.$overlay..show();
     } else{
       this.$el.removeClass('modal-enable');
-      this.$overlay.hide()
     }
-    //modal-enable
+    // modal-enable
   }
 });
 
