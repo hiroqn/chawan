@@ -2,28 +2,23 @@
 var RESOURCE = {
   BMTPL : '<div class="file item"  title="<%- title +"\n"+ comment %>"><div class="title"><a href="<%- url %>" target="_blank"> <%- title %><\/a><\/div><span class="comment"><%- comment %><\/span><span class="others"> <\/span><\/div>',
   FLDTPL : '<div class="folder item" data-name="<%- name %>"><h2><%- name %><\/h2><h3><%- count %><\/h3><\/div>',
-  NAVITPL : '<span id="title">?Chawan<\/span><span id="breadcrumbs"><%- list %><\/span>'
+  NAVITPL : '<span id="title">?Chawan<\/span><span id="breadcrumbs"><%- list %><\/span>',
+  editerTMPL:'\
+<div class="editer">\
+  <h1><%- title %></h1>\
+  <h2><%- url %></h2>\
+  <textarea class="editer-input"><%- comment %></textarea>\
+  <button class="submit">submit</button>\
+</div>',
+  bookmarkTMPL:'\
+<div class="file item"  title="<%- title + comment %>">\
+  <div class="title">\
+    <a href="<%- url %>" target="_blank"> <%- title %><\/a>\
+  <\/div>\
+  <span class="comment"><%- comment %><\/span>\
+  <span class="others"><\/span>\
+<\/div>'
 };
-RESOURCE.editerTMPL = (<><![CDATA[
-<div class="editer">
-  <h1><%- title %></h1>
-  <h2><%- url %></h2>
-  <textarea class="editer-input"><%- comment %></textarea>
-  <button class="submit">submit</button>
-</div>
-]]></>).toString();
-
-RESOURCE.bookmarkTMPL = (<><![CDATA[
-<div class="file item"  title="<%- title +' '+ comment %>">
-  <div class="title">
-    <a href="<%- url %>" target="_blank"> <%- title %><\/a>
-  <\/div>
-  <span class="comment"><%- comment %>
-  <\/span>
-  <span class="others">
-  <\/span>
-<\/div>
-]]></>).toString();
 var TreeMgr = function() {
   var Folder, Bookmark, TreeMgr, tagParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g;
   /** Folder */
@@ -39,7 +34,7 @@ var TreeMgr = function() {
       });
     },
     addFolder : function(name) {
-      var folder = new Folder(name)
+      var folder = new Folder(name);
       this.folders.push(folder);
       return folder;
     },
@@ -145,11 +140,13 @@ var NaviView = Backbone.View.extend({
     }));
   }
 });
+
 var EditerView = Backbone.View.extend({
   tagName: 'div',
-  "class": 'editer',
+  "class": 'editer-wrapper',
   events: {
-    "click .submit":'submit'
+    "click .submit":'submit',
+    "click .editer-wrapper":"cancel"
   }, 
   tmpl:_.template(RESOURCE.editerTMPL),
   initialize: function(options) {
@@ -159,8 +156,16 @@ var EditerView = Backbone.View.extend({
     this.$el.html(tmpl(this.model));
     return this;
   },
-  submit: function(){
+  submit: function() {
+    var text = this.$('.editer-input').text();
+    window.app.setComment(text);
+  },
+  cancel: function() {
     
+  },
+  destroy: function() {
+    window.app.set('isModal',false);
+    this.remove();
   }
 })
 
@@ -168,14 +173,15 @@ var FoldersView = Backbone.View.extend({
   tagName : 'div',
   id : 'folder',
   initialize : function(options) {
-    this.isRoot = options.isRoot;
+    this.isRoot = options.isRoot; // TODO  delete
     this.render();
   },
   events : {
     "click .folder" : "down",
-    "click .upper" : "up"
+    "click .upper" : "up",
+    "dbclick .comment": "editer"
   },
-  bookmarkTpl : _.template(RESOURCE.BMTPL),
+  bookmarkTpl : _.template(RESOURCE.bookmarkTMPL),
   folderTpl : _.template(RESOURCE.FLDTPL),
   render : function() {
     var bmTpl = this.bookmarkTpl, fldTpl = this.folderTpl;
@@ -183,7 +189,6 @@ var FoldersView = Backbone.View.extend({
       return memo + bmTpl(bm);
     }, '')
         + _.reduce(this.model.folders, function(memo, fld) {
-
           return memo + fldTpl({
             name : fld.name,
             count : fld.getBookmarkCount()
@@ -195,10 +200,14 @@ var FoldersView = Backbone.View.extend({
     return this;
   },
   down : function(e) {
-    app.down(e.currentTarget.dataset.name);
+    window.app.down(e.currentTarget.dataset.name);
   },
   up : function() {
-    app.up();
+    window.app.up();
+  },
+  editer: function() {
+    var eV = new EditerView({model:this.model.bookmarks[0]});
+    
   }
 });
 
@@ -225,6 +234,14 @@ var AppModel = Backbone.Model.extend({
       hierarchy.push(name);
       this.trigger('change:hierarchy');
     }
+  },
+  setComment:function(bookmark, comment) {
+    var dfd = Hatena.editComment(bookmark.url,comment);
+    dfd.done(function(object){
+      bookmark.comment = object.comment_raw;
+      var folder = this.get('TreeMgr').getFolder(this.get('hierarchy'));
+      this.get('TreeMgr').moveBookmark(folder,bookmark);
+    });
   }
 });
 
@@ -237,7 +254,7 @@ var AppView = Backbone.View.extend({
     this.model.on('change:hierarchy', this.render, this);
     this.model.on('change:isModal',this.modal,this);
     this.$c = $('<div />',{"class":"contents"}).appendTo(this.$el);
-    this.$overlay. = $('<div />',{"class":"overlay"}).appendTo(this.$el);
+    this.$overlay = $('<div />',{"class":"overlay"}).appendTo(this.$el);
     // this.render();
   },
   render : function() {
@@ -299,7 +316,7 @@ initialize({
     $('body').append(appView.$el);
   },
   dataset : function(text) {
-    app.setText(text);
+    window.app.setText(text);
   },
   onError : function(str) {
     alert(str);

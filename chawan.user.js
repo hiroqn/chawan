@@ -151,8 +151,8 @@ var util={
     }
 };
 var config = {};
-var hatena = {
-    editComment:function(){
+var Hatena = {
+    editComment:function(url,comment){
       return http.post({
         url:'http://b.hatena.ne.jp/'+config.id+'/add.edit.json',
         data:{
@@ -163,11 +163,11 @@ var hatena = {
         }
       });
     },
-    destroyBookmark:function(url){
+    destroyBookmark:function(bookmark){
       return http.post({
         url:'http://b.hatena.ne.jp/'+config.id+'/add.delete',
         data:{
-          url:url,
+          url:bookmark.url,
           rks:config.rks
         }
       });
