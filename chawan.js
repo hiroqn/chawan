@@ -143,17 +143,17 @@ var NaviView = Backbone.View.extend({
 
 var EditerView = Backbone.View.extend({
   tagName: 'div',
-  "class": 'editer-wrapper',
+  className: 'editer-wrapper',
   events: {
     "click .submit":'submit',
-    "click .editer-wrapper":"cancel"
+    "click ":"cancel"
   }, 
   tmpl:_.template(RESOURCE.editerTMPL),
   initialize: function(options) {
     this.render();
   },
   render: function() {
-    this.$el.html(tmpl(this.model));
+    this.$el.html(this.tmpl(this.model));
     return this;
   },
   submit: function() {
@@ -161,7 +161,7 @@ var EditerView = Backbone.View.extend({
     window.app.setComment(text);
   },
   cancel: function() {
-    
+    this.destroy();
   },
   destroy: function() {
     window.app.set('isModal',false);
@@ -174,12 +174,13 @@ var FoldersView = Backbone.View.extend({
   id : 'folder',
   initialize : function(options) {
     this.isRoot = options.isRoot; // TODO  delete
+    this.$wrapper=options.$wrapper;
     this.render();
   },
   events : {
     "click .folder" : "down",
     "click .upper" : "up",
-    "dbclick .comment": "editer"
+    "dblclick .comment": "editer"
   },
   bookmarkTpl : _.template(RESOURCE.bookmarkTMPL),
   folderTpl : _.template(RESOURCE.FLDTPL),
@@ -207,7 +208,8 @@ var FoldersView = Backbone.View.extend({
   },
   editer: function() {
     var eV = new EditerView({model:this.model.bookmarks[0]});
-    
+    window.app.set('isModal',true);
+    this.$wrapper.append(eV.el);
   }
 });
 
@@ -265,7 +267,8 @@ var AppView = Backbone.View.extend({
       // console.log('len',hierarchy.length)
       this.$c.empty().append((new FoldersView({
         model : folder,
-        isRoot : (hierarchy.length == 0)
+        isRoot : (hierarchy.length == 0),
+        $wrapper: this.$overlay
       })).el);
     }
     return this;
