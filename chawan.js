@@ -19,7 +19,7 @@ var RESOURCE = {
   <span class="others"><\/span>\
 <\/div>'
 };
-var TreeMgr = function() {
+var TreeMgr = function() {//TODO change
   var Folder, Bookmark, TreeMgr, tagParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g;
   /** Folder */
   Folder = function(name) {
@@ -146,7 +146,7 @@ var EditerView = Backbone.View.extend({
   className: 'editer-wrapper',
   events: {
     "click .submit":'submit',
-    "click ":"cancel"
+    "click":"cancel"
   }, 
   tmpl:_.template(RESOURCE.editerTMPL),
   initialize: function(options) {
@@ -158,10 +158,12 @@ var EditerView = Backbone.View.extend({
   },
   submit: function() {
     var text = this.$('.editer-input').text();
-    window.app.setComment(text);
+    window.app.setComment(this.model, text);
   },
-  cancel: function() {
-    this.destroy();
+  cancel: function(e) {
+    if(e.target.className!=='editer'){
+      this.destroy();
+    }
   },
   destroy: function() {
     window.app.set('isModal',false);
@@ -237,7 +239,7 @@ var AppModel = Backbone.Model.extend({
       this.trigger('change:hierarchy');
     }
   },
-  setComment:function(bookmark, comment) {
+  setComment:function(bookmark, comment) {//TODO change
     var dfd = Hatena.editComment(bookmark.url,comment);
     dfd.done(function(object){
       bookmark.comment = object.comment_raw;
