@@ -151,8 +151,8 @@ var util={
     }
 };
 var config = {};
-var hatena = {
-    editComment:function(){
+var Hatena = {
+    editComment:function(url,comment){
       return http.post({
         url:'http://b.hatena.ne.jp/'+config.id+'/add.edit.json',
         data:{
@@ -163,11 +163,11 @@ var hatena = {
         }
       });
     },
-    destroyBookmark:function(url){
+    destroyBookmark:function(bookmark){
       return http.post({
         url:'http://b.hatena.ne.jp/'+config.id+'/add.delete',
         data:{
-          url:url,
+          url:bookmark.url,
           rks:config.rks
         }
       });
@@ -193,7 +193,7 @@ function initialize(callbacks) {
     util.addStyle(RESOURCE.CSS);
     var tagText=$('pre').text();
     document.title='?Chawan';   // set title
-    $('body').empty().append(Backbone.View.prototype.make('div',{"id":"container"})); // clear
+    $('body').empty(); // clear
     callbacks.ready(localData);
     config.tags=JSON.parse(tagText);// save tag
     domed=Date.now();                                                     /** timer */

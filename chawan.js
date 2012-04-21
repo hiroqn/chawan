@@ -2,9 +2,23 @@
 var RESOURCE = {
   BMTPL : '<div class="file item"  title="<%- title +"\n"+ comment %>"><div class="title"><a href="<%- url %>" target="_blank"> <%- title %><\/a><\/div><span class="comment"><%- comment %><\/span><span class="others"> <\/span><\/div>',
   FLDTPL : '<div class="folder item" data-name="<%- name %>"><h2><%- name %><\/h2><h3><%- count %><\/h3><\/div>',
-  NAVITPL : '<span id="title">?Chawan<\/span><span id="breadcrumbs"><%- list %><\/span>'
+  NAVITPL : '<span id="title">?Chawan<\/span><span id="breadcrumbs"><%- list %><\/span>',
+  editerTMPL:'\
+<div class="editer">\
+  <h1><%- title %></h1>\
+  <h2><%- url %></h2>\
+  <textarea class="editer-input"><%- comment %></textarea>\
+  <button class="submit">submit</button>\
+</div>',
+  bookmarkTMPL:'\
+<div class="file item"  title="<%- title + comment %>">\
+  <div class="title">\
+    <a href="<%- url %>" target="_blank"> <%- title %><\/a>\
+  <\/div>\
+  <span class="comment"><%- comment %><\/span>\
+  <span class="others"><\/span>\
+<\/div>'
 };
-
 var TreeMgr = function() {
   var Folder, Bookmark, TreeMgr, tagParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g;
   /** Folder */
@@ -20,7 +34,7 @@ var TreeMgr = function() {
       });
     },
     addFolder : function(name) {
-      var folder = new Folder(name)
+      var folder = new Folder(name);
       this.folders.push(folder);
       return folder;
     },
@@ -32,12 +46,16 @@ var TreeMgr = function() {
           + _.reduce(this.folders, function(memo, folder) {
             return folder.getBookmarkCount() + memo;
           }, 0);
+    },
+    takeBookmark: function(bookmark) {
+      var index=this.bookmarks.indexOf(bookmark);
+      return index == -1 ? false : (this.bookmarks.splice(index,1),true);
     }
   });
   /** Bookmark */
-  Bookmark = function(title, comment, url, others) {
+  Bookmark = function(title, comment, url, others) {// TODO bookmark need parent
     this.title = title;
-    // this.comment = comment;
+    this.comment = comment;
     this.url = url;
     this.tagParser(comment);
   }
@@ -47,7 +65,7 @@ var TreeMgr = function() {
       this.hierarchy = _.map(comment.match(tagParam), function(str) {
         return str.slice(2, -1).split('/');
       });
-      this.comment = comment.replace(tagParam, '');
+      // this.comment = comment.replace(tagParam, '');
     }
   });
   Bookmark.createByText = function(texts) {
@@ -117,23 +135,54 @@ var NaviView = Backbone.View.extend({
   render : function() {
     this.$el.html(this.template({
       list : _.reduce(this.model.get('hierarchy'), function(memo, val) {
-        return memo + ' -> ' + val;
+        return val + ' <- ' + memo;
       }, 'root')
     }));
   }
 });
+
+var EditerView = Backbone.View.extend({
+  tagName: 'div',
+  className: 'editer-wrapper',
+  events: {
+    "click .submit":'submit',
+    "click ":"cancel"
+  }, 
+  tmpl:_.template(RESOURCE.editerTMPL),
+  initialize: function(options) {
+    this.render();
+  },
+  render: function() {
+    this.$el.html(this.tmpl(this.model));
+    return this;
+  },
+  submit: function() {
+    var text = this.$('.editer-input').text();
+    window.app.setComment(text);
+  },
+  cancel: function() {
+    this.destroy();
+  },
+  destroy: function() {
+    window.app.set('isModal',false);
+    this.remove();
+  }
+})
+
 var FoldersView = Backbone.View.extend({
   tagName : 'div',
   id : 'folder',
   initialize : function(options) {
-    this.isRoot = options.isRoot;
+    this.isRoot = options.isRoot; // TODO  delete
+    this.$wrapper=options.$wrapper;
     this.render();
   },
   events : {
     "click .folder" : "down",
-    "click .upper" : "up"
+    "click .upper" : "up",
+    "dblclick .comment": "editer"
   },
-  bookmarkTpl : _.template(RESOURCE.BMTPL),
+  bookmarkTpl : _.template(RESOURCE.bookmarkTMPL),
   folderTpl : _.template(RESOURCE.FLDTPL),
   render : function() {
     var bmTpl = this.bookmarkTpl, fldTpl = this.folderTpl;
@@ -141,7 +190,6 @@ var FoldersView = Backbone.View.extend({
       return memo + bmTpl(bm);
     }, '')
         + _.reduce(this.model.folders, function(memo, fld) {
-
           return memo + fldTpl({
             name : fld.name,
             count : fld.getBookmarkCount()
@@ -150,27 +198,32 @@ var FoldersView = Backbone.View.extend({
         + (this.isRoot ? ''
             : '<div class="upper item"><h2>↑Parent<\/h2><\/div>');
     this.$el.html(html);
-    console.log(this);
     return this;
   },
   down : function(e) {
-    app.down(e.currentTarget.dataset.name);
+    window.app.down(e.currentTarget.dataset.name);
   },
   up : function() {
-    app.up();
+    window.app.up();
+  },
+  editer: function() {
+    var eV = new EditerView({model:this.model.bookmarks[0]});
+    window.app.set('isModal',true);
+    this.$wrapper.append(eV.el);
   }
 });
 
 var AppModel = Backbone.Model.extend({
   defaults : {
     'isEmpty' : true,
-    'hierarchy' : []
+    'hierarchy' : [],
+    'isModal' : false
   },
   initialize : function() {
   },
   setText : function(texts) {
     this.get('TreeMgr').setByText(texts);
-    this.set('isEmpty', false)
+    this.set('isEmpty', false);
     this.trigger('change:TreeMgr');
   },
   up : function() {
@@ -183,35 +236,50 @@ var AppModel = Backbone.Model.extend({
       hierarchy.push(name);
       this.trigger('change:hierarchy');
     }
+  },
+  setComment:function(bookmark, comment) {
+    var dfd = Hatena.editComment(bookmark.url,comment);
+    dfd.done(function(object){
+      bookmark.comment = object.comment_raw;
+      var folder = this.get('TreeMgr').getFolder(this.get('hierarchy'));
+      this.get('TreeMgr').moveBookmark(folder,bookmark);
+    });
   }
 });
 
 var AppView = Backbone.View.extend({
   tagName : 'div',
-  id : 'contents',
+  id : 'container',
   initialize : function(options) {
     this.router = options.router;
     this.model.on('change:TreeMgr', this.render, this);
-    this.model.on('change:hierarchy', this.navigate, this);
+    this.model.on('change:hierarchy', this.render, this);
+    this.model.on('change:isModal',this.modal,this);
+    this.$c = $('<div />',{"class":"contents"}).appendTo(this.$el);
+    this.$overlay = $('<div />',{"class":"overlay"}).appendTo(this.$el);
     // this.render();
   },
   render : function() {
     var hierarchy = this.model.get('hierarchy');
-    var tree = this.model.get('TreeMgr')
-    var folder = tree.getFolder(hierarchy);
+    var folder = this.model.get('TreeMgr').getFolder(hierarchy);
     if (folder && !this.model.get('isEmpty')) {
+      this.modal();
       // console.log('len',hierarchy.length)
-      this.$el.empty().append((new FoldersView({
+      this.$c.empty().append((new FoldersView({
         model : folder,
-        isRoot : (hierarchy.length == 0)
+        isRoot : (hierarchy.length == 0),
+        $wrapper: this.$overlay
       })).el);
     }
-
     return this;
   },
-  navigate : function() {
-    this.router.navigate('!' + this.model.get('hierarchy').join('/'));
-    this.render();
+  modal:function(){
+    if(this.model.get('isModal')){
+      this.$el.addClass('modal-enable');
+    } else{
+      this.$el.removeClass('modal-enable');
+    }
+    // modal-enable
   }
 });
 
@@ -224,27 +292,34 @@ initialize({
       routes : {
         "" : "top",
         "!" : "top",
-        "!*path" : "moveTo"
+        "!*path" : "moveTo",
+        "conf":"configure"
       },
       top : function() {
         window.app.set('hierarchy', []);
       },
       moveTo : function(path) {
         window.app.set('hierarchy', path.split('/'));
+      },
+      configure: function(){
+        
       }
     });
     var router = new AppRouter();
     Backbone.history.start();
-    var appView = new AppView({
-      model : appModel,
-      router : router
+    appModel.on('change:hierarchy', function(){
+      router.navigate('!' + appModel.get('hierarchy').join('/'));
     });
-    $('#container').append((new NaviView({
+    var appView = new AppView({
       model : appModel
-    })).el).append(appView.el);
+    });
+    appView.$el.prepend((new NaviView({
+      model : appModel
+    })).el)
+    $('body').append(appView.$el);
   },
   dataset : function(text) {
-    app.setText(text);
+    window.app.setText(text);
   },
   onError : function(str) {
     alert(str);
