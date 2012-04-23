@@ -1,13 +1,17 @@
 // TODO hover ,edit comment, not login ,configuration
 var RESOURCE = {
-  BMTPL : '<div class="file item"  title="<%- title +"\n"+ comment %>"><div class="title"><a href="<%- url %>" target="_blank"> <%- title %><\/a><\/div><span class="comment"><%- comment %><\/span><span class="others"> <\/span><\/div>',
-  FLDTPL : '<div class="folder item" data-name="<%- name %>"><h2><%- name %><\/h2><h3><%- count %><\/h3><\/div>',
-  NAVITPL : '<span id="title">?Chawan<\/span><span id="breadcrumbs"><%- list %><\/span>',
+  naviTMPL:'\
+<span id="title">?Chawan</span>\
+<span id="breadcrumbs"><%- list %></span>',
+  folderTMPL:'\
+<div class="folder item" data-name="<%- name %>">\
+    <h2><%- name %></h2><h3><%- count %></h3>\
+</div>',
   editerTMPL:'\
 <div class="editer">\
   <h1><%- title %></h1>\
   <h2><%- url %></h2>\
-  <textarea class="editer-input"><%- comment %></textarea>\
+  <textarea class="editer-input"><%- rawComment %></textarea>\
   <button class="submit">submit</button>\
 </div>',
   bookmarkTMPL:'\
@@ -19,127 +23,145 @@ var RESOURCE = {
   <span class="others"><\/span>\
 <\/div>'
 };
-var TreeMgr = function() {//TODO change
-  var Folder, Bookmark, TreeMgr, tagParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g;
-  /** Folder */
-  Folder = function(name) {
-    this.name = name;
-    this.bookmarks = [];
-    this.folders = [];
-  };
-  _.extend(Folder.prototype, {
-    getFolder : function(name) {
-      return _.find(this.folders, function(obj) {
-        return obj.name == name;
-      });
-    },
-    addFolder : function(name) {
-      var folder = new Folder(name);
-      this.folders.push(folder);
-      return folder;
-    },
-    addBookmark : function(bm) {
-      this.bookmarks.push(bm);
-    },
-    getBookmarkCount : function() {
-      return this.bookmarks.length
-          + _.reduce(this.folders, function(memo, folder) {
-            return folder.getBookmarkCount() + memo;
-          }, 0);
-    },
-    takeBookmark: function(bookmark) {
-      var index=this.bookmarks.indexOf(bookmark);
-      return index == -1 ? false : (this.bookmarks.splice(index,1),true);
-    }
-  });
-  /** Bookmark */
-  Bookmark = function(title, comment, url, others) {// TODO bookmark need parent
-    this.title = title;
-    this.comment = comment;
-    this.url = url;
-    this.tagParser(comment);
-  }
-  _.extend(Bookmark.prototype, {
-    tagParser : function(c) {
-      var comment = (c || this.comment);
-      this.hierarchy = _.map(comment.match(tagParam), function(str) {
-        return str.slice(2, -1).split('/');
-      });
-      // this.comment = comment.replace(tagParam, '');
-    }
-  });
-  Bookmark.createByText = function(texts) {
-    var array = texts.split('\n');
-    var l = array.length / 4, bookmarks = [];
-    for ( var i = 0; i < l; i++) {
-      bookmarks[i] = new Bookmark(array[i * 3], array[1 + i * 3],
-          array[2 + i * 3], array[i + l * 3])
-    }
-    return bookmarks;
-  };
-  /** Tree Manager */
-  return TreeMgr = {
-    root : new Folder('root'),
-    getFolder : function(hierarchy) {
-      var folder = this.root;
-      for ( var i = 0; i < hierarchy.length; i++) {
-        folder = folder.getFolder(hierarchy[i]);
-        if (!folder) {
-          return null
-        }
-      }
-      ;
-      return folder;
-    },
-    makeFolder : function(hierarchy) {
-      var folder = this.root;
-      for ( var i = 0; i < hierarchy.length; i++) {
-        folder = (folder.getFolder(hierarchy[i]) || folder
-            .addFolder(hierarchy[i]));
-      }
-      return folder;
-    },
-    setByText : function(texts) {
-      _.each(Bookmark.createByText(texts), function(bookmark) {
 
-        if (bookmark.hierarchy.length) {
-          _.each(bookmark.hierarchy, function(tag) {
-            TreeMgr.makeFolder(tag).addBookmark(bookmark);
+var TreeManager = new (Backbone.Model.extend({
+  initialize: function() {
+    var // for [?]
+        chawanParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g,
+        // for tags
+        tagParam = /\[[^%\/\?\[\]]+?\]/g,
+        // Folder,Bookmark
+        Folder, Bookmark;
+    
+    this.Folder = Folder = function(name) {
+      this.name = name;
+      this.bookmarks = [];
+      this.folders = [];
+    };
+    _.extend(Folder.prototype, Backbone.Events, {
+      getFolder : function(name) {
+        return _.find(this.folders, function(obj) {
+          return obj.name == name;
+        });
+      },
+      addFolder : function(name) {
+        var folder = new Folder(name);
+        this.folders.push(folder);
+        return folder;
+      },
+      addBookmark : function(bookmark) {
+        this.bookmarks.push(bookmark);
+      },
+      takeBookmark: function(bookmark) {
+        var index=this.bookmarks.indexOf(bookmark);
+        return (index == -1) ? false : (this.bookmarks.splice(index,1),true);
+      },
+      getBookmarkCount : function() {
+        return _(this.folders).reduce( function(memo, folder) {
+              return folder.getBookmarkCount() + memo;
+            }, 0) + this.bookmarks.length;
+      }
+    });
+    this.Bookmark = Bookmark = function(title, comment, url, others) {
+      this.title = title;
+      this.url = url;
+      this.commentParser(comment);
+      var others = others.split('\t');
+      this.count = Number(others[0]);
+      this.date = Number(others[1]);
+    }
+    Bookmark.create = function(title, comment, url, others) {
+      return new Bookmark(title, comment, url, others);
+    };
+    _.extend(Bookmark.prototype, {
+      commentParser : function(comment) {
+        this.rawComment = comment;
+        this.paths = _(comment.match(chawanParam)).map( function(str) {
+          return str.slice(2, -1).split('/');
+        });
+        comment = comment.replace(chawanParam, '');
+        this.tags = comment.match(tagParam);
+        this.comment = comment.replace(tagParam,'');
+      }
+    });
+    this.root = new Folder('root');
+    this.root.root = true;
+  },
+  getFolder: function(path,isNew) {
+    var folder = this.root;
+    for ( var i = 0; i < path.length; i++) {
+      folder = folder.getFolder(path[i]) || (isNew && folder.addFolder(path[i]));
+      if(!folder) {
+        return null;
+      }
+    }
+    return folder;
+  },
+  addByText: function(texts) {
+    var array = texts.split('\n'), l = array.length / 4, bookmarks = new Array(l);
+    var Tree = this;
+    for ( var i = 0; i < l; i++) {
+      bookmarks[i] = this.Bookmark.create(array[i * 3], array[1 + i * 3],
+          array[2 + i * 3], array[i + l * 3]);
+    }
+    this.allBookmark = bookmarks;
+    _.each(bookmarks, function(bookmark) {
+      if (bookmark.paths.length) {
+          _.each(bookmark.paths, function(chawan) {
+            Tree.getFolder(chawan,true).addBookmark(bookmark);
           });
         } else {// dont have chawan
-          TreeMgr.root.addBookmark(bookmark);
+          bookmark.paths.push([]);
+          Tree.root.addBookmark(bookmark);
         }
-      });
-      return this;
-    },
-    moveBookmark : function(folder, bookmark) {
-      folder.takeBookmark(bookmark);
-      bookmark.tagParser(bm.comment);
-      _.each(bookmark.hierarchy, function(tag) {
-        TreeMgr.makeFolder(tag).addBookmark(bookmark);
-      });
-    },
-    Folder : Folder,
-    Bookmark : Bookmark
-  };
-}();
-
-var NaviView = Backbone.View.extend({
-  tagName : 'div',
-  id : 'navi',
-  template : _.template(RESOURCE.NAVITPL),
-  initialize : function() {
-    this.model.on('change:hierarchy', this.render, this);
-    this.render();
+    });
+    this.trigger('change');
   },
-  render : function() {
-    this.$el.html(this.template({
-      list : _.reduce(this.model.get('hierarchy'), function(memo, val) {
-        return val + ' <- ' + memo;
-      }, 'root')
-    }));
+  moveBookmark: function(bookmark,comment) {
+    var Tree = this;
+    _(bookmark.paths).each( function(path) {
+      Tree.getFolder(path).takeBookmark(bookmark);
+    });
+    bookmark.commentParser(comment);
+    _(bookmark.paths).each( function(chawan) {
+      Tree.getFolder(chawan,true).addBookmark(bookmark);
+    });
+    this.trigger('change');
+  },
+  setComment: function(bookmark, comment){
+    var dfd = Hatena.editComment(bookmark.url,comment);
+    var Tree = this;
+    dfd.then( function(comment) {
+      Tree.moveBookmark(bookmark, comment);
+    }, function() {
+      
+    });
   }
-});
+}));
+
+window.app = new (Backbone.Model.extend({
+  defaults : {
+    'isModal' : false
+  },
+  initialize : function() {
+    this.set('path',[]);
+    this.set('TreeManager',TreeManager);
+  },
+  setText : function(texts) {
+    TreeManager.addByText(texts);
+  },
+  upLevel : function() {
+    if(this.get('path').pop()){
+      this.trigger('change:path');
+    }
+  },
+  downLevel : function(name) {
+    var path = this.get('path');
+    if (TreeManager.getFolder(path = path.concat(name))) {
+      this.set('path',path);
+    }
+  }
+}));
 
 var EditerView = Backbone.View.extend({
   tagName: 'div',
@@ -157,11 +179,12 @@ var EditerView = Backbone.View.extend({
     return this;
   },
   submit: function() {
-    var text = this.$('.editer-input').text();
-    window.app.setComment(this.model, text);
+    var text = this.$('.editer-input').val();
+    TreeManager.setComment(this.model, text);
+    this.destroy();
   },
   cancel: function(e) {
-    if(e.target.className!=='editer'){
+    if(e.target.className === 'editer-wrapper'){
       this.destroy();
     }
   },
@@ -169,156 +192,147 @@ var EditerView = Backbone.View.extend({
     window.app.set('isModal',false);
     this.remove();
   }
-})
+});
 
 var FoldersView = Backbone.View.extend({
   tagName : 'div',
   id : 'folder',
   initialize : function(options) {
-    this.isRoot = options.isRoot; // TODO  delete
-    this.$wrapper=options.$wrapper;
+    this.isRoot = options.isRoot; // TODO delete
     this.render();
   },
   events : {
     "click .folder" : "down",
     "click .upper" : "up",
-    "dblclick .comment": "editer"
+    "dblclick .comment": "edit"
   },
-  bookmarkTpl : _.template(RESOURCE.bookmarkTMPL),
-  folderTpl : _.template(RESOURCE.FLDTPL),
+  bookmarkTmpl : _.template(RESOURCE.bookmarkTMPL),
+  folderTmpl : _.template(RESOURCE.folderTMPL),
   render : function() {
-    var bmTpl = this.bookmarkTpl, fldTpl = this.folderTpl;
-    var html = _.reduce(this.model.bookmarks, function(memo, bm) {
-      return memo + bmTpl(bm);
-    }, '')
-        + _.reduce(this.model.folders, function(memo, fld) {
-          return memo + fldTpl({
-            name : fld.name,
-            count : fld.getBookmarkCount()
+    var btmpl = this.bookmarkTmpl, ftmpl = this.folderTmpl,
+    // bookmarkHTML
+    bookmarkHTML =  _(this.model.bookmarks).reduce(function(memo, bm) {
+      return memo + btmpl(bm);
+    }, ''),
+    // folderHTML
+    folderHTML = _(this.model.folders).reduce( function(memo, folder) {
+          return memo + ftmpl({
+            name : folder.name,
+            count : folder.getBookmarkCount()
           });
-        }, '')
-        + (this.isRoot ? ''
-            : '<div class="upper item"><h2>↑Parent<\/h2><\/div>');
-    this.$el.html(html);
+        }, '');
+// '<div class="upper item"><h2>↑Parent<\/h2><\/div>'
+    this.$el.html(folderHTML + bookmarkHTML );
     return this;
   },
   down : function(e) {
-    window.app.down(e.currentTarget.dataset.name);
+    window.app.downLevel(e.currentTarget.dataset.name);
   },
   up : function() {
-    window.app.up();
+    window.app.upLevel();
   },
-  editer: function() {
-    var eV = new EditerView({model:this.model.bookmarks[0]});
-    window.app.set('isModal',true);
-    this.$wrapper.append(eV.el);
+  edit: function() {
+    var bookmark = this.model.bookmarks[0];// TODO
+    this.trigger('edit',bookmark)
   }
 });
 
-var AppModel = Backbone.Model.extend({
-  defaults : {
-    'isEmpty' : true,
-    'hierarchy' : [],
-    'isModal' : false
+
+var NaviView = Backbone.View.extend({
+  tagName : 'div',
+  id : 'navi',
+  tmpl : _.template(RESOURCE.naviTMPL),
+  events: {
+    'click #title': "top" 
   },
   initialize : function() {
+    this.model.on('change:path', this.render, this);
+    this.render();
   },
-  setText : function(texts) {
-    this.get('TreeMgr').setByText(texts);
-    this.set('isEmpty', false);
-    this.trigger('change:TreeMgr');
+  render : function() {
+    var list = _(this.model.get('path')).reduce(function(memo, val) {
+      return val + ' <- ' + memo;
+    }, 'root');
+    this.$el.html(this.tmpl({
+      list : list
+    }));
   },
-  up : function() {
-    return this.get('hierarchy').pop() ? this.trigger('change:hierarchy')
-        : null;
-  },
-  down : function(name) {
-    var hierarchy = this.get('hierarchy');
-    if (this.get('TreeMgr').getFolder(hierarchy.concat(name))) {
-      hierarchy.push(name);
-      this.trigger('change:hierarchy');
-    }
-  },
-  setComment:function(bookmark, comment) {//TODO change
-    var dfd = Hatena.editComment(bookmark.url,comment);
-    dfd.done(function(object){
-      bookmark.comment = object.comment_raw;
-      var folder = this.get('TreeMgr').getFolder(this.get('hierarchy'));
-      this.get('TreeMgr').moveBookmark(folder,bookmark);
-    });
+  top: function() {
+    app.set('path', []);
   }
 });
 
 var AppView = Backbone.View.extend({
-  tagName : 'div',
-  id : 'container',
   initialize : function(options) {
-    this.router = options.router;
-    this.model.on('change:TreeMgr', this.render, this);
-    this.model.on('change:hierarchy', this.render, this);
+    this.naviView = new NaviView({
+      model : app
+    });
+    this.model.get('TreeManager').on('change', this.render, this);
+    this.model.on('change:path', this.render, this);
     this.model.on('change:isModal',this.modal,this);
-    this.$c = $('<div />',{"class":"contents"}).appendTo(this.$el);
-    this.$overlay = $('<div />',{"class":"overlay"}).appendTo(this.$el);
-    // this.render();
+    this.$container = $('<div />',{"class":"container"});
+    this.$overlay = $('<div />',{"class":"overlay"});
+    this.$el.append(this.naviView.el,this.$container,this.$overlay);
   },
   render : function() {
-    var hierarchy = this.model.get('hierarchy');
-    var folder = this.model.get('TreeMgr').getFolder(hierarchy);
-    if (folder && !this.model.get('isEmpty')) {
-      this.modal();
-      // console.log('len',hierarchy.length)
-      this.$c.empty().append((new FoldersView({
+    var folder = this.model.get('TreeManager').getFolder(this.model.get('path'));
+    if (folder && folder.getBookmarkCount()) {
+      if(this.folderView){
+        this.folderView.remove();
+      }
+      
+      this.folderView = new FoldersView({
         model : folder,
-        isRoot : (hierarchy.length == 0),
         $wrapper: this.$overlay
-      })).el);
+      });
+      this.folderView.on('edit',this.createEditer,this);
+      this.$container.append(this.folderView.el);
     }
     return this;
   },
-  modal:function(){
+  modal: function() {
     if(this.model.get('isModal')){
       this.$el.addClass('modal-enable');
     } else{
       this.$el.removeClass('modal-enable');
     }
-    // modal-enable
+  },
+  createEditer: function(bookmark) {
+    var eV = new EditerView({model:bookmark});
+    window.app.set('isModal',true);
+    this.$overlay.append(eV.el);
   }
 });
-
+new AppView({
+  model: app,
+  el: 'body'
+});
 initialize({
   ready : function(localText) {
-    var appModel = window.app = new AppModel({
-      TreeMgr : TreeMgr
-    });
     var AppRouter = Backbone.Router.extend({
       routes : {
         "" : "top",
         "!" : "top",
         "!*path" : "moveTo",
-        "conf":"configure"
+        "configure":"configure"
       },
       top : function() {
-        window.app.set('hierarchy', []);
+        window.app.set('path', []);
       },
       moveTo : function(path) {
-        window.app.set('hierarchy', path.split('/'));
+        console.log(path);
+        window.app.set('path', _(path.split('/')).map( function(str) {return decodeURIComponent(str);}));
       },
       configure: function(){
         
       }
     });
+    
     var router = new AppRouter();
+    app.on('change:path', function(){
+      router.navigate('!' + app.get('path').join('/'));
+    });
     Backbone.history.start();
-    appModel.on('change:hierarchy', function(){
-      router.navigate('!' + appModel.get('hierarchy').join('/'));
-    });
-    var appView = new AppView({
-      model : appModel
-    });
-    appView.$el.prepend((new NaviView({
-      model : appModel
-    })).el)
-    $('body').append(appView.$el);
   },
   dataset : function(text) {
     window.app.setText(text);

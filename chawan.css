@@ -45,26 +45,29 @@ body {
   background-color: #353535;
   font-family: 'Segoe UI', Meiryo, helvetica, sans-serif;
   color: #FFFFFF;
-  font-size: 100%;
+  font-size: 16px;
   text-shadow: 0 -1px 0 #888888;
+}
+.modal-enable {
+  overflow: hidden;
+  position: relative;
 }
 #container {
   margin: 5px;
   min-width: 640px;
   /*  overflow-y: scroll;*/
 }
-#container .modal-enable {
-  overflow: hidden;
-  position: relative;
-}
 #navi {
   position: relative;
-  width: 100%;
-  height: 60px;
+/*  width: 100%;*/
+  height: 100px;
+  padding: 5px;
 }
 #navi #breadcrumbs {
   position: absolute;
+  top: 5px;
   right: 5px;
+  font-size: 20px;
 }
 #navi #title {
   font-size: 48px;
@@ -78,7 +81,9 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
 }
 .editer-input {
-
+  line-height: 18px;
+  font-size: 13px;
+  border-radius: 4px 4px 4px 4px;
 }
 .editer-wrapper {
   bottom: 0;
@@ -110,7 +115,7 @@ body {
   display: inline-block;
   white-space: nowrap;
   margin: 5px;
-  padding: 0.2em;
+  padding: 3px;
   width: 161px;
   height: 100px;
   overflow: hidden;
@@ -124,13 +129,13 @@ body {
   position: absolute;
   bottom: 5px;
   left: 5px;
-  font-size: 130%;
+  font-size: 24px;
 }
 .folder h3 {
   position: absolute;
   top: 5px;
   right: 5px;
-  font-size: 130%;
+  font-size: 24px;
 }
 /* */
 .upper {
