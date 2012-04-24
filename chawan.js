@@ -10,14 +10,14 @@ var RESOURCE = {
   editerTMPL:'\
 <div class="editer">\
   <h1><%- title %></h1>\
-  <h2><%- url %></h2>\
+  <h2><a href="<%- url %>" target="_blank"><%- url %><\/a></h2>\
   <textarea class="editer-input"><%- rawComment %></textarea>\
   <button class="submit">submit</button>\
 </div>',
   bookmarkTMPL:'\
 <div class="file item"  title="<%- title + comment %>">\
   <div class="title">\
-    <a href="<%- url %>" target="_blank"> <%- title %><\/a>\
+    <a href="<%- url %>" target="_blank"> <%- title %></a>\
   <\/div>\
   <span class="comment"><%- comment %><\/span>\
   <span class="others"><\/span>\
@@ -40,7 +40,7 @@ var TreeManager = new (Backbone.Model.extend({
     };
     _.extend(Folder.prototype, Backbone.Events, {
       getFolder : function(name) {
-        return _.find(this.folders, function(obj) {
+        return _(this.folders).find( function(obj) {
           return obj.name == name;
         });
       },
@@ -54,7 +54,7 @@ var TreeManager = new (Backbone.Model.extend({
       },
       takeBookmark: function(bookmark) {
         var index=this.bookmarks.indexOf(bookmark);
-        return (index == -1) ? false : (this.bookmarks.splice(index,1),true);
+        return ~index ? false : (this.bookmarks.splice(index,1),true);//tilde !!
       },
       getBookmarkCount : function() {
         return _(this.folders).reduce( function(memo, folder) {
@@ -105,9 +105,9 @@ var TreeManager = new (Backbone.Model.extend({
           array[2 + i * 3], array[i + l * 3]);
     }
     this.allBookmark = bookmarks;
-    _.each(bookmarks, function(bookmark) {
+    _(bookmarks).each( function(bookmark) {
       if (bookmark.paths.length) {
-          _.each(bookmark.paths, function(chawan) {
+          _(bookmark.paths).each( function(chawan) {
             Tree.getFolder(chawan,true).addBookmark(bookmark);
           });
         } else {// dont have chawan
@@ -198,7 +198,6 @@ var FoldersView = Backbone.View.extend({
   tagName : 'div',
   id : 'folder',
   initialize : function(options) {
-    this.isRoot = options.isRoot; // TODO delete
     this.render();
   },
   events : {
