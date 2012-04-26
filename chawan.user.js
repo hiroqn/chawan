@@ -1,19 +1,14 @@
 // ==UserScript==
 // @name          ?Chawan
-// @namespace     https://twitter.com/#!/hiroqn
-// @description   more convenience and speed for Hatena Bookmark
+// @namespace     https://github.com/hiroqn
+// @description   make HatenaBookmark more and more convenient ! maybe...  
 // @include       http://b.hatena.ne.jp/*/tags.json*
 // @run-at        document-start
-// @version       0.1.0
+// @version       0.2.0
 // ==/UserScript==
 
 var first=Date.now(),dominit,domed,searched,setted;
-/**
- * TODO jQuery もこっちに書くべき？ libraries underscore & backbone
- * 
- * 
- * // require       http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js
- */
+
 //****<library>****
 //****jQuery-1.7.2****underscore-1.3.1****backbone-0.9.2*****
 /*! jQuery v1.7.2 jquery.com | jquery.org/license */
@@ -123,7 +118,7 @@ var util={
         localStorage.setItem(id+'-text', text);
       },
     },
-    log:function(){ // TODO log
+    log:function(){
       return (GM_log || console).apply(null, arguments);
     },
     isUsable:function(){
@@ -217,7 +212,6 @@ function initialize(callbacks) {
  * *ここからコピペ
  */
 // TODO hover ,edit comment
-//TODO hover ,edit comment, not login ,configuration
 //TODO hover ,edit comment, not login ,configuration
 var RESOURCE = {
   naviTMPL:'\
