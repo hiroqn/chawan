@@ -86,9 +86,6 @@ body {
 .modal-enable .overlay {
   visibility: visible;
 }
-/*.majik .overlay {
- visibility: visible;
- }*/
 .editer-wrapper {
   background: none repeat scroll 0 0 rgba(255, 255, 255, 0.7);
   bottom: 0;
