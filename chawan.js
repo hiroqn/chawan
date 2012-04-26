@@ -1,27 +1,34 @@
 // TODO hover ,edit comment, not login ,configuration
 var RESOURCE = {
   naviTMPL:'\
-<span id="title">?Chawan</span>\
-<span id="breadcrumbs"><%- list %></span>',
-  folderTMPL:'\
-<div class="folder item" data-name="<%- name %>">\
-    <h2><%- name %></h2><h3><%- count %></h3>\
+<div id="title">?Chawan</div>\
+<div id="breadcrumbs">\
+  <span data-position="<%- length %>">?Chawan:</span>\
+  <% _(list).each(function(d,n){%> / <span data-position="<%-length-n-1 %>"><%- d %></span>  <% }); %>\
 </div>',
+  folderTMPL:'\
+<% _(folders).each(function(folder){%>\
+<div class="folder item" data-name="<%- folder.name %>">\
+    <h2><%- folder.name %></h2><h3><%- folder.count %></h3>\
+</div>\
+<% }); %>',
   editerTMPL:'\
 <div class="editer">\
   <h1><%- title %></h1>\
   <h2><a href="<%- url %>" target="_blank"><%- url %><\/a></h2>\
   <textarea class="editer-input"><%- rawComment %></textarea>\
-  <button class="submit">submit</button>\
+  <div class="buttons"><a class="submit">submit</a> <a class="cancel">cancel</a></div>\
 </div>',
   bookmarkTMPL:'\
-<div class="file item"  title="<%- title + comment %>">\
+<% _(bookmarks).each(function(bookmark){%>\
+<div class="bookmark item"  title="<%- bookmark.comment %>" >\
+  <div class="icons">\
+    <div class="edit-icon" data-date="<%- bookmark.date %>"></div></div>\
   <div class="title">\
-    <a href="<%- url %>" target="_blank"> <%- title %></a>\
-  <\/div>\
-  <span class="comment"><%- comment %><\/span>\
-  <span class="others"><\/span>\
-<\/div>'
+    <a href="<%- bookmark.url %>" target="_blank" title="<%- bookmark.title %>"> <%- bookmark.title %></a>\
+  </div>\
+<\/div>\
+<% }); %>'
 };
 
 var TreeManager = new (Backbone.Model.extend({
@@ -54,10 +61,11 @@ var TreeManager = new (Backbone.Model.extend({
       },
       takeBookmark: function(bookmark) {
         var index=this.bookmarks.indexOf(bookmark);
-        return ~index ? false : (this.bookmarks.splice(index,1),true);//tilde !!
+        return ~index ? false : (this.bookmarks.splice(index,1),true);// tilde
+                                                                      // !!
       },
       getBookmarkCount : function() {
-        return _(this.folders).reduce( function(memo, folder) {
+        return this.count =  _(this.folders).reduce( function(memo, folder) {
               return folder.getBookmarkCount() + memo;
             }, 0) + this.bookmarks.length;
       }
@@ -67,8 +75,8 @@ var TreeManager = new (Backbone.Model.extend({
       this.url = url;
       this.commentParser(comment);
       var others = others.split('\t');
-      this.count = Number(others[0]);
-      this.date = Number(others[1]);
+      this.count = others[0];
+      this.date = others[1];
     }
     Bookmark.create = function(title, comment, url, others) {
       return new Bookmark(title, comment, url, others);
@@ -115,7 +123,9 @@ var TreeManager = new (Backbone.Model.extend({
           Tree.root.addBookmark(bookmark);
         }
     });
+    this.root.getBookmarkCount();
     this.trigger('change');
+    
   },
   moveBookmark: function(bookmark,comment) {
     var Tree = this;
@@ -150,8 +160,12 @@ window.app = new (Backbone.Model.extend({
   setText : function(texts) {
     TreeManager.addByText(texts);
   },
-  upLevel : function() {
-    if(this.get('path').pop()){
+  upLevel : function(n) {
+    n || (n === 0) ||(n = 1);
+    if(this.get('path').length){
+      for (var i = 0;i < n;i++){
+        this.get('path').pop();
+      }
       this.trigger('change:path');
     }
   },
@@ -196,30 +210,23 @@ var EditerView = Backbone.View.extend({
 
 var FoldersView = Backbone.View.extend({
   tagName : 'div',
-  id : 'folder',
+  id : 'contents',
   initialize : function(options) {
     this.render();
   },
   events : {
     "click .folder" : "down",
     "click .upper" : "up",
-    "dblclick .comment": "edit"
+    "click .edit-icon": "edit"
   },
   bookmarkTmpl : _.template(RESOURCE.bookmarkTMPL),
   folderTmpl : _.template(RESOURCE.folderTMPL),
   render : function() {
-    var btmpl = this.bookmarkTmpl, ftmpl = this.folderTmpl,
+    var 
     // bookmarkHTML
-    bookmarkHTML =  _(this.model.bookmarks).reduce(function(memo, bm) {
-      return memo + btmpl(bm);
-    }, ''),
+    bookmarkHTML =  this.bookmarkTmpl({bookmarks:this.model.bookmarks}),
     // folderHTML
-    folderHTML = _(this.model.folders).reduce( function(memo, folder) {
-          return memo + ftmpl({
-            name : folder.name,
-            count : folder.getBookmarkCount()
-          });
-        }, '');
+    folderHTML = this.folderTmpl({folders:this.model.folders});
 // '<div class="upper item"><h2>↑Parent<\/h2><\/div>'
     this.$el.html(folderHTML + bookmarkHTML );
     return this;
@@ -230,9 +237,11 @@ var FoldersView = Backbone.View.extend({
   up : function() {
     window.app.upLevel();
   },
-  edit: function() {
-    var bookmark = this.model.bookmarks[0];// TODO
-    this.trigger('edit',bookmark)
+  edit: function(e) {
+    var bookmark = _(this.model.bookmarks).find(function(b){
+      return b.date === e.currentTarget.dataset.date;
+    });
+    bookmark && this.trigger('edit',bookmark);
   }
 });
 
@@ -242,22 +251,25 @@ var NaviView = Backbone.View.extend({
   id : 'navi',
   tmpl : _.template(RESOURCE.naviTMPL),
   events: {
-    'click #title': "top" 
+    'click #title': function(e){
+      this.model.set('path', []);
+    } ,
+    'click #breadcrumbs span': function(e){
+      var n = Number(e.target.dataset.position);
+      if (!isNaN(n)){
+        this.model.upLevel(n);
+      }
+    }
   },
   initialize : function() {
     this.model.on('change:path', this.render, this);
     this.render();
   },
   render : function() {
-    var list = _(this.model.get('path')).reduce(function(memo, val) {
-      return val + ' <- ' + memo;
-    }, 'root');
     this.$el.html(this.tmpl({
-      list : list
+      list : this.model.get('path'),
+      length: this.model.get('path').length
     }));
-  },
-  top: function() {
-    app.set('path', []);
   }
 });
 
@@ -302,13 +314,15 @@ var AppView = Backbone.View.extend({
     this.$overlay.append(eV.el);
   }
 });
-new AppView({
-  model: app,
-  el: 'body'
-});
+
 initialize({
   ready : function(localText) {
-    var AppRouter = Backbone.Router.extend({
+    var body = $('body');
+    new AppView({
+      model: app,
+      el: 'body'
+    });
+    var router = new (Backbone.Router.extend({
       routes : {
         "" : "top",
         "!" : "top",
@@ -319,19 +333,31 @@ initialize({
         window.app.set('path', []);
       },
       moveTo : function(path) {
-        console.log(path);
         window.app.set('path', _(path.split('/')).map( function(str) {return decodeURIComponent(str);}));
       },
       configure: function(){
         
       }
-    });
-    
-    var router = new AppRouter();
+    }));
     app.on('change:path', function(){
       router.navigate('!' + app.get('path').join('/'));
     });
     Backbone.history.start();
+    var flag = false;
+    var debounce = _.debounce(function(){
+      body.removeClass('majik');
+      flag = false;
+    },1000);
+    var scrollMajik = _.throttle(function(){
+      if(flag){
+        debounce();
+      } else {
+        _.defer(function(){body.addClass('majik');});
+        flag = true;
+        debounce();
+      }
+    },200);
+    $(window).scroll(scrollMajik);
   },
   dataset : function(text) {
     window.app.setText(text);
