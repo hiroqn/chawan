@@ -67,5 +67,5 @@
 
 //var result = url.match(/^http.*\/([^\/]+)\/profile\.gif$/);
 
-
-
+非ログイン時の処理（ローカルストレージを使うか）
+Configurationの画面を作る。
