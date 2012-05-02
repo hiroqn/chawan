@@ -21,7 +21,7 @@ var RESOURCE = {
 </div>',
   bookmarkTMPL:'\
 <% _(bookmarks).each(function(bookmark){%>\
-<div class="bookmark item"  title="<%- bookmark.comment %>" >\
+<div class="bookmark item"  <% (bookmark.comment &&  %>title="<%- bookmark.comment %>"<% %> >\
   <div class="icons">\
     <div class="edit-icon" data-date="<%- bookmark.date %>"></div></div>\
   <div class="title">\
@@ -97,6 +97,9 @@ var TreeManager = new (Backbone.Model.extend({
   },
   getFolder: function(path,isNew) {
     var folder = this.root;
+    if(path.length === 0){
+      return folder;
+    }
     for ( var i = 0; i < path.length; i++) {
       folder = folder.getFolder(path[i]) || (isNew && folder.addFolder(path[i]));
       if(!folder) {
