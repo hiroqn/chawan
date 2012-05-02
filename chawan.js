@@ -97,6 +97,9 @@ var TreeManager = new (Backbone.Model.extend({
   },
   getFolder: function(path,isNew) {
     var folder = this.root;
+    if(path.length === 0){
+      return folder;
+    }
     for ( var i = 0; i < path.length; i++) {
       folder = folder.getFolder(path[i]) || (isNew && folder.addFolder(path[i]));
       if(!folder) {
