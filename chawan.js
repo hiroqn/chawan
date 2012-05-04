@@ -1,4 +1,4 @@
-// TODO hover ,edit comment, not login ,configuration
+//TODO hover , not login ,configuration
 var RESOURCE = {
   naviTMPL:'\
 <div id="title">?Chawan</div>\
@@ -21,7 +21,7 @@ var RESOURCE = {
 </div>',
   bookmarkTMPL:'\
 <% _(bookmarks).each(function(bookmark){%>\
-<div class="bookmark item"  <% (bookmark.comment &&  %>title="<%- bookmark.comment %>"<% %> >\
+<div class="bookmark item"  title="<%- bookmark.comment %>" >\
   <div class="icons">\
     <div class="edit-icon" data-date="<%- bookmark.date %>"></div></div>\
   <div class="title">\
@@ -318,54 +318,55 @@ var AppView = Backbone.View.extend({
   }
 });
 
-initialize({
-  ready : function(localText) {
-    var body = $('body');
-    new AppView({
-      model: app,
-      el: 'body'
-    });
-    var router = new (Backbone.Router.extend({
-      routes : {
-        "" : "top",
-        "!" : "top",
-        "!*path" : "moveTo",
-        "configure":"configure"
-      },
-      top : function() {
-        window.app.set('path', []);
-      },
-      moveTo : function(path) {
-        window.app.set('path', _(path.split('/')).map( function(str) {return decodeURIComponent(str);}));
-      },
-      configure: function(){
-        
-      }
-    }));
-    app.on('change:path', function(){
-      router.navigate('!' + app.get('path').join('/'));
-    });
-    Backbone.history.start();
-    var flag = false;
-    var debounce = _.debounce(function(){
-      body.removeClass('majik');
-      flag = false;
-    },1000);
-    var scrollMajik = _.throttle(function(){
-      if(flag){
-        debounce();
-      } else {
-        _.defer(function(){body.addClass('majik');});
-        flag = true;
-        debounce();
-      }
-    },200);
-    $(window).scroll(scrollMajik);
-  },
-  dataset : function(text) {
-    window.app.setText(text);
-  },
-  onError : function(str) {
-    alert(str);
-  }
+us$.dom.then(function(dataDeferred){ // DOMContentLoaded
+  var body = $('body');
+  new AppView({
+    model: app,
+    el: 'body'
+  });
+  var router = new (Backbone.Router.extend({
+    routes : {
+      "" : "top",
+      "!" : "top",
+      "!*path" : "moveTo",
+      "configure":"configure"
+    },
+    top : function() {
+      window.app.set('path', []);
+    },
+    moveTo : function(path) {
+      window.app.set('path', _(path.split('/')).map( function(str) {return decodeURIComponent(str);}));
+    },
+    configure: function(){
+      
+    }
+  }));
+  app.on('change:path', function(){
+    router.navigate('!' + app.get('path').join('/'));
+  });
+  Backbone.history.start();
+  //data setter
+  dataDeferred.then(function(text) {
+    app.setText(text);
+  }, function() {
+    alert('cant get searchData ');
+  });
+  //scroll majik
+  var flag = false;
+  var debounce = _.debounce(function(){
+    body.removeClass('majik');
+    flag = false;
+  },1000);
+  var scrollMajik = _.throttle(function(){
+    if(flag){
+      debounce();
+    } else {
+      _.defer(function(){body.addClass('majik');});
+      flag = true;
+      debounce();
+    }
+  },200);
+  $(window).scroll(scrollMajik);
+}, function(str) {//on error
+  alert(str);
 });
