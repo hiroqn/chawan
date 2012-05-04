@@ -8,8 +8,6 @@
 // @version       0.2.1
 // ==/UserScript==
 
-var first=Date.now(),dominit,domed,searched,setted;
-
 //<library jQuery="1.7.2" underscor="1.3.1" backbone="0.9.2">
 
 //</library>
@@ -17,43 +15,6 @@ var first=Date.now(),dominit,domed,searched,setted;
  * bookmark add config follow interest favorite follow.recommend
  */
 
-var util={
-    addStyle:function (css) {
-      if(GM_addStyle){
-        GM_addStyle(css);
-      }else{
-        var style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = css;
-        document.getElementsByTagName('head')[0].appendChild(style);
-      }
-    },
-    setFavicon:function(data){
-      var favicon = document.createElement('link');
-      favicon.setAttribute('rel', 'icon');
-      favicon.setAttribute('href', data);
-      document.getElementsByTagName('head')[0].appendChild(favicon);
-    },
-    storage:{
-      get:function(name){
-        return JSON.parse(localStorage.getItem(name));
-      },
-      getText:function(id){
-        return localStorage.getItem(id+'-text');
-      },
-      setText:function(id,text){
-        localStorage.setItem(id+'-text', text);
-      },
-    },
-    log:function(){
-      return (GM_log || console).apply(null, arguments);
-    },
-    isUsable:function(){
-      return _.all(arguments,function(obj){
-        return Boolean(obj);
-      });
-    }
-};
 var User = {
     login: false
 };
@@ -104,13 +65,28 @@ var Hatena = {
   // defferd for dom-load
   domDfd = $.Deferred(),
   // deferd
-  searchDataDfd,myNameDfd,
+  searchDataDfd, myNameDfd, domReady,
   //url match tags json
   tags = window.location.href.match(/^http.*\/([^\/]+)\/tags\.json(#.+)?$/),
   // url match my.name http://b.hatena.ne.jp/my.name
   myName = window.location.href.match(/^http:\/\/b\.hatena\.ne\.jp\/my\.name(\?chawan=.+)?$/);
-  
-  if(tags){
+  _(us$).extend({
+    dom: domDfd,
+    addStyle: function (css) {
+      if(GM_addStyle){
+        GM_addStyle(css);
+      } else {
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = css;
+        document.getElementsByTagName('head')[0].appendChild(style);
+      }
+    },
+    log:function(){
+      return (GM_log || console).apply(null, arguments);
+    }
+  });
+  if(tags) {  //at  tags.json 
     User.id = tags[1];
     searchDataDfd = Hatena.searchData();
     (myNameDfd = Hatena.myName()).done(function(json){
@@ -118,66 +94,51 @@ var Hatena = {
       User.rks=json.rks
       User.login=true;
     });
-    $(document).ready(function(){
-      var tagText=$('pre').text(); // TODO ? at chrome
+    domReady = function() {
+      var tagText=$('pre').text(); 
       $('body').empty();
-      domDfd.resolve();
-    });
-  } else if(myName){
+      domDfd.resolve(searchDataDfd);
+      $.when(myNameDfd,searchDataDfd).fail(function(){
+        alert('not login');
+        User.login=false;
+        });
+      User.tags=JSON.parse(tagText);
+    };
+  } else if(myName && myName[1]) { // at my.name if id is selected
     var chawan = myName[1];
-    $(document).ready(function(){
-      var Text=$('pre').text(); // TODO ? at chrome
-      $('body').empty();
-      domDfd.resolve();
-    });
+    User.id = chawan.slice(8);
+    searchDataDfd = Hatena.searchData();
+    domReady = function() {
+      var Text=$('pre').text(), 
+          myNameObj = JSON.parse(Text);
+      if(myNameObj.login){
+        User.rkm=myNameObj.rkm;
+        User.rks=myNameObj.rks
+        User.login=true;
+        $('body').empty();
+        domDfd.resolve(searchDataDfd);
+      } else {
+        domDfd.reject();
+      }
+    };
+  }else if(myName){// if id is not selected
+    
   } else {
     //error
     domDfd.reject();
   }
-  _(us$).extend({
-    dom: domDfd
-  });
+  if(!User.id) {
+    domDfd.reject();
+  } else {
+    $(document).ready(domReady);
+  }
+  document.title='?Chawan';
   window.us$ = us$;
 })();
-function initialize(callbacks) {
-  var localData, result = window.location.href.match(/^http.*\/([^\/]+)\/tags\.json(#.+)?$/), searchDataDfd,myNameDfd;
-  User.id = (result && result[1]);
-  if(!util.isUsable(User.id, JSON, localStorage)){
-    callbacks.onError('Environmental error');
-    return false;
-  }
-  searchDataDfd = Hatena.searchData();
-  (myNameDfd = Hatena.myName()).done(function(json){
-    User.rkm=json.rkm;
-    User.rks=json.rks
-    User.login=true;
-  });
-  document.addEventListener('DOMContentLoaded', function(e) {
-    dominit=Date.now();                                                     /** timer */
-    util.addStyle(RESOURCE.CSS);
-    var tagText=$('pre').text();
-    document.title='?Chawan';   // set title
-    $('body').empty(); // clear
-    callbacks.ready(localData);
-    User.tags=JSON.parse(tagText);// save tag
-    domed=Date.now();                                                     /** timer */
-    searchDataDfd.done(function(text){
-      searched=Date.now();                                                     /** timer */
-      callbacks.dataset(text);
-      setted=Date.now();                                                     /** timer */
-// alert('dominit:'+(dominit-first)+'\n domed' +(domed-first)+'\n
-// searched'+(searched-first)+ '\n setted'+(setted-first));
-    });
-    $.when(myNameDfd,searchDataDfd).fail(function(){
-      callbacks.onError('not login');
-      User.login=false;
-      });
-  }, false);
-}
+
 /*
  * *ここからコピペ
  */
-// TODO hover 
 //TODO hover , not login ,configuration
 var RESOURCE = {
   naviTMPL:'\
@@ -498,57 +459,59 @@ var AppView = Backbone.View.extend({
   }
 });
 
-initialize({
-  ready : function(localText) {
-    var body = $('body');
-    new AppView({
-      model: app,
-      el: 'body'
-    });
-    var router = new (Backbone.Router.extend({
-      routes : {
-        "" : "top",
-        "!" : "top",
-        "!*path" : "moveTo",
-        "configure":"configure"
-      },
-      top : function() {
-        window.app.set('path', []);
-      },
-      moveTo : function(path) {
-        window.app.set('path', _(path.split('/')).map( function(str) {return decodeURIComponent(str);}));
-      },
-      configure: function(){
-        
-      }
-    }));
-    app.on('change:path', function(){
-      router.navigate('!' + app.get('path').join('/'));
-    });
-    Backbone.history.start();
-    var flag = false;
-    var debounce = _.debounce(function(){
-      body.removeClass('majik');
-      flag = false;
-    },1000);
-    var scrollMajik = _.throttle(function(){
-      if(flag){
-        debounce();
-      } else {
-        _.defer(function(){body.addClass('majik');});
-        flag = true;
-        debounce();
-      }
-    },200);
-    $(window).scroll(scrollMajik);
-  },
-  dataset : function(text) {
-    window.app.setText(text);
-  },
-  onError : function(str) {
-    alert(str);
-  }
+us$.dom.then(function(dataDeferred){ // DOMContentLoaded
+  var body = $('body');
+  new AppView({
+    model: app,
+    el: 'body'
+  });
+  var router = new (Backbone.Router.extend({
+    routes : {
+      "" : "top",
+      "!" : "top",
+      "!*path" : "moveTo",
+      "configure":"configure"
+    },
+    top : function() {
+      window.app.set('path', []);
+    },
+    moveTo : function(path) {
+      window.app.set('path', _(path.split('/')).map( function(str) {return decodeURIComponent(str);}));
+    },
+    configure: function(){
+      
+    }
+  }));
+  app.on('change:path', function(){
+    router.navigate('!' + app.get('path').join('/'));
+  });
+  Backbone.history.start();
+  //data setter
+  dataDeferred.then(function(text) {
+    app.setText(text);
+  }, function() {
+    alert('cant get searchData ');
+  });
+  //scroll majik
+  var flag = false;
+  var debounce = _.debounce(function(){
+    body.removeClass('majik');
+    flag = false;
+  },1000);
+  var scrollMajik = _.throttle(function(){
+    if(flag){
+      debounce();
+    } else {
+      _.defer(function(){body.addClass('majik');});
+      flag = true;
+      debounce();
+    }
+  },200);
+  $(window).scroll(scrollMajik);
+}, function(str) {//on error
+  alert(str);
 });
+
 /*
  * *ここまでコピペ
  */
