@@ -34,13 +34,6 @@ table {
   border-collapse: collapse;
   border-spacing: 0
 }
-/*
- * blue #1BA1E2
- * lime #8CBF26   8cbf26
- * orange #F09609
- * teal #00ABA9;
- * green 339933
- */
 body {
   background-color: #353535;
   font-family: 'Segoe UI', 'Meiryo', helvetica, sans-serif;
@@ -84,6 +77,9 @@ body {
   z-index: 100;
 }
 .modal-enable .overlay {
+  visibility: visible;
+}
+.majik .overlay {
   visibility: visible;
 }
 .editer-wrapper {
@@ -176,7 +172,7 @@ body {
   background-color: #00ABA9;
   font-size: 100%;
   text-shadow: 1px -1px 1px #444444;
-  width: 300px;
+  width: 310px;
 }
 .bookmark a {
   text-decoration: none;
@@ -191,9 +187,6 @@ body {
 }
 .bookmark:hover .icons {
   visibility: visible;
-}
-.majik .bookmark:hover .icons {
-  visibility: hidden;
 }
 .title {
   position: absolute;
