@@ -5,7 +5,7 @@
 // @include       http://b.hatena.ne.jp/*/tags.json*
 // @include       http://b.hatena.ne.jp/my.name*
 // @run-at        document-start
-// @version       0.2.1
+// @version       0.3.0
 // ==/UserScript==
 
 //<library jQuery="1.7.2" underscore="1.3.1" backbone="0.9.2">
@@ -186,14 +186,14 @@ var Hatena = {
     $(document).ready(function() {//dom ready
       var Text=$('pre').text(), 
           myNameObj = JSON.parse(Text);
-      if(myNameObj.login){
+      if(myNameObj.login && myNameObj.name === User.id){
         User.rkm=myNameObj.rkm;
         User.rks=myNameObj.rks
         User.login=true;
         $('body').empty();
         domDfd.resolve(searchDataDfd);
       } else {
-        domDfd.reject();
+        domDfd.reject('not login');
       }
       us$.addStyle(RESOURCE.CSS);
     });
@@ -201,12 +201,7 @@ var Hatena = {
     
   } else {
     //error
-    domDfd.reject();
-  }
-  if(!User.id) {
-    domDfd.reject();
-  } else {
-    $(document).ready(domReady);
+    domDfd.reject('environmental error');
   }
   document.title='?Chawan';
   window.us$ = us$;
