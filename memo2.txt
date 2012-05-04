@@ -69,3 +69,29 @@
 
 非ログイン時の処理（ローカルストレージを使うか）
 Configurationの画面を作る。
+
+    setFavicon:function(data){
+      var favicon = document.createElement('link');
+      favicon.setAttribute('rel', 'icon');
+      favicon.setAttribute('href', data);
+      document.getElementsByTagName('head')[0].appendChild(favicon);
+    },
+    storage:{
+      get:function(name){
+        return JSON.parse(localStorage.getItem(name));
+      },
+      getText:function(id){
+        return localStorage.getItem(id+'-text');
+      },
+      setText:function(id,text){
+        localStorage.setItem(id+'-text', text);
+      },
+    },
+    
+/*
+ * blue #1BA1E2
+ * lime #8CBF26   8cbf26
+ * orange #F09609
+ * teal #00ABA9;
+ * green 339933
+ */
