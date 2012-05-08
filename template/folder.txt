@@ -1,0 +1,4 @@
+<% _(folders).each(function(folder){%><div class="folder item" data-name="<%- folder.name %>">
+    <h2><%- folder.name %></h2>
+    <h3><%- folder.count %></h3>
+</div><% }); %>
