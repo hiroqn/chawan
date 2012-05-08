@@ -5,7 +5,7 @@
 // @include       http://b.hatena.ne.jp/*/tags.json*
 // @include       http://b.hatena.ne.jp/my.name*
 // @run-at        document-start
-// @version       0.3.1
+// @version       0.3.2
 // ==/UserScript==
 
 // ==Resource==
@@ -375,7 +375,7 @@ var EditerView = Backbone.View.extend({
   className: 'editer-wrapper',
   events: {
     "click .submit": 'submit',
-    "click .cancel": "cancel",
+    "click .cancel": "destroy",
     "click": "cancel"
   },
   tmpl: _.template(TEXT.editerTemplate),
