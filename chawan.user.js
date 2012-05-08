@@ -143,7 +143,7 @@ var Hatena = {
   //url match tags json
   tags = window.location.href.match(/^http.*\/([^\/]+)\/tags\.json(#.+)?$/),
   // url match my.name http://b.hatena.ne.jp/my.name
-  myName = window.location.href.match(/^http:\/\/b\.hatena\.ne\.jp\/my\.name(\?chawan=.+)?$/);
+  myName = window.location.href.match(/^http:\/\/b\.hatena\.ne\.jp\/my\.name(\?chawan=.+)?(#.+)?$/);
   _(us$).extend({
     dom: domDfd,
     addStyle: function (css) {

@@ -59,10 +59,10 @@ var TreeManager = new (Backbone.Model.extend({
       takeBookmark: function (bookmark) {
         var index = this.bookmarks.indexOf(bookmark);
         if (~index) {// tilde
-          return false;
-        } else {
           this.bookmarks.splice(index, 1);
           return true;
+        } else {
+          return false;
         }
       },
       getBookmarkCount: function () {
@@ -185,6 +185,7 @@ var EditerView = Backbone.View.extend({
   className: 'editer-wrapper',
   events: {
     "click .submit": 'submit',
+    "click .cancel": "cancel",
     "click": "cancel"
   },
   tmpl: _.template(RESOURCE.editerTMPL),
@@ -225,9 +226,9 @@ var FoldersView = Backbone.View.extend({
   bookmarkTmpl: _.template(RESOURCE.bookmarkTMPL),
   folderTmpl: _.template(RESOURCE.folderTMPL),
   render: function () {
-    var // bookmarkHTML
-      bookmarkHTML = this.bookmarkTmpl({bookmarks: this.model.bookmarks}), // folderHTML
-      folderHTML = this.folderTmpl({folders: this.model.folders});
+    var
+      bookmarkHTML = this.bookmarkTmpl({bookmarks: this.model.bookmarks}), // bookmarkHTML
+      folderHTML = this.folderTmpl({folders: this.model.folders});// folderHTML
     // '<div class="upper item"><h2>↑Parent<\/h2><\/div>'
     this.$el.html(folderHTML + bookmarkHTML);
     return this;
@@ -257,7 +258,7 @@ var NaviView = Backbone.View.extend({
     'click #title': function () {
       this.model.set('path', []);
     },
-    'click #breadcrumbs span': function () {
+    'click #breadcrumbs span': function (e) {
       var n = Number(e.target.dataset.position);
       if (!isNaN(n)) {
         this.model.upLevel(n);
