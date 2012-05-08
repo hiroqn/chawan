@@ -1,36 +1,3 @@
-//TODO hover , not login ,configuration
-var RESOURCE = {
-  naviTMPL: '\
-<div id="title">?Chawan</div>\
-<div id="breadcrumbs">\
-  <span data-position="<%- length %>">?Chawan:</span>\
-  <% _(list).each(function(d,n){%> / <span data-position="<%-length-n-1 %>"><%- d %></span>  <% }); %>\
-</div>',
-  folderTMPL: '\
-<% _(folders).each(function(folder){%>\
-<div class="folder item" data-name="<%- folder.name %>">\
-    <h2><%- folder.name %></h2><h3><%- folder.count %></h3>\
-</div>\
-<% }); %>',
-  editerTMPL: '\
-<div class="editer">\
-  <h1><%- title %></h1>\
-  <h2><a href="<%- url %>" target="_blank"><%- url %><\/a></h2>\
-  <textarea class="editer-input"><%- rawComment %></textarea>\
-  <div class="buttons"><a class="submit">submit</a> <a class="cancel">cancel</a></div>\
-</div>',
-  bookmarkTMPL: '\
-<% _(bookmarks).each(function(bookmark){%>\
-<div class="bookmark item"  title="<%- bookmark.comment %>" >\
-  <div class="icons">\
-    <div class="edit-icon" data-date="<%- bookmark.date %>"></div></div>\
-  <div class="title">\
-    <a href="<%- bookmark.url %>" target="_blank" title="<%- bookmark.title %>"> <%- bookmark.title %></a>\
-  </div>\
-  <a href="<%- bookmark.url %>" target="_blank"><div class="dummy"></div></a>\
-</div>\
-<% }); %>'
-};
 
 var TreeManager = new (Backbone.Model.extend({
   initialize: function () {
@@ -194,7 +161,7 @@ var EditerView = Backbone.View.extend({
     "click .cancel": "cancel",
     "click": "cancel"
   },
-  tmpl: _.template(RESOURCE.editerTMPL),
+  tmpl: _.template(TEXT.editerTemplate),
   initialize: function () {
     this.render();
   },
@@ -229,8 +196,8 @@ var FoldersView = Backbone.View.extend({
     "click .upper": "up",
     "click .edit-icon": "edit"
   },
-  bookmarkTmpl: _.template(RESOURCE.bookmarkTMPL),
-  folderTmpl: _.template(RESOURCE.folderTMPL),
+  bookmarkTmpl: _.template(TEXT.bookmarksTemplate),
+  folderTmpl: _.template(TEXT.foldersTemplate),
   render: function () {
     var bookmarkHTML = this.bookmarkTmpl({bookmarks: this.model.bookmarks}), // bookmarkHTML
       folderHTML = this.folderTmpl({folders: this.model.folders});// folderHTML
@@ -260,7 +227,7 @@ var FoldersView = Backbone.View.extend({
 var NaviView = Backbone.View.extend({
   tagName: 'div',
   id: 'navi',
-  tmpl: _.template(RESOURCE.naviTMPL),
+  tmpl: _.template(TEXT.naviTemplate),
   events: {
     'click #title': function () {
       this.model.set('path', []);
