@@ -5,7 +5,7 @@
 // @include       http://b.hatena.ne.jp/*/tags.json*
 // @include       http://b.hatena.ne.jp/my.name*
 // @run-at        document-start
-// @version       0.3.1
+// @version       0.3.2
 // ==/UserScript==
 
 // ==Resource==
@@ -151,7 +151,7 @@ var Hatena = {
     domDfd = $.Deferred(), // deferd
     searchDataDfd, myNameDfd, domReady, //url match tags json
     tags = window.location.href.match(/^http.*\/([^\/]+)\/tags\.json(#.+)?$/), // url match my.name http://b.hatena.ne.jp/my.name
-    myName = window.location.href.match(/^http:\/\/b\.hatena\.ne\.jp\/my\.name(\?chawan=.+)?(#.+)?$/);
+    myName = window.location.href.match(/^http:\/\/b\.hatena\.ne\.jp\/my\.name(\?chawan=.+)?$/);
   _(us$).extend({
     dom: domDfd,
     addStyle: function (css) {
@@ -189,7 +189,7 @@ var Hatena = {
     });
   } else if (myName && myName[1]) { // at my.name if id is selected
     var chawan = myName[1];
-    User.id = chawan.slice(8);
+    User.id = chawan.match(/\?chawan=(\w+)/)[1];
     searchDataDfd = Hatena.searchData();
     $(document).ready(function () {//dom ready
       var Text = $('pre').text(), myNameObj = JSON.parse(Text);
@@ -375,7 +375,7 @@ var EditerView = Backbone.View.extend({
   className: 'editer-wrapper',
   events: {
     "click .submit": 'submit',
-    "click .cancel": "cancel",
+    "click .cancel": "destroy",
     "click": "cancel"
   },
   tmpl: _.template(TEXT.editerTemplate),
