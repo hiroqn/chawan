@@ -5,7 +5,7 @@
         "description": "make HatenaBookmark more and more convenient ! maybe...",
         "include": ["http://b.hatena.ne.jp/*/tags.json*", "http://b.hatena.ne.jp/my.name*"],
         "run-at": "document-start",
-        "version": "0.3.1"
+        "version": "0.3.2"
     },
     "lib": ["lib/jquery-1.7.2.min.js", "lib/underscore-min.js", "lib/backbone-min.js", "init.js", "chawan.js"],
     "TEXT": {

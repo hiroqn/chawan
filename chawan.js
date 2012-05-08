@@ -158,7 +158,7 @@ var EditerView = Backbone.View.extend({
   className: 'editer-wrapper',
   events: {
     "click .submit": 'submit',
-    "click .cancel": "cancel",
+    "click .cancel": "destroy",
     "click": "cancel"
   },
   tmpl: _.template(TEXT.editerTemplate),
