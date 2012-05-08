@@ -1,0 +1,18 @@
+{
+    "meta": {
+        "name": "?Chawan",
+        "namespace": "https://github.com/hiroqn",
+        "description": "make HatenaBookmark more and more convenient ! maybe...",
+        "include": ["http://b.hatena.ne.jp/*/tags.json*", "http://b.hatena.ne.jp/my.name*"],
+        "run-at": "document-start",
+        "version": "0.3.1"
+    },
+    "lib": ["lib/jquery-1.7.2.min.js", "lib/underscore-min.js", "lib/backbone-min.js", "init.js", "chawan.js"],
+    "TEXT": {
+        "CSS": "compress.css",
+        "foldersTemplate": "template/folder.txt",
+        "bookmarksTemplate": "template/bookmark.txt",
+        "naviTemplate": "template/navi.txt",
+        "editerTemplate": "template/editer.txt"
+    }
+}

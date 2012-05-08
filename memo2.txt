@@ -1,21 +1,9 @@
-    // editComment:function(id){//http://b.hatena.ne.jp/hiroqn/add.edit.json}
-    
+
 //http://cdn2.www.st-hatena.com/users/hi/*/profile.gif
 //http://b.st-hatena.com/images/loading.gif
-// GM_xmlhttpRequest({ method : "GET",
-// url : "http://b.hatena.ne.jp/hiroqn/sidebar?with_tags=1", onload :
-// function(response) { var doc = document.createElement('div'); doc.innerHTML =
-// response.responseText; var tagEl = doc.getElementsByClassName('tag'); var tag
-// =
-// []; for(var i = 0; i < tags.length; i++) { tag.push(tags[i].textContent); }
-// var json = JSON.stringify(tags); console.log(json); } });
-
 // http://cdn-ak.b.st-hatena.com/images/loading.gif
 // http://b.hatena.ne.jp/hiroqn/rss
 // http://cdn2.www.st-hatena.com/users/hi/hiroqn/profile.gif
-// document.write('/*');http://b.hatena.ne.jp/hiroqn/search.data
-// http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
-
 // "http://b.hatena.ne.jp/" + config.id + "/search.data"
 // http://b.hatena.ne.jp/hiroqn/api.delete_bookmark.json
 // GM_getValue http://b.hatena.ne.jp/hiroqn/fragment?with_favorites=1&of=0
@@ -67,8 +55,7 @@
 
 //var result = url.match(/^http.*\/([^\/]+)\/profile\.gif$/);
 
-非ログイン時の処理（ローカルストレージを使うか）
-Configurationの画面を作る。
+
 
     setFavicon:function(data){
       var favicon = document.createElement('link');
@@ -95,3 +82,12 @@ Configurationの画面を作る。
  * teal #00ABA9;
  * green 339933
  */
+
+folderをソートする。
+非ログイン時の処理（ローカルストレージを使うか）
+Configurationの画面を作る。
+Bookmark削除機能
+Bookmark追加機能？
+既存のtagをつかった何か
+検索
+@matchを使う
