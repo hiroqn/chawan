@@ -27,6 +27,7 @@ var RESOURCE = {
   <div class="title">\
     <a href="<%- bookmark.url %>" target="_blank" title="<%- bookmark.title %>"> <%- bookmark.title %></a>\
   </div>\
+  <a href="<%- bookmark.url %>" target="_blank"><div class="dummy"></div></a>\
 </div>\
 <% }); %>'
 };
@@ -69,6 +70,11 @@ var TreeManager = new (Backbone.Model.extend({
         return this.count = _(this.folders).reduce(function (memo, folder) {
           return folder.getBookmarkCount() + memo;
         }, 0) + this.bookmarks.length;
+      },
+      getBookmarkByDate: function (date) {
+        return _(this.bookmarks).find(function (bookmark) {
+          return bookmark.date === date;
+        });
       }
     });
     this.Bookmark = Bookmark = function (title, comment, url, other) {
@@ -226,8 +232,7 @@ var FoldersView = Backbone.View.extend({
   bookmarkTmpl: _.template(RESOURCE.bookmarkTMPL),
   folderTmpl: _.template(RESOURCE.folderTMPL),
   render: function () {
-    var
-      bookmarkHTML = this.bookmarkTmpl({bookmarks: this.model.bookmarks}), // bookmarkHTML
+    var bookmarkHTML = this.bookmarkTmpl({bookmarks: this.model.bookmarks}), // bookmarkHTML
       folderHTML = this.folderTmpl({folders: this.model.folders});// folderHTML
     // '<div class="upper item"><h2>↑Parent<\/h2><\/div>'
     this.$el.html(folderHTML + bookmarkHTML);
@@ -240,15 +245,17 @@ var FoldersView = Backbone.View.extend({
     window.app.upLevel();
   },
   edit: function (e) {
-    var bookmark = _(this.model.bookmarks).find(function (b) {
-      return b.date === e.currentTarget.dataset.date;//TODO add method
-    });
-    if(bookmark){
+    var bookmark = this.model.getBookmarkByDate(e.currentTarget.dataset.date);
+    if (bookmark) {
       this.trigger('edit', bookmark);
+    }
+  },
+  link: function (e) {
+    if($(e.target).hasClass('bookmark')){
+      var bookmark = this.model.getBookmarkByDate(e.currentTarget.dataset.date);
     }
   }
 });
-
 
 var NaviView = Backbone.View.extend({
   tagName: 'div',
