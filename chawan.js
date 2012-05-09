@@ -1,4 +1,3 @@
-
 var TreeManager = new (Backbone.Model.extend({
   initialize: function () {
     var chawanParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g, // for [?]
@@ -41,6 +40,11 @@ var TreeManager = new (Backbone.Model.extend({
       getBookmarkByDate: function (date) {
         return _(this.bookmarks).find(function (bookmark) {
           return bookmark.date === date;
+        });
+      },
+      sortFolder: function () {
+        this.folders = _(this.folders).sortBy(function (folder) {
+          return folder.name.charAt(0).charCodeAt();
         });
       }
     });
@@ -100,8 +104,21 @@ var TreeManager = new (Backbone.Model.extend({
       }
     });
     this.root.getBookmarkCount();
+    (function (folder) {
+      _(folder.folders).each(arguments.callee);
+      folder.sortFolder();
+    })(this.root);
     this.trigger('change');
 
+  },
+  setBookmarkCount: function () {
+    (function (folder) {
+      _(folder.folders).each(arguments.callee);
+      folder.count = _(folder.folders).reduce(function (memo, folder) {
+        return folder.count + memo;
+      }, folder.bookmarks.length);
+
+    })(this.root);
   },
   moveBookmark: function (bookmark, comment) {
     var Tree = this;
@@ -218,7 +235,7 @@ var FoldersView = Backbone.View.extend({
     }
   },
   link: function (e) {
-    if($(e.target).hasClass('bookmark')){
+    if ($(e.target).hasClass('bookmark')) {
       var bookmark = this.model.getBookmarkByDate(e.currentTarget.dataset.date);
     }
   }

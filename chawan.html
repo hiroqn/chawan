@@ -20,18 +20,6 @@
     var Hatena = {
         editComment: function (url, comment) {
             var dfd = $.Deferred();
-            var obj = {
-                "success": 1,
-                "epoch": 1324275088,
-                "comment_raw": comment,
-                "private": null,
-                "eid": "28277372",
-                "permalink": "http://b.hatena.ne.jp/hiroqn/20111219#bookmark-28277372",
-                "tags": ["blog", "javascript", "?blog"],
-                "comment": "",
-                "timestamp": "2011/12/19",
-                "user": "hiroqn"
-            }
             setTimeout(function () {
                 dfd.resolve(comment);
             }, 100)
