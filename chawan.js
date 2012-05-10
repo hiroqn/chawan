@@ -103,11 +103,8 @@ var TreeManager = new (Backbone.Model.extend({
         Tree.root.addBookmark(bookmark);
       }
     });
-    this.root.getBookmarkCount();
-    (function (folder) {
-      _(folder.folders).each(arguments.callee);
-      folder.sortFolder();
-    })(this.root);
+    this.setBookmarkCount();
+    this.sortAllFolder();
     this.trigger('change');
 
   },
@@ -120,6 +117,12 @@ var TreeManager = new (Backbone.Model.extend({
 
     })(this.root);
   },
+  sortAllFolder: function () {
+    (function (folder) {
+      _(folder.folders).each(arguments.callee);
+      folder.sortFolder();
+    })(this.root);
+  },
   moveBookmark: function (bookmark, comment) {
     var Tree = this;
     _(bookmark.paths).each(function (path) {
@@ -129,6 +132,8 @@ var TreeManager = new (Backbone.Model.extend({
     _(bookmark.paths).each(function (chawan) {
       Tree.getFolder(chawan, true).addBookmark(bookmark);
     });
+    this.setBookmarkCount();
+    this.sortAllFolder();
     this.trigger('change');
   },
   setComment: function (bookmark, comment) {
@@ -153,8 +158,8 @@ window.app = new (Backbone.Model.extend({
   setText: function (texts) {
     TreeManager.addByText(texts);
   },
-  upLevel: function () {
-    var n = arguments[0] || arguments[0] === 0 || 1;
+  upLevel: function (n) {
+    (n > -1) || (n = 1);
     if (this.get('path').length) {
       for (var i = 0; i < n; i++) {
         this.get('path').pop();
