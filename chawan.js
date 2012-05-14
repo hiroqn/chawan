@@ -153,10 +153,10 @@ window.app = new (Backbone.Model.extend({
   },
   initialize: function () {
     this.set('path', []);
-    this.set('TreeManager', TreeManager);
+    this.set('Tree', TreeManager);
   },
   setText: function (texts) {
-    TreeManager.addByText(texts);
+    this.get('Tree').addByText(texts);
   },
   upLevel: function (n) {
     (n > -1) || (n = 1);
@@ -169,7 +169,7 @@ window.app = new (Backbone.Model.extend({
   },
   downLevel: function (name) {
     var path = this.get('path');
-    if (TreeManager.getFolder(path = path.concat(name))) {
+    if (this.get('Tree').getFolder(path = path.concat(name))) {
       this.set('path', path);
     }
   }
@@ -193,7 +193,7 @@ var EditerView = Backbone.View.extend({
   },
   submit: function () {
     var text = this.$('.editer-input').val();
-    TreeManager.setComment(this.model, text);
+    app.get('Tree').setComment(this.model, text);
     this.destroy();
   },
   cancel: function (e) {
@@ -278,7 +278,7 @@ var AppView = Backbone.View.extend({
     this.naviView = new NaviView({
       model: app
     });
-    this.model.get('TreeManager').on('change', this.render, this);
+    this.model.get('Tree').on('change', this.render, this);
     this.model.on('change:path', this.render, this);
     this.model.on('change:isModal', this.modal, this);
     this.$container = $('<div />', {"class": "container"});
@@ -286,7 +286,7 @@ var AppView = Backbone.View.extend({
     this.$el.append(this.naviView.el, this.$container, this.$overlay);
   },
   render: function () {
-    var folder = this.model.get('TreeManager').getFolder(this.model.get('path'));
+    var folder = this.model.get('Tree').getFolder(this.model.get('path'));
     if (folder && folder.getBookmarkCount()) {
       if (this.folderView) {
         this.folderView.remove();
@@ -355,7 +355,7 @@ us$.dom.then(function (dataDeferred) { // DOMContentLoaded
   var debounce = _.debounce(function () {
     body.removeClass('majik');
     flag = false;
-  }, 1000);
+  }, 800);
   var scrollMajik = _.throttle(function () {
     if (flag) {
       debounce();
@@ -366,7 +366,7 @@ us$.dom.then(function (dataDeferred) { // DOMContentLoaded
       flag = true;
       debounce();
     }
-  }, 200);
+  }, 400);
   $(window).scroll(scrollMajik);
 }, function (str) {//on error
   alert(str);

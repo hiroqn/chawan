@@ -7,7 +7,9 @@
         "run-at": "document-start",
         "version": "0.3.2"
     },
-    "lib": ["lib/jquery-1.7.2.min.js", "lib/underscore-min.js", "lib/backbone-min.js", "init.js", "chawan.js"],
+    "lib": [
+        "lib/jquery-1.7.2.min.js", "lib/underscore-min.js", "lib/backbone-min.js", "init.js", "view.js", "chawan.js"
+    ],
     "TEXT": {
         "CSS": "compress.css",
         "foldersTemplate": "template/folder.txt",
