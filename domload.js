@@ -2,7 +2,7 @@ us$.dom.then(function (dataDeferred) { // DOMContentLoaded
   var body = $('body'), // cache body element
     appView = new AppView({
       model: app,
-      el: body[0]
+      el: document.body
     }), // app View
     router = new (Backbone.Router.extend({
       routes: {

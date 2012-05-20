@@ -17,5 +17,6 @@
         "bookmarksTemplate": "template/bookmark.txt",
         "naviTemplate": "template/navi.txt",
         "editerTemplate": "template/editer.txt"
-    }
+    },
+    "filename": "chawan.user.js"
 }

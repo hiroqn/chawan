@@ -1,12 +1,11 @@
 var fs = require('fs'), //
-  pack = JSON.parse(fs.readFileSync(__dirname + "/pack.json").toString()), //
-  chawan = fs.readFileSync(__dirname + "/chawan.js").toString();
+  pack = require(__dirname + "/" + process.argv[2]);
 function ws(n) {
   var a = new Array(n + 1);
   return a.join(' ');
 }
-var metaStr = '', crlf = '\r\n';
-metaStr += '// ==UserScript==' + crlf;
+var metaStr = '', crlf = '\r\n',metaStrArray=[];
+metaStrArray.push ( '// ==UserScript==');
 for (var hash in pack.meta) {
   if (typeof pack.meta[hash] === 'object') {
     pack.meta[hash].forEach(function (name) {
@@ -30,5 +29,5 @@ pack.lib.forEach(function (path) {
   metaStr += fs.readFileSync(__dirname + "/" + path).toString() + crlf;
 });
 metaStr += '// ==/library==' + crlf;
-fs.writeFileSync('./chawan.user.js', metaStr);
+fs.writeFileSync(pack.filename, metaStr);
 //console.log(metaStr);
