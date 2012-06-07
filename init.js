@@ -1,58 +1,96 @@
-var User = {
-  login: false
-};
-var Hatena = {
-  searchData: function () {
-    return jQuery.post("http://b.hatena.ne.jp/" + User.id + "/search.data", null, null, 'text');
+function HatenaClient(id, rks) {
+  this.id = id;
+  this.rks = rks;
+  this.editURL = 'http://b.hatena.ne.jp/' + id + '/add.edit.json';
+  this.destroyURL = 'http://b.hatena.ne.jp/' + id + '/add.delete'
+}
+_(HatenaClient).extend({
+  searchData: function (id) {
+    var searchURL = 'http://b.hatena.ne.jp/ ' + id + '/search.data';
+    return jQuery.post(searchURL, null, null, 'text');
   },
   myName: function () {
-    var dfd = $.Deferred();
-    jQuery.get("http://b.hatena.ne.jp/my.name", null, null, 'json').then(function (object) {
+    var dfd = $.Deferred(),
+        nameURL = 'http://b.hatena.ne.jp/my.name';
+    jQuery.get(this.nameURL, null, null, 'json').then(function (object) {
       if (object.login) {
         dfd.resolve(object);
       } else {
         dfd.reject();
       }
-    }, function () {
-      dfd.reject();
-    });
+    }, dfd.reject.bind(dfd));
     return dfd.promise();
-  },
-  editComment: function (url, comment) {
-    var dfd = $.Deferred();
-    jQuery.post('http://b.hatena.ne.jp/' + User.id + '/add.edit.json', {
-      url: url,
-      comment: comment,
-      from: 'inplace',
-      rks: User.rks
-    }, null, 'json').then(function (object) {
-        if (object.success) {
-          dfd.resolve(object.comment_raw);
-        } else {
-          dfd.reject();
-        }
-      }, function () {
-        dfd.reject();
-      });
-    return dfd.promise();
-  },
-  destroyBookmark: function (bookmark) {
-    return jQuery.post('http://b.hatena.ne.jp/' + User.id + '/add.delete', {
-      url: bookmark.url,
-      rks: User.rks
-    }, null, 'text');
   }
-};
+});
+_(HatenaClient.prototype).extend({
+      editComment: function (url, comment) {
+        var dfd = $.Deferred(),
+            postData = {
+              url: url,
+              comment: comment,
+              from: 'inplace',
+              rks: this.rks
+            };
+        jQuery.post(this.editURL, postData, null, 'json').then(
+            function (object) {
+              if (object.success) {
+                dfd.resolve(object.comment_raw);
+              } else {
+                dfd.reject();
+              }
+            }, dfd.reject.bind(dfd));
+        return dfd.promise();
+      },
+      destroyBookmark: function (bookmark) {
+        return jQuery.post(this.destroyURL, {url: bookmark.url, rks: this.rks},
+            null, 'text');
+      }
+    }
+);
 (function () {
+  var apply = Function.prototype.apply,
+      slice = Array.prototype.slice;
   var us$ = function (fn) {
-      fn();
-    }, // defferd for dom-load
-    domDfd = $.Deferred(), // deferd
-    searchDataDfd, myNameDfd, domReady, //url match tags json
-    tags = window.location.href.match(/^http.*\/([^\/]+)\/tags\.json(#.+)?$/), // url match my.name http://b.hatena.ne.jp/my.name
-    myName = window.location.href.match(/^http:\/\/b\.hatena\.ne\.jp\/my\.name(\?chawan=.+)?$/);
+        fn();
+      },
+      nameList = {},
+      DOMDeferred = $.Deferred(),
+      dummyDeferred = $.Deferred();
   _(us$).extend({
-    dom: domDfd,
+    register: function (name, regExp, callback) {
+      if (window.location.href.match(regExp)) {
+        nameList[name] = {
+          dfd: $.Deferred()
+        };
+        if (callback) {
+          callback(function (err) {
+            if (err) {
+              nameList[name].dfd.reject();
+            }
+            (nameList[name].arg = slice.call(arguments)).shift();
+          });
+        } else {
+          nameList[name].dfd.resolve();
+        }
+      }
+    },
+    ready: function (name) {
+      if (name) {
+        return DOMDeferred;
+      }
+      if (nameList[name]) {
+        DOMDeferred.done(function () {
+          nameList[name].dfd.resolve(nameList[name].arg);
+        });
+        return nameList[name].dfd;
+      } else {
+        return dummyDeferred;
+      }
+    }
+  });
+  $(document).ready(DOMDeferred.resolve.bind(DOMDeferred));
+
+  _(us$).extend({
     addStyle: function (css) {
       if (GM_addStyle) {
         GM_addStyle(css);
@@ -67,48 +105,21 @@ var Hatena = {
       return (GM_log || console).apply(null, arguments);
     }
   });
-  if (tags) {  //at  tags.json
-    User.id = tags[1];
-    searchDataDfd = Hatena.searchData();
-    (myNameDfd = Hatena.myName()).done(function (json) {
-      User.rkm = json.rkm;
-      User.rks = json.rks
-      User.login = true;
-    });
-    $(document).ready(function () {//dom ready
-      var tagText = $('pre').text();
-      $('body').empty();
-      domDfd.resolve(searchDataDfd);
-      $.when(myNameDfd, searchDataDfd).fail(function () {
-        alert('not login');
-        User.login = false;
-      });
-      us$.addStyle(TEXT.CSS);
-      User.tags = JSON.parse(tagText);
-    });
-  } else if (myName && myName[1]) { // at my.name if id is selected
-    var chawan = myName[1];
-    User.id = chawan.match(/\?chawan=(\w+)/)[1];
-    searchDataDfd = Hatena.searchData();
-    $(document).ready(function () {//dom ready
-      var Text = $('pre').text(), myNameObj = JSON.parse(Text);
-      if (myNameObj.login && myNameObj.name === User.id) {
-        User.rkm = myNameObj.rkm;
-        User.rks = myNameObj.rks
-        User.login = true;
-        $('body').empty();
-        domDfd.resolve(searchDataDfd);
-      } else {
-        domDfd.reject('not login');
-      }
-      us$.addStyle(TEXT.CSS);
-    });
-  } else if (myName) {// if id is not selected
-
-  } else {
-    //error
-    domDfd.reject('environmental error');
-  }
-  document.title = '?Chawan';
+  $(document).ready(DOMDeferred.resolve.bind(DOMDeferred));
   window.us$ = us$;
 })();
+us$(function () {
+  document.title = '?Chawan';
+});
+us$.register('normal', /^http:\/\/b.hatena.ne.jp\/my\.name\?chawan=.+$/,
+    function (callback) {
+      var result = window.location.href.match(/\?chawan=(\w+)/);
+      callback(null, HatenaClient.serchData(result[1]));
+
+    });
+us$.register('config', /^http:\/\/b.hatena.ne.jp\/my\.name$/,
+    function (callback) {
+    });
+us$.register('tags', /^http.*\/([^\/]+)\/tags\.json(#.+)?$/,
+    function (callback) {
+    });
