@@ -1,8 +1,8 @@
-?Chawan とは
+?Chawan
 ===========
-userscirpt for はてブです。
-はてブの重たいトップページに飽きた人や比較的定常的なブックーマークを階層構造を用いて保存したい人用です。
-Firefox with Greasemonkey, Chromeのuserscriptで概ね使えます 。
+userscirpt for HatenaBookmark
+
+Firefox with Greasemonkey, Chrome userscript.
 
 使用方法
 ==========
