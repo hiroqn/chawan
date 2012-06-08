@@ -4,12 +4,20 @@ userscirpt for HatenaBookmark
 
 Firefox with Greasemonkey, Chrome userscript.
 
-使用方法
+Install
 ==========
-インストール後、http://b.hatena.ne.jp/*yourHatenaID*/tags.jsonに行くと動作します。
-もしくは、http://b.hatena.ne.jp/my.name?chawan=*yourHatenaID*に行っても動作します。
+Install -> [click](https://github.com/hiroqn/chawan/raw/master/chawan.user.js)
+
+and
+
+Go to -> [here](http://b.hatena.ne.jp/my.name)
+
+How to use
+==========
+
 ブックマークのコメントに\[?folder1\]と付け加えるとブックマークがfolder1の下に配置されます。
 また、\[?folder1/folder2\]と書くことでfolder1の下にfolder2が作られ、その中にブックマークが配置されます。
+
 
 補足
 ==========

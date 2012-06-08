@@ -89,7 +89,40 @@ _(HatenaClient.prototype).extend({
     }
   });
   $(document).ready(DOMDeferred.resolve.bind(DOMDeferred));
+  /*
+   * module
+   */
+  var modules = {},
+      exports = {},
+      require;
+  function Module(name) {
+    this.exports = {};
+    this.id = name;
+    this.loaded = true;
+  }
+  Module.prototype.require = require = function (name) {
+    //(function (exports,require,module,__filename,__dirname))
+    if (exports.hasOwnProperty(name)) {
+      return exports[name];
+    } else {
+      var module = new Module(name);
+      if (modules.hasOwnProperty(name)) {
+        exports[name] =module.exports;
+        modules[name].call(require.exports, module.require, module);
+      }
+      return module.exports;
+    }
+  };
 
+  _(us$).extend({
+    require: require,
+    modules: {
+      require: require,
+      add: function (name, func) {
+        modules[name] = func;
+      }
+    }
+  });
   _(us$).extend({
     addStyle: function (css) {
       if (GM_addStyle) {
@@ -110,6 +143,7 @@ _(HatenaClient.prototype).extend({
 })();
 us$(function () {
   document.title = '?Chawan';
+  window.ctrl = {};
 });
 us$.register('normal', /^http:\/\/b.hatena.ne.jp\/my\.name\?chawan=.+$/,
     function (callback) {
