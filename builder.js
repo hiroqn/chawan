@@ -5,29 +5,30 @@ function ws(n) {
   return a.join(' ');
 }
 var metaStr = '', crlf = '\r\n',metaStrArray=[];
-metaStrArray.push ( '// ==UserScript==');
-for (var hash in pack.meta) {
-  if (typeof pack.meta[hash] === 'object') {
-    pack.meta[hash].forEach(function (name) {
-      metaStr += '// @' + hash + ws(14 - hash.length) + name + crlf;
+metaStrArray.push ('// ==UserScript==');
+Object.keys(pack.meta).forEach(function(key){
+  if (typeof pack.meta[key] === 'object') {
+    pack.meta[key].forEach(function (name) {
+      metaStrArray.push('// @' + key + ws(14 - key.length) + name);
     });
   } else {
-    metaStr += '// @' + hash + ws(14 - hash.length) + pack.meta[hash] + crlf;
+    metaStrArray.push('// @' + key + ws(14 - key.length) + pack.meta[key] );
   }
-}
-metaStr += '// ==/UserScript==' + crlf + crlf;
-metaStr += '// ==Resource==' + crlf;
-var object = {};
-for (hash in pack.TEXT) {
-  object[hash] = fs.readFileSync(__dirname + "/" + pack.TEXT[hash]).toString();
-}
-metaStr += 'var TEXT = ' + JSON.stringify(object, undefined, 2) + ';' + crlf;
-metaStr += '// ==/Resource==' + crlf + crlf;
-metaStr += '// ==library==' + crlf;
-pack.lib.forEach(function (path) {
-  metaStr += '//' + path + crlf;
-  metaStr += fs.readFileSync(__dirname + "/" + path).toString() + crlf;
 });
-metaStr += '// ==/library==' + crlf;
-fs.writeFileSync(pack.filename, metaStr);
+metaStrArray.push('// ==/UserScript==');
+metaStrArray.push('');
+metaStrArray.push('// ==Resource==');
+var object = {};
+Object.keys(pack.TEXT).forEach(function(key){
+  object[key] = fs.readFileSync(__dirname + "/" + pack.TEXT[key]).toString();
+});
+metaStrArray.push('var TEXT = ' + JSON.stringify(object, undefined, 2) + ';');
+metaStrArray.push('// ==/Resource==');
+metaStrArray.push('// ==library==');
+pack.lib.forEach(function (path) {
+  metaStrArray.push('//' + path );
+  metaStrArray.push(fs.readFileSync(__dirname + "/" + path).toString());
+});
+metaStrArray.push('// ==/library==' );
+fs.writeFileSync(pack.filename, metaStrArray.join(crlf));
 //console.log(metaStr);

@@ -7,11 +7,10 @@
 // "http://b.hatena.ne.jp/" + config.id + "/search.data"
 // http://b.hatena.ne.jp/hiroqn/api.delete_bookmark.json
 // GM_getValue http://b.hatena.ne.jp/hiroqn/fragment?with_favorites=1&of=0
-// user_info : '/my.name',
+
 // entry_favorites : '/my.entry_favorites',
 // fast_entry_data : '/my.fast_entry_data',
-// edit : 'add.edit.json',
-// tags : 'tags.json',
+
 // entry : 'entry.json',
 // information_html : 'partial.information',
 // services_html : 'partial.services',
@@ -52,42 +51,14 @@
 // entry_edit_title : '/entry.edit_title.json',
 // feedback : 'api.feedback.json'
 
-
-//var result = url.match(/^http.*\/([^\/]+)\/profile\.gif$/);
-
-
-
-    setFavicon:function(data){
-      var favicon = document.createElement('link');
-      favicon.setAttribute('rel', 'icon');
-      favicon.setAttribute('href', data);
-      document.getElementsByTagName('head')[0].appendChild(favicon);
-    },
-    storage:{
-      get:function(name){
-        return JSON.parse(localStorage.getItem(name));
-      },
-      getText:function(id){
-        return localStorage.getItem(id+'-text');
-      },
-      setText:function(id,text){
-        localStorage.setItem(id+'-text', text);
-      },
-    },
-    
-/*
- * blue #1BA1E2
- * lime #8CBF26   8cbf26
- * orange #F09609
- * teal #00ABA9;
- * green 339933
- */
-
-folderをソートする。
-非ログイン時の処理（ローカルストレージを使うか）
-Configurationの画面を作る。
-Bookmark削除機能
-Bookmark追加機能？
-既存のtagをつかった何か
-検索
-@matchを使う
+仕様
+Config = [
+  {
+    name:'condition'
+    children:[]
+  }
+]
+#[javascript]*[lib]
+#[javascript]
+##[node.js]
+##[greasemonkey]+[userscript]
