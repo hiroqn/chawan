@@ -134,6 +134,12 @@ _(HatenaClient.prototype).extend({
         document.getElementsByTagName('head')[0].appendChild(style);
       }
     },
+    setFavicon:function(dataURL){
+      var favicon = document.createElement('link');
+      favicon.setAttribute('rel', 'icon');
+      favicon.setAttribute('href', dataURL);
+      document.getElementsByTagName('head')[0].appendChild(favicon);
+    },
     log: function () {
       return (GM_log || console).apply(null, arguments);
     }

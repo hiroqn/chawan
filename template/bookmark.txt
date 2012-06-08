@@ -1,6 +1,8 @@
 <% _(bookmarks).each(function(bookmark){%><div class="bookmark item"  title="<%- bookmark.comment %>" >
   <div class="icons">
-    <div class="edit-icon" data-date="<%- bookmark.date %>"></div></div>
+    <div class="edit-icon" data-date="<%- bookmark.bid %>"></div>
+    <div class="delete-icon" data-date="<%- bookmark.bid %>"></div>
+  </div>
   <div class="title">
     <a href="<%- bookmark.url %>" target="_blank" title="<%- bookmark.title %>"> <%- bookmark.title %></a>
   </div>
