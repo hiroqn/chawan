@@ -6,7 +6,7 @@ function HatenaClient(id, rks) {
 }
 _(HatenaClient).extend({
   searchData: function (id) {
-    var searchURL = 'http://b.hatena.ne.jp/ ' + id + '/search.data';
+    var searchURL = 'http://b.hatena.ne.jp/' + id + '/search.data';
     return jQuery.post(searchURL, null, null, 'text');
   },
   myName: function () {
@@ -41,7 +41,7 @@ _(HatenaClient.prototype).extend({
             }, dfd.reject.bind(dfd));
         return dfd.promise();
       },
-      destroyBookmark: function (bookmark) {
+      deleteBookmark: function (bookmark) {
         return jQuery.post(this.destroyURL, {url: bookmark.url, rks: this.rks},
             null, 'text');
       }
@@ -75,13 +75,14 @@ _(HatenaClient.prototype).extend({
       }
     },
     ready: function (name) {
-      if (name) {
+      if (!name) {
         return DOMDeferred;
       }
       if (nameList[name]) {
-        DOMDeferred.done(function () {
-          nameList[name].dfd.resolve(nameList[name].arg);
-        });
+        DOMDeferred.done(apply.bind(
+            nameList[name].dfd.resolve,
+            nameList[name].dfd.resolve,
+            nameList[name].arg));
         return nameList[name].dfd;
       } else {
         return dummyDeferred;
@@ -95,11 +96,13 @@ _(HatenaClient.prototype).extend({
   var modules = {},
       exports = {},
       require;
+
   function Module(name) {
     this.exports = {};
     this.id = name;
     this.loaded = true;
   }
+
   Module.prototype.require = require = function (name) {
     //(function (exports,require,module,__filename,__dirname))
     if (exports.hasOwnProperty(name)) {
@@ -107,8 +110,11 @@ _(HatenaClient.prototype).extend({
     } else {
       var module = new Module(name);
       if (modules.hasOwnProperty(name)) {
-        exports[name] =module.exports;
-        modules[name].call(require.exports, module.require, module);
+        exports[name] = module.exports;
+        modules[name].call(null, module.exports, module.require, module);
+        if (module.exports != exports[name]) {
+          exports[name] = module.exports;
+        }
       }
       return module.exports;
     }
@@ -134,7 +140,7 @@ _(HatenaClient.prototype).extend({
         document.getElementsByTagName('head')[0].appendChild(style);
       }
     },
-    setFavicon:function(dataURL){
+    setFavicon: function (dataURL) {
       var favicon = document.createElement('link');
       favicon.setAttribute('rel', 'icon');
       favicon.setAttribute('href', dataURL);
@@ -154,7 +160,7 @@ us$(function () {
 us$.register('normal', /^http:\/\/b.hatena.ne.jp\/my\.name\?chawan=.+$/,
     function (callback) {
       var result = window.location.href.match(/\?chawan=(\w+)/);
-      callback(null, HatenaClient.serchData(result[1]));
+      callback(null, HatenaClient.searchData(result[1]));
 
     });
 us$.register('config', /^http:\/\/b.hatena.ne.jp\/my\.name$/,

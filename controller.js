@@ -1,13 +1,71 @@
+us$.modules.add('ctrl', function (exports, require, module) {
+  var model = require('model');
+  var view = require('view');
 
-function Controller(client){
+  function Controller(client) { // this is not controller mvc
+    this.client = client;
+    var appModel = this.app = new model.App({
+      path: [],
+      Tree: new model.TreeManager()
+    });
+    var Router = Backbone.Router.extend({
+      routes: {
+        "": "top",
+        "!": "top",
+        "!*path": "moveTo",
+        "configure": "configure"
+      },
+      top: function () {
+        appModel.set('path', []);
+      },
+      moveTo: function (path) {
+        appModel.set('path', path.split('/').map(function (str) {
+          return decodeURIComponent(str);
+        }));
+      },
+      configure: function () {
+      }
+    });
+    router = new Router();
+    appModel.on('change:path', function () {
+      router.navigate('!' + appModel.get('path').join('/'));
+    });
+    Backbone.history.start();
+    var appView = new view.AppView({
+      model: appModel,
+      el: document.body
+    });
+    appView.on('submit')
+  }
 
-}
-_(Controller.prototype).extend(Backbone.Events,{
+  _(Controller.prototype).extend(Backbone.Events, {
+    addByText: function (texts) {
+      var array = texts.split('\n'),
+          l = array.length / 4, bookmarks = new Array(l);
+      for (var i = 0; i < l; i++) {
+        bookmarks[i] = model.Bookmark.create(array[i * 3], array[1 + i * 3],
+            array[2 + i * 3], array[i + l * 3]);
+      }
+      this.app.get('Tree').addBookmarks(bookmarks)
+    },
+    editComment: function (bookmark, text) {
+      var dfd = this.client.editComment(bookmark.url, text);
+      var Tree = this.app.get('Tree');
+      dfd.then(function (comment) {
+        Tree.moveBookmark(bookmark, comment);
+      }, function () {
 
+      });
+    },
+    deleteBookmark: function(bookmark){
+      var dfd = this.client.deleteBookmark(bookmark);
+    }
+  });
+  module.exports = Controller;
 });
 us$.ready().done(function () {
   us$.addStyle(TEXT.CSS);
-  var body = $('body').empty(), // cache body element
+  var body = $('body'), // cache body element
       flag = false, // scroll majik
       debounce = _.debounce(function () {
         body.removeClass('majik');
@@ -15,47 +73,25 @@ us$.ready().done(function () {
       }, 600),
       throttle = _.throttle(function () {
         if (!flag) {
-          _.defer(function () {
-            body.addClass('majik');
-          });
+          body.addClass('majik');
+          //          _.defer(function () {
+          //            body.addClass('majik');
+          //          });
           flag = true;
         }
         debounce();
-      }, 400),
-      appView = new AppView({
-        model: app,
-        el: document.body
-      }), // app View
-      router = new (Backbone.Router.extend({
-        routes: {
-          "": "top",
-          "!": "top",
-          "!*path": "moveTo",
-          "configure": "configure"
-        },
-        top: function () {
-          window.app.set('path', []);
-        },
-        moveTo: function (path) {
-          window.app.set('path', path.split('/').map(function (str) {
-            return decodeURIComponent(str);
-          }));
-        },
-        configure: function () {
-
-        }
-      }))();
-  app.on('change:path', function () {
-    router.navigate('!' + app.get('path').join('/'));
-  });
-  Backbone.history.start();
+      }, 400);
   $(window).scroll(throttle);
 
 });
-us$.ready('normal').done(function (dataDeferd) {
+us$.ready('normal').done(function (dataDeferred) {
   var myName = JSON.parse($('pre').text());
-  if(!myName.login){
+  $('body').empty();
+  if (!myName.login) {
     throw new Error('not Login');
   }
-  var client = new HatenaClient(myName.name, myName.rks);
+  var client = new HatenaClient(myName.name, myName.rks),
+      Controller = us$.require('ctrl');
+  var ctrl = new Controller(client);
+  dataDeferred.done(ctrl.addByText.bind(ctrl));
 });
