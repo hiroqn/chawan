@@ -1,10 +1,10 @@
-<% _(bookmarks).each(function(bookmark){%><div class="bookmark item"  title="<%- bookmark.comment %>" >
+<% _(bookmarks).each(function(bookmark){%><div class="bookmark"  title="<%- bookmark.comment %>" >
   <div class="icons">
     <div class="edit-icon" data-date="<%- bookmark.bid %>"></div>
     <div class="delete-icon" data-date="<%- bookmark.bid %>"></div>
   </div>
   <div class="title">
-    <a href="<%- bookmark.url %>" target="_blank" title="<%- bookmark.title %>"> <%- bookmark.title %></a>
+    <a href="<%- bookmark.url %>" target="_blank" title="<%- bookmark.title || 'No comment' %>"> <%- bookmark.title %></a>
   </div>
   <a href="<%- bookmark.url %>" target="_blank"><div class="dummy"></div></a>
 </div><% }); %>

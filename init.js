@@ -163,9 +163,12 @@ us$.register('normal', /^http:\/\/b.hatena.ne.jp\/my\.name\?chawan=.+$/,
       callback(null, HatenaClient.searchData(result[1]));
 
     });
-us$.register('config', /^http:\/\/b.hatena.ne.jp\/my\.name$/,
+us$.register('setup', /^http:\/\/b.hatena.ne.jp\/my\.name$/,
     function (callback) {
+      callback(null);
     });
-us$.register('tags', /^http.*\/([^\/]+)\/tags\.json(#.+)?$/,
+us$.register('tags', /\/[^\/]+\/tags\.json(#.+)?$/,
     function (callback) {
+      var result = window.location.href.match(/\/([^\/]+)\/tags\.json/);
+      callback(null, HatenaClient.searchData(result[1]), HatenaClient.myName());
     });

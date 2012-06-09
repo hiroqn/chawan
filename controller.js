@@ -35,7 +35,7 @@ us$.modules.add('ctrl', function (exports, require, module) {
       model: appModel,
       el: document.body
     });
-    appView.on('submit')
+    appView.on('submit', function(){});
   }
 
   _(Controller.prototype).extend(Backbone.Events, {
@@ -54,10 +54,10 @@ us$.modules.add('ctrl', function (exports, require, module) {
       dfd.then(function (comment) {
         Tree.moveBookmark(bookmark, comment);
       }, function () {
-
+// error
       });
     },
-    deleteBookmark: function(bookmark){
+    deleteBookmark: function (bookmark) {
       var dfd = this.client.deleteBookmark(bookmark);
     }
   });
@@ -94,4 +94,18 @@ us$.ready('normal').done(function (dataDeferred) {
       Controller = us$.require('ctrl');
   var ctrl = new Controller(client);
   dataDeferred.done(ctrl.addByText.bind(ctrl));
+});
+us$.ready('setup').done(function () {
+  var myName = JSON.parse($('pre').text());
+  $('body').empty();
+  if (!myName.login) {
+    throw new Error('not Login');
+  }
+  var html = '<div style="margin: auto;">' +
+             '<a href="http://b.hatena.ne.jp/my.name?=<% name %>" style="font-size: 8em;color: #ffffff;">Welcome to ?Chawan</a>' +
+             '</div>';
+  $('body').append(_.template(html, {name: myName.name}));
+});
+us$.ready('tags').done(function(dataDeferred, nameDeferred){
+
 });

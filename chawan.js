@@ -30,7 +30,7 @@ us$.modules.add('model', function (exports, require, module) {
     return b;
   };
   _(Bookmark.prototype).extend({
-    commentParser: function (comment) {
+    commentParser: function (comment) {//TODO change
       this.rawComment = comment;
       this.paths = _(comment.match(chawanParam)).map(function (str) {
         return str.slice(2, -1).split('/');
@@ -70,7 +70,7 @@ us$.modules.add('model', function (exports, require, module) {
         return false;
       }
     },
-    pickBookmark: function(){
+    pickBookmark: function(bookmark){
       var index = this.bookmarks.indexOf(bookmark);
       if (~index) {// tilde
         this.bookmarks.splice(index, 1);

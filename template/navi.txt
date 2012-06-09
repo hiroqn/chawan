@@ -1,4 +1,4 @@
-<div id="title">?Chawan</div>
+<div id="name">?Chawan</div>
 <div id="breadcrumbs">
   <span data-position="<%- length %>">?Chawan:</span>
   <% _(list).each(function(d,n){%> / <span data-position="<%-length-n-1 %>"><%- d %></span>  <% }); %>
