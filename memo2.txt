@@ -52,13 +52,34 @@
 // feedback : 'api.feedback.json'
 
 仕様
-Config = [
-  {
-    name:'condition'
-    children:[]
-  }
-]
-#[javascript]*[lib]
+
+#[javascript]*[lib]-
 #[javascript]
 ##[node.js]
 ##[greasemonkey]+[userscript]
+
+Config = [
+  {
+    name:'[javascript]*[lib]-'
+    children:[],
+    condition:[['javascript','lib']],
+    exclude:true
+  },
+  {
+    name:'[javascript]'
+    children:[
+        {
+          name:'[node.js]'
+          children:[],
+          condition:['node.js']
+        },
+        {
+          name:'[greasemonkey]+[userscript]'
+          children:[],
+          condition:[['greasemonkey'],['userscript']]
+        }
+    ],
+    condition:[[javascript]]
+  },
+
+]
