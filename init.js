@@ -12,7 +12,7 @@ _(HatenaClient).extend({
   myName: function () {
     var dfd = $.Deferred(),
         nameURL = 'http://b.hatena.ne.jp/my.name';
-    jQuery.get(this.nameURL, null, null, 'json').then(function (object) {
+    jQuery.get(nameURL, null, null, 'json').then(function (object) {
       if (object.login) {
         dfd.resolve(object);
       } else {
