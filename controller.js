@@ -2,11 +2,11 @@ us$.modules.add('ctrl', function (exports, require, module) {
   var model = require('model');
   var view = require('view');
 
-  function Controller(client) { // this is not controller mvc
+  function Controller(client, config) { // this is not controller mvc
     this.client = client;
     var appModel = this.app = new model.App({
       path: [],
-      Tree: new model.TreeManager()
+      Tree: new model.TreeManager({config:config})
     });
     var Router = Backbone.Router.extend({
       routes: {
@@ -35,7 +35,7 @@ us$.modules.add('ctrl', function (exports, require, module) {
       model: appModel,
       el: document.body
     });
-    appView.on('submit', function(){});
+    appView.on('submit', function () {});
   }
 
   _(Controller.prototype).extend(Backbone.Events, {
@@ -54,7 +54,7 @@ us$.modules.add('ctrl', function (exports, require, module) {
       dfd.then(function (comment) {
         Tree.moveBookmark(bookmark, comment);
       }, function () {
-// error
+        // error
       });
     },
     deleteBookmark: function (bookmark) {
@@ -106,6 +106,27 @@ us$.ready('setup').done(function () {
              '</div>';
   $('body').append(_.template(html, {name: myName.name}));
 });
-us$.ready('tags').done(function(dataDeferred, nameDeferred){
+us$.ready('tags').done(function (dataDeferred, nameDeferred) {
+  var tagsJSON = $('pre').text(),
+      obj = JSON.parse(tagsJSON),
+      count = obj.count,
+      tags = obj.tags,
+      dummyArray = [],
+      Controller = us$.require('ctrl'),
+      conditions = Object.keys(tags).map(
+          function (tag) {
+            return {
+              name: tag,
+              children: dummyArray,
+              condition: [
+                [tag]
+              ]
+            };
+          });
+  nameDeferred.done(function (myName) {
+    var client = new HatenaClient(myName.name, myName.rks),
+        ctrl = new Controller(client, {folder:conditions});
+    dataDeferred.done(ctrl.addByText.bind(ctrl));
 
+  });
 });

@@ -117,7 +117,7 @@ us$.modules.add('view', function (exports, require, module) {
     },
     render: function () {
       var app = this.model;
-      var folder = app.get('Tree').getFolder(app.get('path'));
+      var folder = app.get('Tree').findFolder(app.get('path'));
       if (folder && folder.count) {
         if (this.folderView) {
           this.folderView.remove();

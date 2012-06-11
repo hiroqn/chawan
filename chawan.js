@@ -11,6 +11,7 @@ us$.modules.add('model', function (exports, require, module) {
   var counter = 0;
   function Bookmark(title, comment, url, other) {
     this.title = title;
+    this.rawComment = comment;
     this.url = url;
     var others = other.split('\t');
     this.count = others[0];
@@ -30,9 +31,12 @@ us$.modules.add('model', function (exports, require, module) {
     return b;
   };
   _(Bookmark.prototype).extend({
+    updateComment: function(comment){
+      this.rawComment = comment;
+    },
     commentParser: function (comment) {//TODO change
       this.rawComment = comment;
-      this.paths = _(comment.match(chawanParam)).map(function (str) {
+      this.chawans = _(comment.match(chawanParam)).map(function (str) {
         return str.slice(2, -1).split('/');
       });
       comment = comment.replace(chawanParam, '');
@@ -79,11 +83,6 @@ us$.modules.add('model', function (exports, require, module) {
         return false;
       }
     },
-    getBookmarkByDate: function (date) {// TODO obsolete
-      return _(this.bookmarks).find(function (bookmark) {
-        return bookmark.date === date;
-      });
-    },
     getBookmarkByBid: function(bid){
       return _(this.bookmarks).find(function (bookmark) {
         return bookmark.bid === bid;
@@ -99,6 +98,20 @@ us$.modules.add('model', function (exports, require, module) {
     initialize: function () {
       this.root = new Folder('root');
       this.root.root = true;
+      this.allBookmarks = [];
+    },
+    findFolder: function(path){
+      var folder = this.root;
+      if (path.length === 0) {
+        return folder;
+      }
+      for (var i = 0; i < path.length; i++) {
+        folder = folder.getFolder(path[i]);
+        if (!folder) {
+          return null;
+        }
+      }
+      return folder;
     },
     getFolder: function (path, isNew) {
       var folder = this.root;
@@ -106,16 +119,21 @@ us$.modules.add('model', function (exports, require, module) {
         return folder;
       }
       for (var i = 0; i < path.length; i++) {
-        folder = folder.getFolder(path[i]) ||
-                 (isNew && folder.addFolder(path[i]));
-        if (!folder) {
-          return null;
-        }
+        folder = folder.getFolder(path[i]) || folder.addFolder(path[i]);
       }
       return folder;
     },
     addBookmarks:function(bookmarkArray){
-      this.allBookmark = bookmarkArray;
+      this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
+      var condition = this.get('config').folder,
+          Tree = this,
+          folder;
+      condition.forEach(function(cond){
+        Tree.getFolder(cond.name);
+        bookmarkArray.filter(function(bookmark){
+
+        });
+      });
     },
     addByText: function (texts) {//TODO c obsolete
       var array = texts.split('\n'), l = array.length /
@@ -156,7 +174,7 @@ us$.modules.add('model', function (exports, require, module) {
         folder.sortFolder();
       })(this.root);
     },
-    moveBookmark: function (bookmark, comment) {
+    moveBookmark: function (bookmark, comment) {//TODO delete paths
       var Tree = this;
       _(bookmark.paths).each(function (path) {
         Tree.getFolder(path).takeBookmark(bookmark);
@@ -195,7 +213,7 @@ us$.modules.add('model', function (exports, require, module) {
     },
     downLevel: function (name) {
       var path = this.get('path');
-      if (this.get('Tree').getFolder(path = path.concat(name))) {
+      if (this.get('Tree').findFolder(path = path.concat(name))) {
         this.set('path', path);
       }
     }
