@@ -112,7 +112,7 @@ us$.modules.add('view', function (exports, require, module) {
     events: {
       "edit .container": 'createEditer',
       "down .container": function (name) {
-        this.model.downLevel(name);
+        this.model.downLevel(name);//TODO name is event
       }
     },
     render: function () {

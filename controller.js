@@ -36,6 +36,7 @@ us$.modules.add('ctrl', function (exports, require, module) {
       el: document.body
     });
     appView.on('submit', function () {});
+    this.view = appView;
   }
 
   _(Controller.prototype).extend(Backbone.Events, {
@@ -46,7 +47,8 @@ us$.modules.add('ctrl', function (exports, require, module) {
         bookmarks[i] = model.Bookmark.create(array[i * 3], array[1 + i * 3],
             array[2 + i * 3], array[i + l * 3]);
       }
-      this.app.get('Tree').addBookmarks(bookmarks)
+      this.app.get('Tree').addBookmarks(bookmarks);
+      this.view.render();
     },
     editComment: function (bookmark, text) {
       var dfd = this.client.editComment(bookmark.url, text);
@@ -92,7 +94,7 @@ us$.ready('normal').done(function (dataDeferred) {
   }
   var client = new HatenaClient(myName.name, myName.rks),
       Controller = us$.require('ctrl');
-  var ctrl = new Controller(client);
+  var ctrl = new Controller(client, {folder:[]});
   dataDeferred.done(ctrl.addByText.bind(ctrl));
 });
 us$.ready('setup').done(function () {
@@ -102,7 +104,7 @@ us$.ready('setup').done(function () {
     throw new Error('not Login');
   }
   var html = '<div style="margin: auto;">' +
-             '<a href="http://b.hatena.ne.jp/my.name?=<% name %>" style="font-size: 8em;color: #ffffff;">Welcome to ?Chawan</a>' +
+             '<a href="http://b.hatena.ne.jp/my.name?=<%- name %>" style="font-size: 8em;color: #ffffff;">Welcome to ?Chawan</a>' +
              '</div>';
   $('body').append(_.template(html, {name: myName.name}));
 });
@@ -123,6 +125,7 @@ us$.ready('tags').done(function (dataDeferred, nameDeferred) {
               ]
             };
           });
+  $('body').empty();
   nameDeferred.done(function (myName) {
     var client = new HatenaClient(myName.name, myName.rks),
         ctrl = new Controller(client, {folder:conditions});

@@ -1,6 +1,6 @@
 us$.modules.add('model', function (exports, require, module) {
   var chawanParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g, // for [?]
-      tagParam = /\[[^%\/\?\[\]]+?\]/g;// not %,?,/
+      tagParam = /\[([^%\/\?\[\]]+?)\]/g;// not %,?,/
   /**
    * @param title
    * @param comment
@@ -9,6 +9,7 @@ us$.modules.add('model', function (exports, require, module) {
    * @constructor
    */
   var counter = 0;
+
   function Bookmark(title, comment, url, other) {
     this.title = title;
     this.rawComment = comment;
@@ -16,8 +17,9 @@ us$.modules.add('model', function (exports, require, module) {
     var others = other.split('\t');
     this.count = others[0];
     this.date = others[1];
-    this.bid = 'b'+counter++;
+    this.bid = 'b' + counter++;
   }
+
   /**
    * @param title
    * @param comment
@@ -26,12 +28,12 @@ us$.modules.add('model', function (exports, require, module) {
    * @return {Bookmark}
    */
   Bookmark.create = function (title, comment, url, others) {
-    var b =  new Bookmark(title, comment, url, others);
+    var b = new Bookmark(title, comment, url, others);
     b.commentParser(comment);
     return b;
   };
   _(Bookmark.prototype).extend({
-    updateComment: function(comment){
+    updateComment: function (comment) {
       this.rawComment = comment;
     },
     commentParser: function (comment) {//TODO change
@@ -40,7 +42,7 @@ us$.modules.add('model', function (exports, require, module) {
         return str.slice(2, -1).split('/');
       });
       comment = comment.replace(chawanParam, '');
-      this.tags = comment.match(tagParam);
+      this.tags = comment.match(tagParam) || [];
       this.comment = comment.replace(tagParam, '');
     }
   });
@@ -74,7 +76,7 @@ us$.modules.add('model', function (exports, require, module) {
         return false;
       }
     },
-    pickBookmark: function(bookmark){
+    pickBookmark: function (bookmark) {
       var index = this.bookmarks.indexOf(bookmark);
       if (~index) {// tilde
         this.bookmarks.splice(index, 1);
@@ -83,7 +85,7 @@ us$.modules.add('model', function (exports, require, module) {
         return false;
       }
     },
-    getBookmarkByBid: function(bid){
+    getBookmarkByBid: function (bid) {
       return _(this.bookmarks).find(function (bookmark) {
         return bookmark.bid === bid;
       });
@@ -100,7 +102,7 @@ us$.modules.add('model', function (exports, require, module) {
       this.root.root = true;
       this.allBookmarks = [];
     },
-    findFolder: function(path){
+    findFolder: function (path) {
       var folder = this.root;
       if (path.length === 0) {
         return folder;
@@ -123,17 +125,47 @@ us$.modules.add('model', function (exports, require, module) {
       }
       return folder;
     },
-    addBookmarks:function(bookmarkArray){
+    addBookmarks: function (bookmarkArray) {
       this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
-      var condition = this.get('config').folder,
-          Tree = this,
-          folder;
-      condition.forEach(function(cond){
-        Tree.getFolder(cond.name);
-        bookmarkArray.filter(function(bookmark){
-
-        });
-      });
+      var conditions = this.get('config').folder;
+      this.classifyFolder(conditions, this.root, bookmarkArray);
+      this.setBookmarkCount();
+      this.trigger('change');
+    },
+    classifyFolder: function (conditions, folder, bookmarks) {
+      var classify = this.classifyFolder.bind(this),
+          copied = bookmarks.slice(0);
+      conditions.forEach(
+          function (cond) {// TODO inline
+            var fldr = folder.getFolder(cond.name) ||
+                       folder.addFolder(cond.name),
+                add = cond.condition;
+            for (var l = copied.length - 1; 0 <= l; l--) {
+              var or = false;
+              for (var k = add.length - 1; 0 <= k; k--) {
+                var and = true;
+                for (var j = add[k].length - 1; 0 <= j; j--) {
+                  if (copied[l].tags.indexOf(add[k][j]) === -1) {
+                    and = false;
+                    break;
+                  }
+                }
+                if (and) {
+                  or = true;
+                  break;
+                }
+              }
+              if (or) {
+                fldr.addBookmark(copied[l]);
+                if (cond.exclude) {
+                  copied.splice(l, 1)
+                }
+              }
+            }
+            for (var i = cond.children.length - 1; 0 <= i; i--) {
+              classify(cond.children[i], fldr, fldr.bookmarks);
+            }
+          });
     },
     addByText: function (texts) {//TODO c obsolete
       var array = texts.split('\n'), l = array.length /
