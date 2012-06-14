@@ -137,8 +137,8 @@ us$.modules.add('model', function (exports, require, module) {
     classifyFolder: function (configs, folder, bookmarks) {
       var classify = this.classifyFolder.bind(this),
           copied = bookmarks.slice(0),
-          x, i, j, k, l, fldr,config;
-      for (x = configs.length; 0 <= x; x--) {
+          x, i, j, k, l, fldr, config;
+      for (x = configs.length - 1; 0 <= x; x--) {
         config = configs[x];
         fldr = folder.getFolder(config.name) || folder.addFolder(config.name);
         var condition = config.condition;
