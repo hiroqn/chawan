@@ -112,7 +112,7 @@ _(HatenaClient).extend({
   myName: function () {
     var dfd = $.Deferred(),
         nameURL = 'http://b.hatena.ne.jp/my.name';
-    jQuery.get(this.nameURL, null, null, 'json').then(function (object) {
+    jQuery.get(nameURL, null, null, 'json').then(function (object) {
       if (object.login) {
         dfd.resolve(object);
       } else {
@@ -255,7 +255,6 @@ _(HatenaClient.prototype).extend({
 })();
 us$(function () {
   document.title = '?Chawan';
-  window.ctrl = {};
 });
 us$.register('normal', /^http:\/\/b.hatena.ne.jp\/my\.name\?chawan=.+$/,
     function (callback) {
@@ -285,6 +284,7 @@ us$.modules.add('model', function (exports, require, module) {
    * @constructor
    */
   var counter = 0;
+
   function Bookmark(title, comment, url, other) {
     this.title = title;
     this.rawComment = comment;
@@ -292,8 +292,9 @@ us$.modules.add('model', function (exports, require, module) {
     var others = other.split('\t');
     this.count = others[0];
     this.date = others[1];
-    this.bid = 'b'+counter++;
+    this.bid = 'b' + counter++;
   }
+
   /**
    * @param title
    * @param comment
@@ -302,12 +303,12 @@ us$.modules.add('model', function (exports, require, module) {
    * @return {Bookmark}
    */
   Bookmark.create = function (title, comment, url, others) {
-    var b =  new Bookmark(title, comment, url, others);
+    var b = new Bookmark(title, comment, url, others);
     b.commentParser(comment);
     return b;
   };
   _(Bookmark.prototype).extend({
-    updateComment: function(comment){
+    updateComment: function (comment) {
       this.rawComment = comment;
     },
     commentParser: function (comment) {//TODO change
@@ -316,7 +317,9 @@ us$.modules.add('model', function (exports, require, module) {
         return str.slice(2, -1).split('/');
       });
       comment = comment.replace(chawanParam, '');
-      this.tags = comment.match(tagParam);
+      this.tags = (comment.match(tagParam) || []).map(function (str) {
+        return str.slice(1, -1);
+      });
       this.comment = comment.replace(tagParam, '');
     }
   });
@@ -350,7 +353,7 @@ us$.modules.add('model', function (exports, require, module) {
         return false;
       }
     },
-    pickBookmark: function(bookmark){
+    pickBookmark: function (bookmark) {
       var index = this.bookmarks.indexOf(bookmark);
       if (~index) {// tilde
         this.bookmarks.splice(index, 1);
@@ -359,7 +362,7 @@ us$.modules.add('model', function (exports, require, module) {
         return false;
       }
     },
-    getBookmarkByBid: function(bid){
+    getBookmarkByBid: function (bid) {
       return _(this.bookmarks).find(function (bookmark) {
         return bookmark.bid === bid;
       });
@@ -376,56 +379,77 @@ us$.modules.add('model', function (exports, require, module) {
       this.root.root = true;
       this.allBookmarks = [];
     },
-    getFolder: function (path, isNew) {
+    findFolder: function (path) {
       var folder = this.root;
       if (path.length === 0) {
         return folder;
       }
       for (var i = 0; i < path.length; i++) {
-        folder = folder.getFolder(path[i]) ||
-                 (isNew && folder.addFolder(path[i]));
+        folder = folder.getFolder(path[i]);
         if (!folder) {
           return null;
         }
       }
       return folder;
     },
-    addBookmarks:function(bookmarkArray){
-      this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
-
-    },
-    addByText: function (texts) {//TODO c obsolete
-      var array = texts.split('\n'), l = array.length /
-                                         4, bookmarks = new Array(l);
-      var Tree = this;
-      for (var i = 0; i < l; i++) {
-        bookmarks[i] = this.Bookmark.create(array[i * 3], array[1 + i * 3],
-            array[2 + i * 3], array[i + l * 3]);
+    getFolder: function (path) {
+      var folder = this.root;
+      if (path.length === 0) {
+        return folder;
       }
-      this.allBookmark = bookmarks;
-      _(bookmarks).each(function (bookmark) {
-        if (bookmark.paths.length) {
-          _(bookmark.paths).each(function (chawan) {
-            Tree.getFolder(chawan, true).addBookmark(bookmark);
-          });
-        } else {// dont have chawan
-          bookmark.paths.push([]);
-          Tree.root.addBookmark(bookmark);
-        }
-      });
-      this.setBookmarkCount();
-      this.sortAllFolder();
-      this.trigger('change');
-
+      for (var i = 0; i < path.length; i++) {
+        folder = folder.getFolder(path[i]) || folder.addFolder(path[i]);
+      }
+      return folder;
     },
-    setBookmarkCount: function () {
-      (function (folder) {
-        _(folder.folders).each(arguments.callee);
-        folder.count = _(folder.folders).reduce(function (memo, folder) {
-          return folder.count + memo;
-        }, folder.bookmarks.length);
-
-      })(this.root);
+    addBookmarks: function (bookmarkArray) {
+      this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
+      var conditions = this.get('config').folder;
+      this.classifyFolder(conditions, this.root, bookmarkArray);
+      this.setBookmarkCount(this.root);
+      this.trigger('change');
+    },
+    classifyFolder: function (configs, folder, bookmarks) {
+      var classify = this.classifyFolder.bind(this),
+          copied = bookmarks.slice(0),
+          x, i, j, k, l, fldr,config;
+      for (x = configs.length; 0 <= x; x--) {
+        config = configs[x];
+        fldr = folder.getFolder(config.name) || folder.addFolder(config.name);
+        var condition = config.condition;
+        for (l = copied.length - 1; 0 <= l; l--) {
+          var or = false;
+          for (k = condition.length - 1; 0 <= k; k--) {
+            var and = true;
+            for (j = condition[k].length - 1; 0 <= j; j--) {
+              if (copied[l].tags.indexOf(condition[k][j]) === -1) {
+                and = false;
+                break;
+              }
+            }
+            if (and) {
+              or = true;
+              break;
+            }
+          }
+          if (or) {
+            fldr.addBookmark(copied[l]);
+            if (config.exclude) {
+              copied.splice(l, 1)
+            }
+          }
+        }
+        for (i = config.children.length - 1; 0 <= i; i--) {
+          classify(cond.children[i], fldr, fldr.bookmarks);
+        }
+      }
+    },
+    setBookmarkCount: function sortFolder(folder) {
+      var folders = folder.folders;
+      folders.forEach(sortFolder);
+      folder.count = folders.reduce(function (memo, folder) {
+        return folder.count + memo;
+      }, folder.bookmarks.length);
     },
     sortAllFolder: function () {
       (function (folder) {
@@ -472,7 +496,7 @@ us$.modules.add('model', function (exports, require, module) {
     },
     downLevel: function (name) {
       var path = this.get('path');
-      if (this.get('Tree').getFolder(path = path.concat(name))) {
+      if (this.get('Tree').findFolder(path = path.concat(name))) {
         this.set('path', path);
       }
     }
@@ -496,6 +520,7 @@ us$.modules.add('view', function (exports, require, module) {
     events: {
       "click .folder": "down",
       "click .upper": "up",
+      "click .destroy-icon": "destroy",
       "click .edit-icon": "edit"
     },
     bookmarkTmpl: _.template(TEXT.bookmarksTemplate),
@@ -513,11 +538,16 @@ us$.modules.add('view', function (exports, require, module) {
     up: function () {
       this.$el.trigger('up', 1);
     },
+    destroy: function (e) {
+      var bookmark = this.model.getBookmarkByBid(e.currentTarget.dataset.date);
+      if (bookmark) {
+        this.$el.trigger('destroy', bookmark);
+      }
+    },
     edit: function (e) {
       var bookmark = this.model.getBookmarkByBid(e.currentTarget.dataset.date);
       if (bookmark) {
         this.$el.trigger('edit', bookmark);
-        //        this.trigger('edit', bookmark);
       }
     }
   });
@@ -558,8 +588,8 @@ us$.modules.add('view', function (exports, require, module) {
     id: 'navi',
     tmpl: _.template(TEXT.naviTemplate),
     events: {
-      'click #title': function () {
-        this.model.set('path', []);
+      'click #name': function () {
+        this.model.upLevel(1);
       },
       'click #breadcrumbs span': function (e) {
         var n = Number(e.target.dataset.position);
@@ -584,7 +614,6 @@ us$.modules.add('view', function (exports, require, module) {
   exports.AppView = Backbone.View.extend({
     initialize: function () {
       var app = this.model;
-      this.naviView = new NaviView({model: app});
       app.get('Tree').on('change', this.render, this);
       app.on('change:path', this.render, this);
       app.on('change:modal', this.modal, this);
@@ -597,14 +626,14 @@ us$.modules.add('view', function (exports, require, module) {
     },
     events: {
       "edit .container": 'createEditer',
-      "down .container": function (name) {
+      "down .container": function (e, name) {
         this.model.downLevel(name);
       }
     },
     render: function () {
       var app = this.model;
-      var folder = app.get('Tree').getFolder(app.get('path'));
-      if (folder && folder.count) {
+      var folder = app.get('Tree').findFolder(app.get('path'));
+      if (folder) {
         if (this.folderView) {
           this.folderView.remove();
         }
@@ -620,7 +649,7 @@ us$.modules.add('view', function (exports, require, module) {
         this.$el.removeClass('modal-enable');
       }
     },
-    createEditer: function (bookmark) {
+    createEditer: function (e, bookmark) {
       var editer = new EditerView({model: bookmark});
       this.model.set('modal', true);
       this.$overlay.append(editer.el);
@@ -630,18 +659,19 @@ us$.modules.add('view', function (exports, require, module) {
       editer.on('remove', function () {this.model.set('modal', false);}, this);
     }
   });
-});
+})
+;
 
 //controller.js
 us$.modules.add('ctrl', function (exports, require, module) {
   var model = require('model');
   var view = require('view');
 
-  function Controller(client) { // this is not controller mvc
+  function Controller(client, config) { // this is not controller mvc
     this.client = client;
     var appModel = this.app = new model.App({
       path: [],
-      Tree: new model.TreeManager()
+      Tree: new model.TreeManager({config:config})
     });
     var Router = Backbone.Router.extend({
       routes: {
@@ -670,7 +700,8 @@ us$.modules.add('ctrl', function (exports, require, module) {
       model: appModel,
       el: document.body
     });
-    appView.on('submit', function(){});
+    appView.on('submit', function () {});
+    this.view = appView;
   }
 
   _(Controller.prototype).extend(Backbone.Events, {
@@ -681,7 +712,8 @@ us$.modules.add('ctrl', function (exports, require, module) {
         bookmarks[i] = model.Bookmark.create(array[i * 3], array[1 + i * 3],
             array[2 + i * 3], array[i + l * 3]);
       }
-      this.app.get('Tree').addBookmarks(bookmarks)
+      this.app.get('Tree').addBookmarks(bookmarks);
+      this.view.render();
     },
     editComment: function (bookmark, text) {
       var dfd = this.client.editComment(bookmark.url, text);
@@ -689,7 +721,7 @@ us$.modules.add('ctrl', function (exports, require, module) {
       dfd.then(function (comment) {
         Tree.moveBookmark(bookmark, comment);
       }, function () {
-// error
+        // error
       });
     },
     deleteBookmark: function (bookmark) {
@@ -727,7 +759,7 @@ us$.ready('normal').done(function (dataDeferred) {
   }
   var client = new HatenaClient(myName.name, myName.rks),
       Controller = us$.require('ctrl');
-  var ctrl = new Controller(client);
+  var ctrl = new Controller(client, {folder:[]});
   dataDeferred.done(ctrl.addByText.bind(ctrl));
 });
 us$.ready('setup').done(function () {
@@ -737,11 +769,33 @@ us$.ready('setup').done(function () {
     throw new Error('not Login');
   }
   var html = '<div style="margin: auto;">' +
-             '<a href="http://b.hatena.ne.jp/my.name?=<% name %>" style="font-size: 8em;color: #ffffff;">Welcome to ?Chawan</a>' +
+             '<a href="http://b.hatena.ne.jp/my.name?=<%- name %>" style="font-size: 8em;color: #ffffff;">Welcome to ?Chawan</a>' +
              '</div>';
   $('body').append(_.template(html, {name: myName.name}));
 });
-us$.ready('tags').done(function(dataDeferred, nameDeferred){
+us$.ready('tags').done(function (dataDeferred, nameDeferred) {
+  var tagsJSON = $('pre').text(),
+      obj = JSON.parse(tagsJSON),
+      count = obj.count,
+      tags = obj.tags,
+      dummyArray = [],
+      Controller = us$.require('ctrl'),
+      conditions = Object.keys(tags).map(
+          function (tag) {
+            return {
+              name: tag,
+              children: dummyArray,
+              condition: [
+                [tag]
+              ]
+            };
+          });
+  $('body').empty();
+  nameDeferred.done(function (myName) {
+    var client = new HatenaClient(myName.name, myName.rks),
+        ctrl = new Controller(client, {folder:conditions});
+    dataDeferred.done(ctrl.addByText.bind(ctrl));
 
+  });
 });
 // ==/library==

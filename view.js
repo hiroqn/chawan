@@ -10,6 +10,7 @@ us$.modules.add('view', function (exports, require, module) {
     events: {
       "click .folder": "down",
       "click .upper": "up",
+      "click .destroy-icon": "destroy",
       "click .edit-icon": "edit"
     },
     bookmarkTmpl: _.template(TEXT.bookmarksTemplate),
@@ -27,11 +28,16 @@ us$.modules.add('view', function (exports, require, module) {
     up: function () {
       this.$el.trigger('up', 1);
     },
+    destroy: function (e) {
+      var bookmark = this.model.getBookmarkByBid(e.currentTarget.dataset.date);
+      if (bookmark) {
+        this.$el.trigger('destroy', bookmark);
+      }
+    },
     edit: function (e) {
       var bookmark = this.model.getBookmarkByBid(e.currentTarget.dataset.date);
       if (bookmark) {
         this.$el.trigger('edit', bookmark);
-        //        this.trigger('edit', bookmark);
       }
     }
   });
@@ -72,8 +78,8 @@ us$.modules.add('view', function (exports, require, module) {
     id: 'navi',
     tmpl: _.template(TEXT.naviTemplate),
     events: {
-      'click #title': function () {
-        this.model.set('path', []);
+      'click #name': function () {
+        this.model.upLevel(1);
       },
       'click #breadcrumbs span': function (e) {
         var n = Number(e.target.dataset.position);
@@ -98,7 +104,6 @@ us$.modules.add('view', function (exports, require, module) {
   exports.AppView = Backbone.View.extend({
     initialize: function () {
       var app = this.model;
-      this.naviView = new NaviView({model: app});
       app.get('Tree').on('change', this.render, this);
       app.on('change:path', this.render, this);
       app.on('change:modal', this.modal, this);
@@ -111,8 +116,8 @@ us$.modules.add('view', function (exports, require, module) {
     },
     events: {
       "edit .container": 'createEditer',
-      "down .container": function (name) {
-        this.model.downLevel(name);//TODO name is event
+      "down .container": function (e, name) {
+        this.model.downLevel(name);
       }
     },
     render: function () {
@@ -134,7 +139,7 @@ us$.modules.add('view', function (exports, require, module) {
         this.$el.removeClass('modal-enable');
       }
     },
-    createEditer: function (bookmark) {
+    createEditer: function (e, bookmark) {
       var editer = new EditerView({model: bookmark});
       this.model.set('modal', true);
       this.$overlay.append(editer.el);
@@ -144,4 +149,5 @@ us$.modules.add('view', function (exports, require, module) {
       editer.on('remove', function () {this.model.set('modal', false);}, this);
     }
   });
-});
+})
+;

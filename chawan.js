@@ -1,6 +1,6 @@
 us$.modules.add('model', function (exports, require, module) {
   var chawanParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g, // for [?]
-      tagParam = /\[([^%\/\?\[\]]+?)\]/g;// not %,?,/
+      tagParam = /\[[^%\/\?\[\]]+?\]/g;// not %,?,/
   /**
    * @param title
    * @param comment
@@ -42,7 +42,9 @@ us$.modules.add('model', function (exports, require, module) {
         return str.slice(2, -1).split('/');
       });
       comment = comment.replace(chawanParam, '');
-      this.tags = comment.match(tagParam) || [];
+      this.tags = (comment.match(tagParam) || []).map(function (str) {
+        return str.slice(1, -1);
+      });
       this.comment = comment.replace(tagParam, '');
     }
   });
@@ -115,7 +117,7 @@ us$.modules.add('model', function (exports, require, module) {
       }
       return folder;
     },
-    getFolder: function (path, isNew) {
+    getFolder: function (path) {
       var folder = this.root;
       if (path.length === 0) {
         return folder;
@@ -129,76 +131,50 @@ us$.modules.add('model', function (exports, require, module) {
       this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
       var conditions = this.get('config').folder;
       this.classifyFolder(conditions, this.root, bookmarkArray);
-      this.setBookmarkCount();
+      this.setBookmarkCount(this.root);
       this.trigger('change');
     },
-    classifyFolder: function (conditions, folder, bookmarks) {
+    classifyFolder: function (configs, folder, bookmarks) {
       var classify = this.classifyFolder.bind(this),
-          copied = bookmarks.slice(0);
-      conditions.forEach(
-          function (cond) {// TODO inline
-            var fldr = folder.getFolder(cond.name) ||
-                       folder.addFolder(cond.name),
-                add = cond.condition;
-            for (var l = copied.length - 1; 0 <= l; l--) {
-              var or = false;
-              for (var k = add.length - 1; 0 <= k; k--) {
-                var and = true;
-                for (var j = add[k].length - 1; 0 <= j; j--) {
-                  if (copied[l].tags.indexOf(add[k][j]) === -1) {
-                    and = false;
-                    break;
-                  }
-                }
-                if (and) {
-                  or = true;
-                  break;
-                }
-              }
-              if (or) {
-                fldr.addBookmark(copied[l]);
-                if (cond.exclude) {
-                  copied.splice(l, 1)
-                }
+          copied = bookmarks.slice(0),
+          x, i, j, k, l, fldr,config;
+      for (x = configs.length; 0 <= x; x--) {
+        config = configs[x];
+        fldr = folder.getFolder(config.name) || folder.addFolder(config.name);
+        var condition = config.condition;
+        for (l = copied.length - 1; 0 <= l; l--) {
+          var or = false;
+          for (k = condition.length - 1; 0 <= k; k--) {
+            var and = true;
+            for (j = condition[k].length - 1; 0 <= j; j--) {
+              if (copied[l].tags.indexOf(condition[k][j]) === -1) {
+                and = false;
+                break;
               }
             }
-            for (var i = cond.children.length - 1; 0 <= i; i--) {
-              classify(cond.children[i], fldr, fldr.bookmarks);
+            if (and) {
+              or = true;
+              break;
             }
-          });
-    },
-    addByText: function (texts) {//TODO c obsolete
-      var array = texts.split('\n'), l = array.length /
-                                         4, bookmarks = new Array(l);
-      var Tree = this;
-      for (var i = 0; i < l; i++) {
-        bookmarks[i] = this.Bookmark.create(array[i * 3], array[1 + i * 3],
-            array[2 + i * 3], array[i + l * 3]);
-      }
-      this.allBookmark = bookmarks;
-      _(bookmarks).each(function (bookmark) {
-        if (bookmark.paths.length) {
-          _(bookmark.paths).each(function (chawan) {
-            Tree.getFolder(chawan, true).addBookmark(bookmark);
-          });
-        } else {// dont have chawan
-          bookmark.paths.push([]);
-          Tree.root.addBookmark(bookmark);
+          }
+          if (or) {
+            fldr.addBookmark(copied[l]);
+            if (config.exclude) {
+              copied.splice(l, 1)
+            }
+          }
         }
-      });
-      this.setBookmarkCount();
-      this.sortAllFolder();
-      this.trigger('change');
-
+        for (i = config.children.length - 1; 0 <= i; i--) {
+          classify(cond.children[i], fldr, fldr.bookmarks);
+        }
+      }
     },
-    setBookmarkCount: function () {
-      (function (folder) {
-        _(folder.folders).each(arguments.callee);
-        folder.count = _(folder.folders).reduce(function (memo, folder) {
-          return folder.count + memo;
-        }, folder.bookmarks.length);
-
-      })(this.root);
+    setBookmarkCount: function sortFolder(folder) {
+      var folders = folder.folders;
+      folders.forEach(sortFolder);
+      folder.count = folders.reduce(function (memo, folder) {
+        return folder.count + memo;
+      }, folder.bookmarks.length);
     },
     sortAllFolder: function () {
       (function (folder) {

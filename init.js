@@ -155,7 +155,6 @@ _(HatenaClient.prototype).extend({
 })();
 us$(function () {
   document.title = '?Chawan';
-  window.ctrl = {};
 });
 us$.register('normal', /^http:\/\/b.hatena.ne.jp\/my\.name\?chawan=.+$/,
     function (callback) {
