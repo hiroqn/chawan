@@ -1,6 +1,6 @@
 us$.modules.add('view', function (exports, require, module) {
 
-  var NaviView, EditerView, FoldersView;
+  var NaviView, EditorView, FoldersView;
   FoldersView = Backbone.View.extend({
     tagName: 'div',
     id: 'contents',
@@ -41,15 +41,15 @@ us$.modules.add('view', function (exports, require, module) {
       }
     }
   });
-  EditerView = Backbone.View.extend({
+  EditorView = Backbone.View.extend({
     tagName: 'div',
-    className: 'editer-wrapper',
+    className: 'editor-wrapper',
     events: {
       "click .submit": 'submit',
       "click .cancel": "destroy",
       "click": "cancel"
     },
-    tmpl: _.template(TEXT.editerTemplate),
+    tmpl: _.template(TEXT.editorTemplate),
     initialize: function () {
       this.render();
     },
@@ -58,12 +58,12 @@ us$.modules.add('view', function (exports, require, module) {
       return this;
     },
     submit: function () {
-      var text = this.$('.editer-input').val();
+      var text = this.$('.editor-input').val();
       this.trigger('submit', text);
       this.destroy();
     },
     cancel: function (e) {
-      if (e.target.className === 'editer-wrapper') {
+      if (e.target.className === 'editor-wrapper') {
         this.destroy();
       }
     },
@@ -99,7 +99,9 @@ us$.modules.add('view', function (exports, require, module) {
       }));
     }
   });
-
+  var ConfigureView = Backbone.View.extend({
+    initialize: function(){}
+  });
 
   exports.AppView = Backbone.View.extend({
     initialize: function () {
@@ -115,7 +117,7 @@ us$.modules.add('view', function (exports, require, module) {
           this.$overlay);
     },
     events: {
-      "edit .container": 'createEditer',
+      "edit .container": 'createEditor',
       "down .container": function (e, name) {
         this.model.downLevel(name);
       }
@@ -139,14 +141,14 @@ us$.modules.add('view', function (exports, require, module) {
         this.$el.removeClass('modal-enable');
       }
     },
-    createEditer: function (e, bookmark) {
-      var editer = new EditerView({model: bookmark});
+    createEditor: function (e, bookmark) {
+      var editor = new EditorView({model: bookmark});
       this.model.set('modal', true);
-      this.$overlay.append(editer.el);
-      editer.on('submit', function (text) {
+      this.$overlay.append(editor.el);
+      editor.on('submit', function (text) {
         this.trigger('submit', bookmark, text);
       }, this);
-      editer.on('remove', function () {this.model.set('modal', false);}, this);
+      editor.on('remove', function () {this.model.set('modal', false);}, this);
     }
   });
 })

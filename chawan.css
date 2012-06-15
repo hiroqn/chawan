@@ -154,7 +154,7 @@ body {
   right: 18px;
   font-size: 54px;
 }
-.editer-wrapper {
+.editor-wrapper {
   background: none repeat scroll 0 0 rgba(255, 255, 255, 0.7);
   display: none;
   position: fixed;
@@ -164,10 +164,10 @@ body {
   right: 0;
   bottom: 0;
 }
-.modal-enable .editer-wrapper {
+.modal-enable .editor-wrapper {
   display: block;
 }
-.editer {
+.editor {
   position: relative;
   overflow: hidden;
   width: 560px;
@@ -178,17 +178,17 @@ body {
   text-decoration: none;
   color: #ffffff;
 }
-.editer h1 {
+.editor h1 {
   font-size: 24px;
   color: #000000;
   margin-bottom: 12px;
 }
-.editer h2 {
+.editor h2 {
   font-size: 18px;
   color: #888888;
   margin-bottom: 24px;
 }
-.editer .editer-input {
+.editor .editor-input {
   line-height: 18px;
   font-size: 14px;
   border-radius: 4px 4px 4px 4px;
@@ -197,7 +197,7 @@ body {
   resize: vertical;
   margin-bottom: 8px;
 }
-.editer .buttons {
+.editor .buttons {
   height: 32px;
 }
 .item {
