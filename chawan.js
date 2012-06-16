@@ -1,4 +1,4 @@
-us$.modules.add('model', function (exports, require, module) {
+us$.modules.define('model', function (exports, require, module) {
   var chawanParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g, // for [?]
       tagParam = /\[[^%\/\?\[\]]+?\]/g;// not %,?,/
   /**

@@ -224,7 +224,7 @@ _(HatenaClient.prototype).extend({
     require: require,
     modules: {
       require: require,
-      add: function (name, func) {
+      define: function (name, func) {
         modules[name] = func;
       }
     }
@@ -273,7 +273,7 @@ us$.register('tags', /\/[^\/]+\/tags\.json(#.+)?$/,
     });
 
 //chawan.js
-us$.modules.add('model', function (exports, require, module) {
+us$.modules.define('model', function (exports, require, module) {
   var chawanParam = /\[\?([^%\/\?\[\]]+?(?:\/[^%\/\?\[\]]+?)*)\]/g, // for [?]
       tagParam = /\[[^%\/\?\[\]]+?\]/g;// not %,?,/
   /**
@@ -508,7 +508,7 @@ us$.modules.add('model', function (exports, require, module) {
 });
 
 //view.js
-us$.modules.add('view', function (exports, require, module) {
+us$.modules.define('view', function (exports, require, module) {
 
   var NaviView, EditorView, FoldersView;
   FoldersView = Backbone.View.extend({
@@ -665,7 +665,7 @@ us$.modules.add('view', function (exports, require, module) {
 ;
 
 //controller.js
-us$.modules.add('ctrl', function (exports, require, module) {
+us$.modules.define('ctrl', function (exports, require, module) {
   var model = require('model');
   var view = require('view');
 

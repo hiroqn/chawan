@@ -1,4 +1,4 @@
-us$.modules.add('view', function (exports, require, module) {
+us$.modules.define('view', function (exports, require, module) {
 
   var NaviView, EditorView, FoldersView;
   FoldersView = Backbone.View.extend({

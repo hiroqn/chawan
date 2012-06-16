@@ -124,7 +124,7 @@ _(HatenaClient.prototype).extend({
     require: require,
     modules: {
       require: require,
-      add: function (name, func) {
+      define: function (name, func) {
         modules[name] = func;
       }
     }

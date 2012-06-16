@@ -1,4 +1,4 @@
-us$.modules.add('ctrl', function (exports, require, module) {
+us$.modules.define('ctrl', function (exports, require, module) {
   var model = require('model');
   var view = require('view');
 
