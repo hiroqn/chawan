@@ -116,24 +116,24 @@ us$.modules.define('view', function (exports, require, module) {
     },
     enterSearchInFolder: function(event) {
       if (event.keyCode == 13) {
-	    // cancel default action of putting 'enter' key (submitting)
+        // cancel default action of putting 'enter' key (submitting)
         event.preventDefault();
-		var contents = $('#contents').children();
-		if (contents.length == 1) {
-		  var content = contents[0];
-		  if (content.className == "folder") {
-		    this.model.downLevel(content.getAttribute('data-name'));
-		  } else if (content.className == "bookmark") {
-		    location.href = content.getElementsByTagName("a")[0].getAttribute('href');
-		  }
-		}
+        var contents = $('#contents').children();
+        if (contents.length == 1) {
+          var content = contents[0];
+          if (content.className == "folder") {
+            this.model.downLevel(content.getAttribute('data-name'));
+          } else if (content.className == "bookmark") {
+            location.href = content.getElementsByTagName("a")[0].getAttribute('href');
+          }
+        }
       }
     }
   });
   var ConfigureView = Backbone.View.extend({
     initialize: function(){}
   });
-
+    
   exports.AppView = Backbone.View.extend({
     initialize: function () {
       var app = this.model;
@@ -147,6 +147,7 @@ us$.modules.define('view', function (exports, require, module) {
           new NaviView({model: app}).el,
           this.$container,
           this.$overlay);
+      $('#incremental-infolder-search').focus();
     },
     events: {
       "edit .container": 'createEditor',
