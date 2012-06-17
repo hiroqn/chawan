@@ -118,6 +118,15 @@ us$.modules.define('view', function (exports, require, module) {
       if (event.keyCode == 13) {
 	    // cancel default action of putting 'enter' key (submitting)
         event.preventDefault();
+		var contents = $('#contents').children();
+		if (contents.length == 1) {
+		  var content = contents[0];
+		  if (content.className == "folder") {
+		    this.model.downLevel(content.getAttribute('data-name'));
+		  } else if (content.className == "bookmark") {
+		    location.href = content.getElementsByTagName("a")[0].getAttribute('href');
+		  }
+		}
       }
     }
   });
