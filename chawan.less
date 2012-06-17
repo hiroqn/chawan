@@ -10,6 +10,7 @@
 @teal: #00ABA9;
 @green: #339933;
 @grey: #353535;
+@light-grey: #575757;
 @white: #FFFFFF;
 @black: #000000;
 
@@ -67,15 +68,22 @@ body {
 //            border-radius: 9px 9px 9px 9px;
 //            padding: 0.2em;
         }
+        #incremental-infolder-search-parent {
+            background-color: @light-grey;
+            border: solid 2px @white;
+            display: inline;
+        }
+        #incremental-infolder-search {
+            color: @white;
+            border-style: none;
+            background-color: @light-grey;
+        }
     }
     #name {
         position: absolute;
         top: @fontsize;
         right: @fontsize;
         font-size: @fontsize * 3;
-    }
-    #incremental-infolder-search-parent {
-        display: inline;
     }
 }
 
