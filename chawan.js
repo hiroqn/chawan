@@ -127,6 +127,14 @@ us$.modules.define('model', function (exports, require, module) {
       }
       return folder;
     },
+    searchInFolder: function (path, searchText) {
+      currentFolder = this.getFolder(path);
+      var folders = _.filter(currentFolder.folders, 
+        function(folder) { return folder.name.indexOf(searchText) == 0});
+      var bookmarks = _.filter(currentFolder.bookmarks, 
+        function(bookmark) { return bookmark.title.indexOf(searchText) == 0});
+      this.trigger('infolder-search', folders, bookmarks);
+    },
     addBookmarks: function (bookmarkArray) {
       this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
       var conditions = this.get('config').folder;

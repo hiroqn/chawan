@@ -16,8 +16,11 @@ us$.modules.define('view', function (exports, require, module) {
     bookmarkTmpl: _.template(TEXT.bookmarksTemplate),
     folderTmpl: _.template(TEXT.foldersTemplate),
     render: function () {
-      var bookmarkHTML = this.bookmarkTmpl({bookmarks: this.model.bookmarks}), // bookmarkHTML
-          folderHTML = this.folderTmpl({folders: this.model.folders});// folderHTML
+      return this.refresh(this.model.folders, this.model.bookmarks);
+    },
+    refresh: function(folders, bookmarks) {
+      var bookmarkHTML = this.bookmarkTmpl({bookmarks: bookmarks}), // bookmarkHTML
+          folderHTML = this.folderTmpl({folders: folders});// folderHTML
       this.$el.html(folderHTML + bookmarkHTML);
       return this;
     },
@@ -77,6 +80,8 @@ us$.modules.define('view', function (exports, require, module) {
     tagName: 'div',
     id: 'navi',
     tmpl: _.template(TEXT.naviTemplate),
+    inFolderSearchTimer: null,
+    inFolderSearchInterval: 500,
     events: {
       'click #name': function () {
         this.model.upLevel(1);
@@ -86,7 +91,10 @@ us$.modules.define('view', function (exports, require, module) {
         if (!isNaN(n)) {
           this.model.upLevel(n);
         }
-      }
+      },
+      'focus #incremental-infolder-search': "searchInFolder",
+      'blur #incremental-infolder-search': "stopSearchInFolder",
+      'keydown #incremental-infolder-search': "enterSearchInFolder" 
     },
     initialize: function () {
       this.model.on('change:path', this.render, this);
@@ -97,6 +105,20 @@ us$.modules.define('view', function (exports, require, module) {
         list: this.model.get('path'),
         length: this.model.get('path').length
       }));
+    },
+    searchInFolder: function() {
+      var searchText = $('#incremental-infolder-search').val();
+      this.model.get('Tree').searchInFolder(this.model.get('path'), searchText);
+      this.inFolderSearchTimer = setTimeout(this.searchInFolder.bind(this), this.inFolderSearchInterval);
+    },
+    stopSearchInFolder: function() {
+      clearTimeout(this.inFolderSearchTimer);
+    },
+    enterSearchInFolder: function(event) {
+      if (event.keyCode == 13) {
+	    // cancel default action of putting 'enter' key (submitting)
+        event.preventDefault();
+      }
     }
   });
   var ConfigureView = Backbone.View.extend({
@@ -107,6 +129,7 @@ us$.modules.define('view', function (exports, require, module) {
     initialize: function () {
       var app = this.model;
       app.get('Tree').on('change', this.render, this);
+      app.get('Tree').on('infolder-search', this.refreshFolderView, this);
       app.on('change:path', this.render, this);
       app.on('change:modal', this.modal, this);
       this.$container = $('<div />', {"class": "container"});
@@ -133,6 +156,11 @@ us$.modules.define('view', function (exports, require, module) {
         this.$container.append(this.folderView.el);
       }
       return this;
+    },
+    refreshFolderView: function (folders, bookmarks) {
+      if (this.folderView && (folders.length != 0 || bookmarks.length != 0)) {
+        this.folderView.refresh(folders, bookmarks);
+      }
     },
     modal: function () {
       if (this.model.get('modal')) {
