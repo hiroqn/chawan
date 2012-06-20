@@ -69,15 +69,6 @@ us$.modules.define('model', function (exports, require, module) {
     addBookmark: function (bookmark) {
       this.bookmarks.push(bookmark);
     },
-    takeBookmark: function (bookmark) {
-      var index = this.bookmarks.indexOf(bookmark);
-      if (~index) {// tilde
-        this.bookmarks.splice(index, 1);
-        return true;
-      } else {
-        return false;
-      }
-    },
     pickBookmark: function (bookmark) {
       var index = this.bookmarks.indexOf(bookmark);
       if (~index) {// tilde
@@ -91,6 +82,15 @@ us$.modules.define('model', function (exports, require, module) {
       return _(this.bookmarks).find(function (bookmark) {
         return bookmark.bid === bid;
       });
+    },
+    search: function (text) {
+      var folders = _.filter(this.folders,
+          function (folder) { return folder.name.indexOf(searchText) == 0});
+      var bookmarks = _.filter(this.bookmarks,
+          function (bookmark) {
+            return bookmark.title.indexOf(searchText) == 0
+          });
+      return null;//???? TODO
     },
     sortFolder: function () {
       this.folders = _(this.folders).sortBy(function (folder) {
@@ -202,15 +202,6 @@ us$.modules.define('model', function (exports, require, module) {
       this.setBookmarkCount();
       this.sortAllFolder();
       this.trigger('change');
-    },
-    setComment: function (bookmark, comment) { //TODO c
-      var dfd = Hatena.editComment(bookmark.url, comment);
-      var Tree = this;
-      dfd.then(function (comment) {
-        Tree.moveBookmark(bookmark, comment);
-      }, function () {
-
-      });
     }
   });
   var App = Backbone.Model.extend({

@@ -94,11 +94,14 @@ us$.modules.define('view', function (exports, require, module) {
       },
       'focus #incremental-infolder-search': "searchInFolder",
       'blur #incremental-infolder-search': "stopSearchInFolder",
-      'keydown #incremental-infolder-search': "enterSearchInFolder" 
+      'keydown #incremental-infolder-search': "enterSearchInFolder"
     },
     initialize: function () {
       this.model.on('change:path', this.render, this);
       this.render();
+    },
+    focusSearch: function () {
+      this.$el.find('#incremental-infolder-search').focus();
     },
     render: function () {
       this.$el.html(this.tmpl({
@@ -133,7 +136,7 @@ us$.modules.define('view', function (exports, require, module) {
   var ConfigView = Backbone.View.extend({
     initialize: function () {}
   });
-    
+
   exports.AppView = Backbone.View.extend({
     initialize: function () {
       var app = this.model;
@@ -171,6 +174,13 @@ us$.modules.define('view', function (exports, require, module) {
     refreshFolderView: function (folders, bookmarks) {
       if (this.folderView && (folders.length != 0 || bookmarks.length != 0)) {
         this.folderView.refresh(folders, bookmarks);
+      }
+    },
+    toggleModal: function (bool) {
+      if (bool) {
+        this.$el.addClass('modal-enable');
+      } else {
+        this.$el.removeClass('modal-enable');
       }
     },
     toggleState: function () {

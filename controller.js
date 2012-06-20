@@ -24,7 +24,7 @@ us$.modules.define('ctrl', function (exports, require, module) {
         }));
       },
       configure: function () {
-        appModel.set('config', true);
+        appModel.set('state', 'config');
       }
     });
     router = new Router();
@@ -36,7 +36,7 @@ us$.modules.define('ctrl', function (exports, require, module) {
       model: appModel,
       el: document.body
     });
-    appView.on('submit', function () {});
+    appView.on('submit', this.editComment, this);
     this.view = appView;
   }
 
