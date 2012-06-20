@@ -177,18 +177,18 @@ us$.modules.define('model', function (exports, require, module) {
         }
       }
     },
-    setBookmarkCount: function sortFolder(folder) {
+    setBookmarkCount: function setCount(folder) {
       var folders = folder.folders;
-      folders.forEach(sortFolder);
+      folders.forEach(setCount);
       folder.count = folders.reduce(function (memo, folder) {
         return folder.count + memo;
       }, folder.bookmarks.length);
     },
-    sortAllFolder: function () {
-      (function (folder) {
-        _(folder.folders).each(arguments.callee);
+    sortAllFolder: function sortFolder(folder) {
+      folder.folders.forEach(function(folder){
+        sortFolder(folder);
         folder.sortFolder();
-      })(this.root);
+      });
     },
     moveBookmark: function (bookmark, comment) {//TODO delete paths
       var Tree = this;
@@ -215,7 +215,7 @@ us$.modules.define('model', function (exports, require, module) {
   });
   var App = Backbone.Model.extend({
     defaults: {
-      'modal': false
+      'state': 'folder'
     },
     initialize: function () {
     },

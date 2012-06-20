@@ -130,8 +130,8 @@ us$.modules.define('view', function (exports, require, module) {
       }
     }
   });
-  var ConfigureView = Backbone.View.extend({
-    initialize: function(){}
+  var ConfigView = Backbone.View.extend({
+    initialize: function () {}
   });
     
   exports.AppView = Backbone.View.extend({
@@ -140,9 +140,10 @@ us$.modules.define('view', function (exports, require, module) {
       app.get('Tree').on('change', this.render, this);
       app.get('Tree').on('infolder-search', this.refreshFolderView, this);
       app.on('change:path', this.render, this);
-      app.on('change:modal', this.modal, this);
+      app.on('change:state', this.toggleState, this);
       this.$container = $('<div />', {"class": "container"});
       this.$overlay = $('<div />', {"class": "overlay"});
+      this.configView = new ConfigView();
       this.$el.append(
           new NaviView({model: app}).el,
           this.$container,
@@ -172,21 +173,24 @@ us$.modules.define('view', function (exports, require, module) {
         this.folderView.refresh(folders, bookmarks);
       }
     },
-    modal: function () {
-      if (this.model.get('modal')) {
-        this.$el.addClass('modal-enable');
-      } else {
-        this.$el.removeClass('modal-enable');
+    toggleState: function () {
+      switch (this.model.get('state')) {
+      case 'folder':
+        break;
+      case 'config':
+          this.toggleModal(true);
+        break;
       }
+
     },
     createEditor: function (e, bookmark) {
       var editor = new EditorView({model: bookmark});
-      this.model.set('modal', true);
+      this.toggleModal(true);
       this.$overlay.append(editor.el);
       editor.on('submit', function (text) {
         this.trigger('submit', bookmark, text);
       }, this);
-      editor.on('remove', function () {this.model.set('modal', false);}, this);
+      editor.on('remove', function () {this.toggleModal(false)}, this);
     }
   });
 })

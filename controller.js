@@ -6,7 +6,7 @@ us$.modules.define('ctrl', function (exports, require, module) {
     this.client = client;
     var appModel = this.app = new model.App({
       path: [],
-      Tree: new model.TreeManager({config:config})
+      Tree: new model.TreeManager({config: config})
     });
     var Router = Backbone.Router.extend({
       routes: {
@@ -24,6 +24,7 @@ us$.modules.define('ctrl', function (exports, require, module) {
         }));
       },
       configure: function () {
+        appModel.set('config', true);
       }
     });
     router = new Router();
@@ -94,7 +95,7 @@ us$.ready('normal').done(function (dataDeferred) {
   }
   var client = new HatenaClient(myName.name, myName.rks),
       Controller = us$.require('ctrl');
-  var ctrl = new Controller(client, {folder:[]});
+  var ctrl = new Controller(client, {folder: []});
   dataDeferred.done(ctrl.addByText.bind(ctrl));
 });
 us$.ready('setup').done(function () {
@@ -128,7 +129,7 @@ us$.ready('tags').done(function (dataDeferred, nameDeferred) {
   $('body').empty();
   nameDeferred.done(function (myName) {
     var client = new HatenaClient(myName.name, myName.rks),
-        ctrl = new Controller(client, {folder:conditions});
+        ctrl = new Controller(client, {folder: conditions});
     dataDeferred.done(ctrl.addByText.bind(ctrl));
 
   });
