@@ -134,6 +134,8 @@ us$.modules.define('view', function (exports, require, module) {
     }
   });
   var ConfigView = Backbone.View.extend({
+    tagName: 'div',
+    id: 'config',
     initialize: function () {}
   });
 
