@@ -1,7 +1,6 @@
 us$.modules.define('view', function (exports, require, module) {
-
-  var NaviView, EditorView, FoldersView;
-  FoldersView = Backbone.View.extend({
+  var template = require('template');
+  var FoldersView = Backbone.View.extend({
     tagName: 'div',
     id: 'contents',
     initialize: function () {
@@ -13,8 +12,8 @@ us$.modules.define('view', function (exports, require, module) {
       "click .destroy-icon": "destroy",
       "click .edit-icon": "edit"
     },
-    bookmarkTmpl: _.template(TEXT.bookmarksTemplate),
-    folderTmpl: _.template(TEXT.foldersTemplate),
+    bookmarkTmpl: template.bookmarks,
+    folderTmpl: template.folders,
     render: function () {
       return this.refresh(this.model.folders, this.model.bookmarks);
     },
@@ -44,7 +43,7 @@ us$.modules.define('view', function (exports, require, module) {
       }
     }
   });
-  EditorView = Backbone.View.extend({
+  var EditorView = Backbone.View.extend({
     tagName: 'div',
     className: 'editor-wrapper',
     events: {
@@ -52,12 +51,12 @@ us$.modules.define('view', function (exports, require, module) {
       "click .cancel": "destroy",
       "click": "cancel"
     },
-    tmpl: _.template(TEXT.editorTemplate),
+    template: template.editor,
     initialize: function () {
       this.render();
     },
     render: function () {
-      this.$el.html(this.tmpl(this.model));
+      this.$el.html(this.template(this.model));
       return this;
     },
     submit: function () {
@@ -76,10 +75,10 @@ us$.modules.define('view', function (exports, require, module) {
     }
   });
 
-  NaviView = Backbone.View.extend({
+  var NaviView = Backbone.View.extend({
     tagName: 'div',
     id: 'navi',
-    tmpl: _.template(TEXT.naviTemplate),
+    template: template.nav,
     inFolderSearchTimer: null,
     inFolderSearchInterval: 500,
     events: {
@@ -104,7 +103,7 @@ us$.modules.define('view', function (exports, require, module) {
       this.$el.find('#incremental-infolder-search').focus();
     },
     render: function () {
-      this.$el.html(this.tmpl({
+      this.$el.html(this.template({
         list: this.model.get('path'),
         length: this.model.get('path').length
       }));
@@ -134,9 +133,30 @@ us$.modules.define('view', function (exports, require, module) {
     }
   });
   var ConfigView = Backbone.View.extend({
+    // model AppModel
     tagName: 'div',
     id: 'config',
-    initialize: function () {}
+    events: {
+      "click .save": "save",
+      "click .cancel": "cancel"
+    },
+    template: template.config,
+    initialize: function () {
+      this.model.get('config')
+    },
+    render: function () {
+      this.$el.html(this.template());
+      return this;
+    },
+    save: function () {
+      var text = this.$('.config-input').val();
+      this.model.setConfig(text);
+
+//      this.model.set('config')
+    },
+    cancel: function () {
+
+    }
   });
 
   exports.AppView = Backbone.View.extend({
@@ -190,7 +210,7 @@ us$.modules.define('view', function (exports, require, module) {
       case 'folder':
         break;
       case 'config':
-          this.toggleModal(true);
+        this.toggleModal(true);
         break;
       }
 
