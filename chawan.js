@@ -224,6 +224,13 @@ us$.modules.define('model', function (exports, require, module) {
         this.set('path', path);
         this.trigger('change:downLevel');
       }
+    },
+    moveTo: function(destination) {
+      if (destination.method == 'downLevel') {
+        this.downLevel(destination.value);
+      } else if (destination.method == 'href') {
+        location.href = destination.value;
+      }
     }
   });
   exports.Bookmark = Bookmark;

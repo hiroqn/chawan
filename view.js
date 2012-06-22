@@ -24,6 +24,19 @@ us$.modules.define('view', function (exports, require, module) {
       this.$el.html(folderHTML + bookmarkHTML);
       return this;
     },
+    getDestination: function() {
+        var contents = $('#contents').children();
+        if (contents.length == 1) {
+          var content = contents[0];
+          if (content.className == "folder") {
+            return {method:'downLevel', value:content.getAttribute('data-name')};
+          } else if (content.className == "bookmark") {
+            return {method:'href', value: content.getElementsByTagName("a")[0].getAttribute('href')};
+          }
+        } else {
+          return false;
+        }
+    },
     down: function (e) {
       this.$el.trigger('down', e.currentTarget.dataset.name);
       //      app.downLevel(e.currentTarget.dataset.name);
@@ -121,15 +134,7 @@ us$.modules.define('view', function (exports, require, module) {
       if (event.keyCode == 13) {
         // cancel default action of putting 'enter' key (submitting)
         event.preventDefault();
-        var contents = $('#contents').children();
-        if (contents.length == 1) {
-          var content = contents[0];
-          if (content.className == "folder") {
-            this.model.downLevel(content.getAttribute('data-name'));
-          } else if (content.className == "bookmark") {
-            location.href = content.getElementsByTagName("a")[0].getAttribute('href');
-          }
-        }
+        this.trigger('enterSearchInFolder');
       }
     }
   });
@@ -148,6 +153,7 @@ us$.modules.define('view', function (exports, require, module) {
       this.$overlay = $('<div />', {"class": "overlay"});
       this.configView = new ConfigView();
       var naviView = new NaviView({model:app});
+      naviView.on('enterSearchInFolder', this.mayEnterNextPage, this);
       this.$el.append(
           naviView.el,
           this.$container,
@@ -204,6 +210,12 @@ us$.modules.define('view', function (exports, require, module) {
         this.trigger('submit', bookmark, text);
       }, this);
       editor.on('remove', function () {this.toggleModal(false)}, this);
+    },
+    mayEnterNextPage: function() {
+      var destination = this.folderView.getDestination();
+      if (destination) {
+        this.model.moveTo(destination);
+      }
     }
   });
 })
