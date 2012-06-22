@@ -1,2 +1,0 @@
-<h1>about:config</h1>
-<textarea class="config-input"></textarea>
