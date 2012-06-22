@@ -222,7 +222,6 @@ us$.modules.define('model', function (exports, require, module) {
       var path = this.get('path');
       if (this.get('Tree').findFolder(path = path.concat(name))) {
         this.set('path', path);
-        this.trigger('change:downLevel');
       }
     },
     moveTo: function(destination) {

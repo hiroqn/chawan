@@ -121,6 +121,7 @@ us$.modules.define('view', function (exports, require, module) {
         list: this.model.get('path'),
         length: this.model.get('path').length
       }));
+      this.focusOnSearchBox();
     },
     searchInFolder: function() {
       var searchText = $('#incremental-infolder-search').val();
@@ -158,9 +159,6 @@ us$.modules.define('view', function (exports, require, module) {
           naviView.el,
           this.$container,
           this.$overlay);
-      app.on('change:downLevel', naviView.focusOnSearchBox, naviView);
-      app.on('change:path', naviView.focusOnSearchBox, naviView);
-      naviView.focusOnSearchBox();
     },
     events: {
       "edit .container": 'createEditor',
