@@ -100,7 +100,7 @@ us$.modules.define('view', function (exports, require, module) {
       this.model.on('change:path', this.render, this);
       this.render();
     },
-    focusSearch: function () {
+    focusOnSearchBox: function () {
       this.$el.find('#incremental-infolder-search').focus();
     },
     render: function () {
@@ -147,11 +147,14 @@ us$.modules.define('view', function (exports, require, module) {
       this.$container = $('<div />', {"class": "container"});
       this.$overlay = $('<div />', {"class": "overlay"});
       this.configView = new ConfigView();
+      var naviView = new NaviView({model:app});
       this.$el.append(
-          new NaviView({model: app}).el,
+          naviView.el,
           this.$container,
           this.$overlay);
-      $('#incremental-infolder-search').focus();
+      app.on('change:downLevel', naviView.focusOnSearchBox, naviView);
+      app.on('change:path', naviView.focusOnSearchBox, naviView);
+      naviView.focusOnSearchBox();
     },
     events: {
       "edit .container": 'createEditor',

@@ -216,14 +216,13 @@ us$.modules.define('model', function (exports, require, module) {
           this.get('path').pop();
         }
         this.trigger('change:path');
-        $("#incremental-infolder-search").focus();
       }
     },
     downLevel: function (name) {
       var path = this.get('path');
       if (this.get('Tree').findFolder(path = path.concat(name))) {
         this.set('path', path);
-        $("#incremental-infolder-search").focus();
+        this.trigger('change:downLevel');
       }
     }
   });
