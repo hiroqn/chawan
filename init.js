@@ -159,6 +159,7 @@ us$(function () {
 us$.register('normal', /^http:\/\/b.hatena.ne.jp\/my\.name\?chawan=.+$/,
     function (callback) {
       var result = window.location.href.match(/\?chawan=(\w+)/);
+
       callback(null, HatenaClient.searchData(result[1]));
 
     });

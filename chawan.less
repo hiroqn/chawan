@@ -14,7 +14,7 @@
 @white: #FFFFFF;
 @black: #000000;
 
-.all-direction(@d:0){
+.all-direction(@d: 0){
     left: @d;
     top: @d;
     right: @d;
@@ -54,6 +54,23 @@ body {
     min-width: @min-width;
 }
 
+#config {
+    overflow: hidden;
+    background: none repeat scroll 0 0 @lime;
+    display: none;
+    position: fixed;
+    .all-direction(5px);
+    .condig-input {
+        line-height: @fontsize;
+        font-size: @fontsize * 5 / 6;
+        border-radius: 4px 4px 4px 4px;
+        border: solid 1px @white;
+        display: block;
+        width: inherit;
+        resize: vertical;
+    }
+}
+
 #navi {
     text-shadow: 0 -1px 0 #888888;
     position: relative;
@@ -64,9 +81,6 @@ body {
         left: @fontsize;
         font-size: 1.5em;
         span {
-            border: solid 2px @white;
-//            border-radius: 9px 9px 9px 9px;
-//            padding: 0.2em;
         }
         #incremental-infolder-search-parent {
             background-color: @light-grey;
@@ -88,7 +102,7 @@ body {
 }
 
 .editor-wrapper {
-    background: none repeat scroll 0 0 fade(@white,70%);
+    background: none repeat scroll 0 0 fade(@white, 70%);
     display: none;
     position: fixed;
     z-index: 200;
@@ -103,7 +117,6 @@ body {
     position: relative;
     overflow: hidden;
     width: @min-width * 7 / 8;
-//    height: @min-width;
     margin: 100px auto;
     background-color: @green;
     padding: @fontsize;
