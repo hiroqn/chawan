@@ -1,7 +1,6 @@
 us$.modules.define('view', function (exports, require, module) {
-
-  var NaviView, EditorView, FoldersView;
-  FoldersView = Backbone.View.extend({
+  var template = require('template');
+  var FoldersView = Backbone.View.extend({
     tagName: 'div',
     id: 'contents',
     initialize: function () {
@@ -13,11 +12,14 @@ us$.modules.define('view', function (exports, require, module) {
       "click .destroy-icon": "destroy",
       "click .edit-icon": "edit"
     },
-    bookmarkTmpl: _.template(TEXT.bookmarksTemplate),
-    folderTmpl: _.template(TEXT.foldersTemplate),
+    bookmarkTmpl: template.bookmarks,
+    folderTmpl: template.folders,
     render: function () {
-      var bookmarkHTML = this.bookmarkTmpl({bookmarks: this.model.bookmarks}), // bookmarkHTML
-          folderHTML = this.folderTmpl({folders: this.model.folders});// folderHTML
+      return this.refresh(this.model.folders, this.model.bookmarks);
+    },
+    refresh: function(folders, bookmarks) {
+      var bookmarkHTML = this.bookmarkTmpl({bookmarks: bookmarks}), // bookmarkHTML
+          folderHTML = this.folderTmpl({folders: folders});// folderHTML
       this.$el.html(folderHTML + bookmarkHTML);
       return this;
     },
@@ -41,7 +43,7 @@ us$.modules.define('view', function (exports, require, module) {
       }
     }
   });
-  EditorView = Backbone.View.extend({
+  var EditorView = Backbone.View.extend({
     tagName: 'div',
     className: 'editor-wrapper',
     events: {
@@ -49,12 +51,12 @@ us$.modules.define('view', function (exports, require, module) {
       "click .cancel": "destroy",
       "click": "cancel"
     },
-    tmpl: _.template(TEXT.editorTemplate),
+    template: template.editor,
     initialize: function () {
       this.render();
     },
     render: function () {
-      this.$el.html(this.tmpl(this.model));
+      this.$el.html(this.template(this.model));
       return this;
     },
     submit: function () {
@@ -73,10 +75,12 @@ us$.modules.define('view', function (exports, require, module) {
     }
   });
 
-  NaviView = Backbone.View.extend({
+  var NaviView = Backbone.View.extend({
     tagName: 'div',
     id: 'navi',
-    tmpl: _.template(TEXT.naviTemplate),
+    template: template.nav,
+    inFolderSearchTimer: null,
+    inFolderSearchInterval: 500,
     events: {
       'click #name': function () {
         this.model.upLevel(1);
@@ -86,27 +90,80 @@ us$.modules.define('view', function (exports, require, module) {
         if (!isNaN(n)) {
           this.model.upLevel(n);
         }
-      }
+      },
+      'focus #incremental-infolder-search': "searchInFolder",
+      'blur #incremental-infolder-search': "stopSearchInFolder",
+      'keydown #incremental-infolder-search': "enterSearchInFolder"
     },
     initialize: function () {
       this.model.on('change:path', this.render, this);
       this.render();
     },
+    focusSearch: function () {
+      this.$el.find('#incremental-infolder-search').focus();
+    },
     render: function () {
-      this.$el.html(this.tmpl({
+      this.$el.html(this.template({
         list: this.model.get('path'),
         length: this.model.get('path').length
       }));
+    },
+    searchInFolder: function() {
+      var searchText = $('#incremental-infolder-search').val();
+      this.model.get('Tree').searchInFolder(this.model.get('path'), searchText);
+      this.inFolderSearchTimer = setTimeout(this.searchInFolder.bind(this), this.inFolderSearchInterval);
+    },
+    stopSearchInFolder: function() {
+      clearTimeout(this.inFolderSearchTimer);
+    },
+    enterSearchInFolder: function(event) {
+      if (event.keyCode == 13) {
+        // cancel default action of putting 'enter' key (submitting)
+        event.preventDefault();
+        var contents = $('#contents').children();
+        if (contents.length == 1) {
+          var content = contents[0];
+          if (content.className == "folder") {
+            this.model.downLevel(content.getAttribute('data-name'));
+          } else if (content.className == "bookmark") {
+            location.href = content.getElementsByTagName("a")[0].getAttribute('href');
+          }
+        }
+      }
     }
   });
   var ConfigView = Backbone.View.extend({
-    initialize: function () {}
+    // model AppModel
+    tagName: 'div',
+    id: 'config',
+    events: {
+      "click .save": "save",
+      "click .cancel": "cancel"
+    },
+    template: template.config,
+    initialize: function () {
+      this.model.get('config')
+    },
+    render: function () {
+      this.$el.html(this.template());
+      return this;
+    },
+    save: function () {
+      var text = this.$('.config-input').val();
+      this.model.setConfig(text);
+
+//      this.model.set('config')
+    },
+    cancel: function () {
+
+    }
   });
 
   exports.AppView = Backbone.View.extend({
     initialize: function () {
       var app = this.model;
       app.get('Tree').on('change', this.render, this);
+      app.get('Tree').on('infolder-search', this.refreshFolderView, this);
       app.on('change:path', this.render, this);
       app.on('change:state', this.toggleState, this);
       this.$container = $('<div />', {"class": "container"});
@@ -116,6 +173,7 @@ us$.modules.define('view', function (exports, require, module) {
           new NaviView({model: app}).el,
           this.$container,
           this.$overlay);
+      $('#incremental-infolder-search').focus();
     },
     events: {
       "edit .container": 'createEditor',
@@ -135,6 +193,11 @@ us$.modules.define('view', function (exports, require, module) {
       }
       return this;
     },
+    refreshFolderView: function (folders, bookmarks) {
+      if (this.folderView && (folders.length != 0 || bookmarks.length != 0)) {
+        this.folderView.refresh(folders, bookmarks);
+      }
+    },
     toggleModal: function (bool) {
       if (bool) {
         this.$el.addClass('modal-enable');
@@ -147,7 +210,7 @@ us$.modules.define('view', function (exports, require, module) {
       case 'folder':
         break;
       case 'config':
-          this.toggleModal(true);
+        this.toggleModal(true);
         break;
       }
 

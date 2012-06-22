@@ -69,15 +69,6 @@ us$.modules.define('model', function (exports, require, module) {
     addBookmark: function (bookmark) {
       this.bookmarks.push(bookmark);
     },
-    takeBookmark: function (bookmark) {
-      var index = this.bookmarks.indexOf(bookmark);
-      if (~index) {// tilde
-        this.bookmarks.splice(index, 1);
-        return true;
-      } else {
-        return false;
-      }
-    },
     pickBookmark: function (bookmark) {
       var index = this.bookmarks.indexOf(bookmark);
       if (~index) {// tilde
@@ -91,6 +82,15 @@ us$.modules.define('model', function (exports, require, module) {
       return _(this.bookmarks).find(function (bookmark) {
         return bookmark.bid === bid;
       });
+    },
+    search: function (text) {
+      var folders = _.filter(this.folders,
+          function (folder) { return folder.name.indexOf(searchText) == 0});
+      var bookmarks = _.filter(this.bookmarks,
+          function (bookmark) {
+            return bookmark.title.indexOf(searchText) == 0
+          });
+      return null;//???? TODO
     },
     sortFolder: function () {
       this.folders = _(this.folders).sortBy(function (folder) {
@@ -127,9 +127,17 @@ us$.modules.define('model', function (exports, require, module) {
       }
       return folder;
     },
+    searchInFolder: function (path, searchText) {
+      currentFolder = this.getFolder(path);
+      var folders = _.filter(currentFolder.folders,
+        function(folder) { return folder.name.indexOf(searchText) == 0});
+      var bookmarks = _.filter(currentFolder.bookmarks,
+        function(bookmark) { return bookmark.title.indexOf(searchText) == 0});
+      this.trigger('infolder-search', folders, bookmarks);
+    },
     addBookmarks: function (bookmarkArray) {
       this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
-      var conditions = this.get('config').folder;
+      var conditions = this.get('config').get('folder');
       this.classifyFolder(conditions, this.root, bookmarkArray);
       this.setBookmarkCount(this.root);
       this.trigger('change');
@@ -177,7 +185,7 @@ us$.modules.define('model', function (exports, require, module) {
       }, folder.bookmarks.length);
     },
     sortAllFolder: function sortFolder(folder) {
-      folder.folders.forEach(function(folder){
+      folder.folders.forEach(function (folder) {
         sortFolder(folder);
         folder.sortFolder();
       });
@@ -194,15 +202,69 @@ us$.modules.define('model', function (exports, require, module) {
       this.setBookmarkCount();
       this.sortAllFolder();
       this.trigger('change');
-    },
-    setComment: function (bookmark, comment) { //TODO c
-      var dfd = Hatena.editComment(bookmark.url, comment);
-      var Tree = this;
-      dfd.then(function (comment) {
-        Tree.moveBookmark(bookmark, comment);
-      }, function () {
+    }
+  });
+  var configParam = /^\[[^%\/\?\[\]]+\](?:(?:\*|\+)\[[^%\/\?\[\]]+\])*$/;
 
+  function tokenizer(text) {
+    if (text.match(configParam)) {
+      return text.slice(1, -1).split(/\]\+\[/).map(function (chunk) {
+        return chunk.split(/\]\*\[/);
       });
+    } else {
+      throw new Error();
+    }
+  }
+
+  function Condition(name) {
+    name = name.replace(/^\s+|\s+$/g, '');
+    if (name.match(/-$/)) {
+      this.exclude = true;
+      name = name.slide(-1);
+    }
+    this.condition = tokenizer(name);
+    this.children = [];
+    this.name = name;
+  }
+
+  var Config = Backbone.Model.extend({
+    defaults: {
+      folder: []
+    },
+    configParser: function (text) {//folder condition
+      var lines = text.split(/\r\n|\n/),
+          i = 0, level = -1;
+      var root = [];
+
+      function parser(dir, depth) {
+        while (true) {
+          if (lines[i] === '') {
+            continue;
+          }
+          if (lines.length <= i) {
+            break;
+          }
+          var spaceCount = lines[i].match(/^ */)[0].length;
+          if (depth - spaceCount === -1) {
+            dir.push(new Condition(lines[i]));
+            i++;
+            parser(obj.children, spaceCount);
+          } else {
+            break;
+          }
+        }
+      }
+
+      parser(root, -1);
+      return root;
+    },
+    setCondition: function (text) {
+      try {
+        this.set('folder', this.configParser(text));
+        this.trigger('change');
+      } catch (e) {
+        alert('parse error');//TODO
+      }
     }
   });
   var App = Backbone.Model.extend({
@@ -217,12 +279,14 @@ us$.modules.define('model', function (exports, require, module) {
           this.get('path').pop();
         }
         this.trigger('change:path');
+        $("#incremental-infolder-search").focus();
       }
     },
     downLevel: function (name) {
       var path = this.get('path');
       if (this.get('Tree').findFolder(path = path.concat(name))) {
         this.set('path', path);
+        $("#incremental-infolder-search").focus();
       }
     }
   });
@@ -230,4 +294,5 @@ us$.modules.define('model', function (exports, require, module) {
   exports.Folder = Folder;
   exports.TreeManager = TreeManager;
   exports.App = App;
+  exports.Config = Config;
 });

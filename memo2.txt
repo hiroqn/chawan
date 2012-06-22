@@ -53,10 +53,10 @@
 
 仕様
 
-#[javascript]*[lib]-
-#[javascript]
-##[node.js]
-##[greasemonkey]+[userscript]
+[javascript]*[lib]-
+[javascript]
+ [node.js]
+ [greasemonkey]+[userscript]
 
 Config = [
   {

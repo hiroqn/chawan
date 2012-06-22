@@ -2,10 +2,12 @@ us$.modules.define('ctrl', function (exports, require, module) {
   var model = require('model');
   var view = require('view');
 
-  function Controller(client, config) { // this is not controller mvc
+  function Controller(client, conf) { // this is not controller mvc
     this.client = client;
+    var config = new model.Config(conf);
     var appModel = this.app = new model.App({
       path: [],
+      config: config,
       Tree: new model.TreeManager({config: config})
     });
     var Router = Backbone.Router.extend({
@@ -24,7 +26,7 @@ us$.modules.define('ctrl', function (exports, require, module) {
         }));
       },
       configure: function () {
-        appModel.set('config', true);
+        appModel.set('state', 'config');
       }
     });
     router = new Router();
@@ -36,7 +38,7 @@ us$.modules.define('ctrl', function (exports, require, module) {
       model: appModel,
       el: document.body
     });
-    appView.on('submit', function () {});
+    appView.on('submit', this.editComment, this);
     this.view = appView;
   }
 
@@ -93,9 +95,11 @@ us$.ready('normal').done(function (dataDeferred) {
   if (!myName.login) {
     throw new Error('not Login');
   }
+  var config = localStorage.chawan;
+
   var client = new HatenaClient(myName.name, myName.rks),
       Controller = us$.require('ctrl');
-  var ctrl = new Controller(client, {folder: []});
+  var ctrl = new Controller(client, JSON.stringify(config));
   dataDeferred.done(ctrl.addByText.bind(ctrl));
 });
 us$.ready('setup').done(function () {
