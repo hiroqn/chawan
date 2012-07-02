@@ -10,20 +10,23 @@ Install -> [click](https://github.com/hiroqn/chawan/raw/master/chawan.user.js)
 
 and
 
-Go to -> [here](http://b.hatena.ne.jp/my.name)
+Go to -> [here](http://b.hatena.ne.jp/my.name) and write config
+
+or
+
+simple tags,http://b.hatena.ne.jp/ + id + /tags.json
+
+
 
 How to use
 ==========
 
-ブックマークのコメントに\[?folder1\]と付け加えるとブックマークがfolder1の下に配置されます。
-また、\[?folder1/folder2\]と書くことでfolder1の下にfolder2が作られ、その中にブックマークが配置されます。
 
+Notice
+=======
 
-補足
-==========
-*  まだαです。
-*  Greasemonkey,Firefox, Chromeはなるべく最新を使いましょう。
-*  階層構造はあくまで表示上です。   
-*  おおむねタグは汚染されません。  
-*  userscriptなので動作の責任は負いません。
-*  LisenceはMITです。
+Firefox higher version 12?13 cant exucute with known bug
+
+WAWAWA
+=======
+*MIT LICENSE*
