@@ -10,10 +10,10 @@
 
 *  非ログイン時の処理
 *  Configurationの画面
+*  Bookmark編集機能
 *  Bookmark削除機能
 *  Bookmark追加機能
-*  既存のtag
-*  検索
+* firefoxのBug fix
 
 #color
 
