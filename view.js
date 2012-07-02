@@ -110,6 +110,7 @@ us$.modules.define('view', function (exports, require, module) {
     },
     initialize: function () {
       this.model.on('change:path', this.render, this);
+      this.focusOnSearchBox();
       this.render();
     },
     focusOnSearchBox: function () {
@@ -148,7 +149,7 @@ us$.modules.define('view', function (exports, require, module) {
     },
     template: template.config,
     initialize: function () {
-      this.model.get('config')
+//      this.model.get('config')
     },
     render: function () {
       this.$el.html(this.template());
@@ -156,7 +157,7 @@ us$.modules.define('view', function (exports, require, module) {
     },
     save: function () {
       var text = this.$('.config-input').val();
-      this.model.setConfig(text);
+      this.model.setCondition(text);
 
 //      this.model.set('config')
     },
@@ -174,7 +175,8 @@ us$.modules.define('view', function (exports, require, module) {
       app.on('change:state', this.toggleState, this);
       this.$container = $('<div />', {"class": "container"});
       this.$overlay = $('<div />', {"class": "overlay"});
-      this.configView = new ConfigView();
+      this.configView = new ConfigView({model:app.get('config')});
+      this.$overlay.append(this.configView.el);
       var naviView = new NaviView({model:app});
       naviView.on('enterSearchInFolder', this.mayEnterNextPage, this);
       this.$el.append(
@@ -215,8 +217,11 @@ us$.modules.define('view', function (exports, require, module) {
     toggleState: function () {
       switch (this.model.get('state')) {
       case 'folder':
+        this.configView.$el.hide();
+        this.toggleModal(false);
         break;
       case 'config':
+        this.configView.$el.show();
         this.toggleModal(true);
         break;
       }
