@@ -1,21 +1,32 @@
-?Chawan とは
+?Chawan
 ===========
-userscirpt for はてブです。
-はてブの重たいトップページに飽きた人や比較的定常的なブックーマークを階層構造を用いて保存したい人用です。
-Firefox with Greasemonkey, Chromeのuserscriptで概ね使えます 。
+userscirpt for HatenaBookmark
 
-使用方法
-==========
-インストール後、http://b.hatena.ne.jp/*yourHatenaID*/tags.jsonに行くと動作します。
-もしくは、http://b.hatena.ne.jp/my.name?chawan=*yourHatenaID*に行っても動作します。
-ブックマークのコメントに\[?folder1\]と付け加えるとブックマークがfolder1の下に配置されます。
-また、\[?folder1/folder2\]と書くことでfolder1の下にfolder2が作られ、その中にブックマークが配置されます。
+Firefox with Greasemonkey, Chrome userscript.
 
-補足
+Install
 ==========
-*  まだαです。
-*  Greasemonkey,Firefox, Chromeはなるべく最新を使いましょう。
-*  階層構造はあくまで表示上です。   
-*  おおむねタグは汚染されません。  
-*  userscriptなので動作の責任は負いません。
-*  LisenceはMITです。
+Install -> [click](https://github.com/hiroqn/chawan/raw/master/chawan.user.js)
+
+and
+
+Go to -> [here](http://b.hatena.ne.jp/my.name) and write config
+
+or
+
+simple tags,http://b.hatena.ne.jp/ + id + /tags.json
+
+
+
+How to use
+==========
+
+
+Notice
+=======
+
+Firefox higher version 12?13 cant exucute with known bug
+
+WAWAWA
+=======
+*MIT LICENSE*

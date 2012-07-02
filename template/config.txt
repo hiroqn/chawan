@@ -1,0 +1,3 @@
+<h1>about:config</h1>
+<textarea class="config-input"></textarea>
+<div class="buttons"><a class="save">save</a> <a class="cancel">cancel</a></div>
