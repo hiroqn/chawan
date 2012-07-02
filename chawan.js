@@ -234,7 +234,7 @@ us$.modules.define('model', function (exports, require, module) {
     configParser: function (text) {//folder condition
       var lines = text.split(/\r\n|\n/),
           i = 0, level = -1;
-      var root = [];
+      var root = [],condition;
 
       function parser(dir, depth) {
         while (true) {
@@ -246,9 +246,9 @@ us$.modules.define('model', function (exports, require, module) {
           }
           var spaceCount = lines[i].match(/^ */)[0].length;
           if (depth - spaceCount === -1) {
-            dir.push(new Condition(lines[i]));
+            dir.push(condition = new Condition(lines[i]));
             i++;
-            parser(obj.children, spaceCount);
+            parser(condition.children, spaceCount);
           } else {
             break;
           }
@@ -279,14 +279,19 @@ us$.modules.define('model', function (exports, require, module) {
           this.get('path').pop();
         }
         this.trigger('change:path');
-        $("#incremental-infolder-search").focus();
       }
     },
     downLevel: function (name) {
       var path = this.get('path');
       if (this.get('Tree').findFolder(path = path.concat(name))) {
         this.set('path', path);
-        $("#incremental-infolder-search").focus();
+      }
+    },
+    moveTo: function(destination) {
+      if (destination.method == 'downLevel') {
+        this.downLevel(destination.value);
+      } else if (destination.method == 'href') {
+        location.href = destination.value;
       }
     }
   });
