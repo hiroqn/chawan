@@ -17,24 +17,25 @@ us$.modules.define('view', function (exports, require, module) {
     render: function () {
       return this.refresh(this.model.folders, this.model.bookmarks);
     },
-    refresh: function(folders, bookmarks) {
+    refresh: function (folders, bookmarks) {
       var bookmarkHTML = this.bookmarkTmpl({bookmarks: bookmarks}), // bookmarkHTML
           folderHTML = this.folderTmpl({folders: folders});// folderHTML
       this.$el.html(folderHTML + bookmarkHTML);
       return this;
     },
-    getDestination: function() {
-        var contents = $('#contents').children();
-        if (contents.length == 1) {
-          var content = contents[0];
-          if (content.className == "folder") {
-            return {method:'downLevel', value:content.getAttribute('data-name')};
-          } else if (content.className == "bookmark") {
-            return {method:'href', value: content.getElementsByTagName("a")[0].getAttribute('href')};
+    getDestination: function () {
+      var contents = $('#contents').children();
+      if (contents.length == 1) {
+        var content = contents[0];
+        if (content.className == "folder") {
+          return {method: 'downLevel', value: content.getAttribute('data-name')};
+        } else
+          if (content.className == "bookmark") {
+            return {method: 'href', value: content.getElementsByTagName("a")[0].getAttribute('href')};
           }
-        } else {
-          return false;
-        }
+      } else {
+        return false;
+      }
     },
     down: function (e) {
       this.$el.trigger('down', e.currentTarget.dataset.name);
@@ -123,15 +124,16 @@ us$.modules.define('view', function (exports, require, module) {
       }));
       this.focusOnSearchBox();
     },
-    searchInFolder: function() {
+    searchInFolder: function () {
       var searchText = $('#incremental-infolder-search').val();
       this.model.get('Tree').searchInFolder(this.model.get('path'), searchText);
-      this.inFolderSearchTimer = setTimeout(this.searchInFolder.bind(this), this.inFolderSearchInterval);
+      this.inFolderSearchTimer = setTimeout(this.searchInFolder.bind(this),
+          this.inFolderSearchInterval);
     },
-    stopSearchInFolder: function() {
+    stopSearchInFolder: function () {
       clearTimeout(this.inFolderSearchTimer);
     },
-    enterSearchInFolder: function(event) {
+    enterSearchInFolder: function (event) {
       if (event.keyCode == 13) {
         // cancel default action of putting 'enter' key (submitting)
         event.preventDefault();
@@ -149,20 +151,25 @@ us$.modules.define('view', function (exports, require, module) {
     },
     template: template.config,
     initialize: function () {
-//      this.model.get('config')
+      //      this.model.get('config')
     },
     render: function () {
       this.$el.html(this.template());
+      this.$el.show();
       return this;
     },
     save: function () {
       var text = this.$('.config-input').val();
       this.model.setCondition(text);
-
-//      this.model.set('config')
+      //      this.model.set('config')
+      this.destroy();
     },
     cancel: function () {
-
+      this.destroy();
+    },
+    destroy: function () {
+      this.$el.hide();
+      this.trigger('remove');
     }
   });
 
@@ -175,9 +182,12 @@ us$.modules.define('view', function (exports, require, module) {
       app.on('change:state', this.toggleState, this);
       this.$container = $('<div />', {"class": "container"});
       this.$overlay = $('<div />', {"class": "overlay"});
-      this.configView = new ConfigView({model:app.get('config')});
+      this.configView = new ConfigView({model: app.get('config')});
+      this.configView.on('remove', function () {
+        app.set('state', 'folder');
+      });
       this.$overlay.append(this.configView.el);
-      var naviView = new NaviView({model:app});
+      var naviView = new NaviView({model: app});
       naviView.on('enterSearchInFolder', this.mayEnterNextPage, this);
       this.$el.append(
           naviView.el,
@@ -217,11 +227,10 @@ us$.modules.define('view', function (exports, require, module) {
     toggleState: function () {
       switch (this.model.get('state')) {
       case 'folder':
-        this.configView.$el.hide();
         this.toggleModal(false);
         break;
       case 'config':
-        this.configView.$el.show();
+        this.configView.render();
         this.toggleModal(true);
         break;
       }
@@ -236,7 +245,7 @@ us$.modules.define('view', function (exports, require, module) {
       }, this);
       editor.on('remove', function () {this.toggleModal(false)}, this);
     },
-    mayEnterNextPage: function() {
+    mayEnterNextPage: function () {
       var destination = this.folderView.getDestination();
       if (destination) {
         this.model.moveTo(destination);

@@ -130,9 +130,11 @@ us$.modules.define('model', function (exports, require, module) {
     searchInFolder: function (path, searchText) {
       currentFolder = this.getFolder(path);
       var folders = _.filter(currentFolder.folders,
-        function(folder) { return folder.name.indexOf(searchText) == 0});
+          function (folder) { return folder.name.indexOf(searchText) == 0});
       var bookmarks = _.filter(currentFolder.bookmarks,
-        function(bookmark) { return bookmark.title.indexOf(searchText) == 0});
+          function (bookmark) {
+            return bookmark.title.indexOf(searchText) == 0
+          });
       this.trigger('infolder-search', folders, bookmarks);
     },
     addBookmarks: function (bookmarkArray) {
@@ -234,7 +236,7 @@ us$.modules.define('model', function (exports, require, module) {
     configParser: function (text) {//folder condition
       var lines = text.split(/\r\n|\n/),
           i = 0, level = -1;
-      var root = [],condition;
+      var root = [], condition;
 
       function parser(dir, depth) {
         while (true) {
@@ -287,12 +289,13 @@ us$.modules.define('model', function (exports, require, module) {
         this.set('path', path);
       }
     },
-    moveTo: function(destination) {
+    moveTo: function (destination) {
       if (destination.method == 'downLevel') {
         this.downLevel(destination.value);
-      } else if (destination.method == 'href') {
-        location.href = destination.value;
-      }
+      } else
+        if (destination.method == 'href') {
+          location.href = destination.value;
+        }
     }
   });
   exports.Bookmark = Bookmark;

@@ -5,6 +5,7 @@ us$.modules.define('ctrl', function (exports, require, module) {
   function Controller(client, conf) { // this is not controller mvc
     this.client = client;
     var config = new model.Config(conf);
+    config.on('change', this.saveConfig, this);
     var appModel = this.app = new model.App({
       path: [],
       config: config,
@@ -43,6 +44,11 @@ us$.modules.define('ctrl', function (exports, require, module) {
   }
 
   _(Controller.prototype).extend(Backbone.Events, {
+    saveConfig: function () {
+      localStorage.chawan = JSON.stringify({
+        folder: this.app.get('config').get('folder')
+      });
+    },
     addByText: function (texts) {
       var array = texts.split('\n'),
           l = array.length / 4, bookmarks = new Array(l);
@@ -99,7 +105,7 @@ us$.ready('normal').done(function (dataDeferred) {
 
   var client = new HatenaClient(myName.name, myName.rks),
       Controller = us$.require('ctrl');
-  var ctrl = new Controller(client, JSON.stringify(config));
+  var ctrl = new Controller(client, JSON.parse(config));
   dataDeferred.done(ctrl.addByText.bind(ctrl));
 });
 us$.ready('setup').done(function () {
@@ -133,7 +139,7 @@ us$.ready('tags').done(function (dataDeferred, nameDeferred) {
   $('body').empty();
   nameDeferred.done(function (myName) {
     var client = new HatenaClient(myName.name, myName.rks),
-        ctrl = new Controller(client, {folder: conditions});
+        ctrl = new Controller(client, {folder: conditions, tags: true});
     dataDeferred.done(ctrl.addByText.bind(ctrl));
 
   });
