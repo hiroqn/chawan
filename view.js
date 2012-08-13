@@ -165,7 +165,7 @@ us$.modules.define('view', function (exports, require, module) {
       console.log('saved'); // TODO add save notification
     },
     cancel: function () {
-      this.destroy();
+      this.render();
     },
     destroy: function () {
       this.$el.hide();
