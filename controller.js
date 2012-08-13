@@ -15,8 +15,7 @@ us$.modules.define('ctrl', function (exports, require, module) {
       routes: {
         "": "top",
         "!": "top",
-        "!*path": "moveTo",
-        "configure": "configure"
+        "!*path": "moveTo"
       },
       top: function () {
         appModel.set('path', []);
@@ -25,9 +24,6 @@ us$.modules.define('ctrl', function (exports, require, module) {
         appModel.set('path', path.split('/').map(function (str) {
           return decodeURIComponent(str);
         }));
-      },
-      configure: function () {
-        appModel.set('state', 'config');
       }
     });
     router = new Router();
@@ -143,4 +139,15 @@ us$.ready('tags').done(function (dataDeferred, nameDeferred) {
     dataDeferred.done(ctrl.addByText.bind(ctrl));
 
   });
+});
+us$.ready('config').done(function (dataDeferred) {
+  $('body').empty();
+  var view = us$.require('view');
+  var model = us$.require('model');
+  var configModel = this.app = new model.Config({});
+  var configView = new view.ConfigView({
+      model: configModel,
+      el: document.body
+    });
+  configView.render();
 });

@@ -172,3 +172,7 @@ us$.register('tags', /\/[^\/]+\/tags\.json(#.+)?$/,
       var result = window.location.href.match(/\/([^\/]+)\/tags\.json/);
       callback(null, HatenaClient.searchData(result[1]), HatenaClient.myName());
     });
+us$.register('config', /^http:\/\/b.hatena.ne.jp\/my\.name\?config$/,
+    function (callback) {
+        callback(null);
+    });

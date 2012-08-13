@@ -141,8 +141,7 @@ us$.modules.define('view', function (exports, require, module) {
       }
     }
   });
-  var ConfigView = Backbone.View.extend({
-    // model AppModel
+  exports.ConfigView = Backbone.View.extend({
     tagName: 'div',
     id: 'config',
     events: {
@@ -182,11 +181,6 @@ us$.modules.define('view', function (exports, require, module) {
       app.on('change:state', this.toggleState, this);
       this.$container = $('<div />', {"class": "container"});
       this.$overlay = $('<div />', {"class": "overlay"});
-      this.configView = new ConfigView({model: app.get('config')});
-      this.configView.on('remove', function () {
-        app.set('state', 'folder');
-      });
-      this.$overlay.append(this.configView.el);
       var naviView = new NaviView({model: app});
       naviView.on('enterSearchInFolder', this.mayEnterNextPage, this);
       this.$el.append(
@@ -228,10 +222,6 @@ us$.modules.define('view', function (exports, require, module) {
       switch (this.model.get('state')) {
       case 'folder':
         this.toggleModal(false);
-        break;
-      case 'config':
-        this.configView.render();
-        this.toggleModal(true);
         break;
       }
 

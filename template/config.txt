@@ -1,3 +1,7 @@
-<h1>about:config</h1>
-<textarea class="config-input"></textarea>
+<h1>Chawan?: config</h1>
+<div id="configBox">
+<div class="config"><label>ID:</label><input type="text"></input></div>
+<div class="config"><label>Password:</label><input type="password"></input></div>
+<div class="config"><label>Transformation rules:</label><textarea class="config-input"></textarea></div>
 <div class="buttons"><a class="save">save</a> <a class="cancel">cancel</a></div>
+</div>
