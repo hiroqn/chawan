@@ -150,10 +150,11 @@ us$.modules.define('view', function (exports, require, module) {
     },
     template: template.config,
     initialize: function () {
+      this.render();
       //      this.model.get('config')
     },
     render: function () {
-      this.$el.html(this.template());
+      this.$el.html(this.template({name: this.model.get('name')}));
       this.$el.show();
       return this;
     },
