@@ -5,7 +5,6 @@ us$.modules.define('ctrl', function (exports, require, module) {
   function Controller(client, conf) { // this is not controller mvc
     this.client = client;
     var config = new model.Config(conf);
-    config.on('change', this.saveConfig, this);
     var appModel = this.app = new model.App({
       path: [],
       config: config,
@@ -15,8 +14,7 @@ us$.modules.define('ctrl', function (exports, require, module) {
       routes: {
         "": "top",
         "!": "top",
-        "!*path": "moveTo",
-        "configure": "configure"
+        "!*path": "moveTo"
       },
       top: function () {
         appModel.set('path', []);
@@ -25,9 +23,6 @@ us$.modules.define('ctrl', function (exports, require, module) {
         appModel.set('path', path.split('/').map(function (str) {
           return decodeURIComponent(str);
         }));
-      },
-      configure: function () {
-        appModel.set('state', 'config');
       }
     });
     router = new Router();
@@ -44,11 +39,6 @@ us$.modules.define('ctrl', function (exports, require, module) {
   }
 
   _(Controller.prototype).extend(Backbone.Events, {
-    saveConfig: function () {
-      localStorage.chawan = JSON.stringify({
-        folder: this.app.get('config').get('folder')
-      });
-    },
     addByText: function (texts) {
       var array = texts.split('\n'),
           l = array.length / 4, bookmarks = new Array(l);
@@ -143,4 +133,21 @@ us$.ready('tags').done(function (dataDeferred, nameDeferred) {
     dataDeferred.done(ctrl.addByText.bind(ctrl));
 
   });
+});
+us$.ready('config').done(function (dataDeferred) {
+  var config;
+  if (!localStorage.chawan)
+	  config = {};
+  else
+	  config = JSON.parse(localStorage.chawan);
+  if (!config.name)
+	  config.name = JSON.parse($('pre').text()).name;
+  $('body').empty();
+  var view = us$.require('view');
+  var model = us$.require('model');
+  var configModel = this.app = new model.Config(config);
+  var configView = new view.ConfigView({
+      model: configModel,
+      el: document.body
+    });
 });

@@ -175,7 +175,7 @@ us$.modules.define('model', function (exports, require, module) {
           }
         }
         for (i = config.children.length - 1; 0 <= i; i--) {
-          classify(cond.children[i], fldr, fldr.bookmarks);
+          classify(config.children[i], fldr, fldr.bookmarks);
         }
       }
     },
@@ -260,10 +260,14 @@ us$.modules.define('model', function (exports, require, module) {
       parser(root, -1);
       return root;
     },
-    setCondition: function (text) {
+    setCondition: function (text, name, password) {
       try {
-        this.set('folder', this.configParser(text));
-        this.trigger('change');
+        localStorage.chawan = JSON.stringify({
+          text: text,
+          folder: this.configParser(text),
+          name: name,
+          password: password
+        });
       } catch (e) {
         alert('parse error');//TODO
       }

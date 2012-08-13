@@ -141,8 +141,7 @@ us$.modules.define('view', function (exports, require, module) {
       }
     }
   });
-  var ConfigView = Backbone.View.extend({
-    // model AppModel
+  exports.ConfigView = Backbone.View.extend({
     tagName: 'div',
     id: 'config',
     events: {
@@ -151,21 +150,24 @@ us$.modules.define('view', function (exports, require, module) {
     },
     template: template.config,
     initialize: function () {
+      this.render();
       //      this.model.get('config')
     },
     render: function () {
-      this.$el.html(this.template());
+      this.$el.html(this.template(
+    		  {name: this.model.get('name'), text: this.model.get('text')}));
       this.$el.show();
       return this;
     },
     save: function () {
       var text = this.$('.config-input').val();
-      this.model.setCondition(text);
+      this.model.setCondition(
+    		  text, this.$('#user-name').val(), this.$('#password').val());
       //      this.model.set('config')
-      this.destroy();
+      console.log('saved'); // TODO add save notification
     },
     cancel: function () {
-      this.destroy();
+      this.render();
     },
     destroy: function () {
       this.$el.hide();
@@ -182,11 +184,6 @@ us$.modules.define('view', function (exports, require, module) {
       app.on('change:state', this.toggleState, this);
       this.$container = $('<div />', {"class": "container"});
       this.$overlay = $('<div />', {"class": "overlay"});
-      this.configView = new ConfigView({model: app.get('config')});
-      this.configView.on('remove', function () {
-        app.set('state', 'folder');
-      });
-      this.$overlay.append(this.configView.el);
       var naviView = new NaviView({model: app});
       naviView.on('enterSearchInFolder', this.mayEnterNextPage, this);
       this.$el.append(
@@ -228,10 +225,6 @@ us$.modules.define('view', function (exports, require, module) {
       switch (this.model.get('state')) {
       case 'folder':
         this.toggleModal(false);
-        break;
-      case 'config':
-        this.configView.render();
-        this.toggleModal(true);
         break;
       }
 
