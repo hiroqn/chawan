@@ -260,10 +260,13 @@ us$.modules.define('model', function (exports, require, module) {
       parser(root, -1);
       return root;
     },
-    setCondition: function (text) {
+    setCondition: function (text, name, password) {
       try {
         localStorage.chawan = JSON.stringify({
-          folder: this.configParser(text)
+          text: text,
+          folder: this.configParser(text),
+          name: name,
+          password: password
         });
       } catch (e) {
         alert('parse error');//TODO

@@ -154,13 +154,15 @@ us$.modules.define('view', function (exports, require, module) {
       //      this.model.get('config')
     },
     render: function () {
-      this.$el.html(this.template({name: this.model.get('name')}));
+      this.$el.html(this.template(
+    		  {name: this.model.get('name'), text: this.model.get('text')}));
       this.$el.show();
       return this;
     },
     save: function () {
       var text = this.$('.config-input').val();
-      this.model.setCondition(text);
+      this.model.setCondition(
+    		  text, this.$('#user-name').val(), this.$('#password').val());
       //      this.model.set('config')
       console.log('saved'); // TODO add save notification
     },

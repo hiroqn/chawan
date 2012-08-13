@@ -135,11 +135,17 @@ us$.ready('tags').done(function (dataDeferred, nameDeferred) {
   });
 });
 us$.ready('config').done(function (dataDeferred) {
-  var name = JSON.parse($('pre').text()).name;
+  var config;
+  if (!localStorage.chawan)
+	  config = {};
+  else
+	  config = JSON.parse(localStorage.chawan);
+  if (!config.name)
+	  config.name = JSON.parse($('pre').text()).name;
   $('body').empty();
   var view = us$.require('view');
   var model = us$.require('model');
-  var configModel = this.app = new model.Config({name: name});
+  var configModel = this.app = new model.Config(config);
   var configView = new view.ConfigView({
       model: configModel,
       el: document.body
