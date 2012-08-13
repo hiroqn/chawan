@@ -175,7 +175,7 @@ us$.modules.define('model', function (exports, require, module) {
           }
         }
         for (i = config.children.length - 1; 0 <= i; i--) {
-          classify(cond.children[i], fldr, fldr.bookmarks);
+          classify(config.children[i], fldr, fldr.bookmarks);
         }
       }
     },
@@ -262,8 +262,9 @@ us$.modules.define('model', function (exports, require, module) {
     },
     setCondition: function (text) {
       try {
-        this.set('folder', this.configParser(text));
-        this.trigger('change');
+        localStorage.chawan = JSON.stringify({
+          folder: this.configParser(text)
+        });
       } catch (e) {
         alert('parse error');//TODO
       }

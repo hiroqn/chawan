@@ -162,7 +162,7 @@ us$.modules.define('view', function (exports, require, module) {
       var text = this.$('.config-input').val();
       this.model.setCondition(text);
       //      this.model.set('config')
-      this.destroy();
+      console.log('saved'); // TODO add save notification
     },
     cancel: function () {
       this.destroy();

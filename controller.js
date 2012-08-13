@@ -5,7 +5,6 @@ us$.modules.define('ctrl', function (exports, require, module) {
   function Controller(client, conf) { // this is not controller mvc
     this.client = client;
     var config = new model.Config(conf);
-    config.on('change', this.saveConfig, this);
     var appModel = this.app = new model.App({
       path: [],
       config: config,
@@ -40,11 +39,6 @@ us$.modules.define('ctrl', function (exports, require, module) {
   }
 
   _(Controller.prototype).extend(Backbone.Events, {
-    saveConfig: function () {
-      localStorage.chawan = JSON.stringify({
-        folder: this.app.get('config').get('folder')
-      });
-    },
     addByText: function (texts) {
       var array = texts.split('\n'),
           l = array.length / 4, bookmarks = new Array(l);
