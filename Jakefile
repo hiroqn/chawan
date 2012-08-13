@@ -1,20 +1,25 @@
 var exec = require('child_process').exec,
-    fs = require('fs');
+    fs = require('fs'),
+    less = require('less'),
+    gc = require('GCtrl');
 desc('This is the default task.');
-task('default', ['us'], function (params) {
-  fs.unlinkSync('./build/compress.css');
-  fs.unlinkSync('./build/file.js');
+task('default', [], function (params) {
 });
 
 desc('This is the compile less');
 task('less', [], function (params) {
-  exec('lessc chawan.less -x',
-      {timeout: 2000},
-      function (error, stdout, stderr) {
-        fs.writeFileSync('build/compress.css', stdout);
+  var parser = new (less.Parser)({
+    paths: ['./less'], // Specify search paths for @import directives
+    filename: 'chawan.less'
+  });
+  parser.parse(fs.readFileSync('./less/styles.less', 'utf8'),
+      function (err, tree) {
+        if (err) { return console.error(err) }
+        fs.writeFileSync('compress.css', tree.toCSS({ compress: true }));
         complete();
       });
 }, true);
+
 desc('This is the task template file 2 json');
 task('template', [], function (params) {
   exec('node build/file2json',
@@ -39,3 +44,10 @@ task('us', ['less','template'], function (params) {
         complete();
       });
 }, true);
+desc('This is the building javascript');
+task('gc', [], function (params) {
+  var code = gc.build(process.cwd() + '/src', {
+    lf: '\r\n'
+  });
+  fs.writeFileSync('bin.js', code);
+});

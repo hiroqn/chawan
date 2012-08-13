@@ -1,0 +1,7 @@
+{
+    "name"          : "chawan",
+    "description"   : "client for HatenaBookmark",
+    "author"        : "hiroqn",
+    "main"          : "main.js",
+    "version"       : "0.4.0"
+}
