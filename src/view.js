@@ -28,3 +28,7 @@ exports.Config = Backbone.View.extend({
     //    this.render();
   }
 });
+
+exports.App = Backbone.View.extend({
+
+});
