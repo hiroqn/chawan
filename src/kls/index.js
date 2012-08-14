@@ -56,36 +56,7 @@ function statics(prop, value) {
   }
   return this;
 }
-function Singleton() {
-  if (!this.constructor._singleton) {
 
-  }
-
-}
-
-function S(m) {
-  return function (x) {
-    return function (f) {
-      return f(m(x)(f))
-    }
-  }
-}
-
-function Zero(x) {
-  return function (f) {
-    return x;
-  }
-}
-function advice(fn) {
-  this._init;
-}
-//Kls.advice(function () {
-//
-//});
-
-function loader(fn, context, arg) {
-  return fn.apply(context, arg);
-}
 function derive(_init) {
   var Super = this;
   (Sub.prototype = ObjectCreate(Sub.Super = Super.prototype)).constructor = Sub;

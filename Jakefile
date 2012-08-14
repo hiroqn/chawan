@@ -12,42 +12,33 @@ task('less', [], function (params) {
     paths: ['./less'], // Specify search paths for @import directives
     filename: 'chawan.less'
   });
-  parser.parse(fs.readFileSync('./less/styles.less', 'utf8'),
+  parser.parse(fs.readFileSync('./less/chawan.less', 'utf8'),
       function (err, tree) {
         if (err) { return console.error(err) }
-        fs.writeFileSync('compress.css', tree.toCSS({ compress: true }));
+        var script = 'exports.css = ';
+        script += JSON.stringify(tree.toCSS({ compress: true })) + ';';
+        fs.writeFileSync('src/css.js', script);
+        console.log('compile less');
         complete();
       });
 }, true);
 
 desc('This is the task template file 2 json');
 task('template', [], function (params) {
-  exec('node build/file2json',
-      {timeout: 2000},
-      function (error, stdout, stderr) {
-        if (error !== null) {
-          console.log('exec error: ' + error);
-        }
-        console.log('end');
-        complete();
-      });
-}, true);
-desc('This is the build userscript');
-task('us', ['less','template'], function (params) {
-  exec('node build/builder.js ../package.us.json',
-      {timeout: 2000},
-      function (error, stdout, stderr) {
-        if (error !== null) {
-          console.log('exec error: ' + error);
-        }
-        console.log('end');
-        complete();
-      });
-}, true);
-desc('This is the building javascript');
-task('gc', [], function (params) {
+  var map = {};
+  fs.readdirSync('./template').forEach(function (p) {
+    map[p.slice(0, -4)] = fs.readFileSync('template/' + p, 'utf8');
+  });
+  fs.writeFileSync('src/file.js',
+      'module.exports = ' + JSON.stringify(map) + ';');
+  console.log('template end');
+});
+
+desc('This is the task build javascript');
+task('gc', ['template'], function (params) {
   var code = gc.build(process.cwd() + '/src', {
     lf: '\r\n'
   });
   fs.writeFileSync('bin.js', code);
+  console.log('script compiles');
 });

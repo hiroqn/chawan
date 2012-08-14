@@ -3,3 +3,5 @@
 .project
 .buildpath
 /.idea
+src/file.js
+src/css.js
