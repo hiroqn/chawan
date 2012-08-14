@@ -1,13 +1,11 @@
 var HatenaClient = require('./hatena_client.js'),
     SettingJSON = localStorage.getItem('chawan');
 
-
 var Setting = JSON.parse(SettingJSON || '{}');
 if (window.location.search === '?config') {
   document.addEventListener("DOMContentLoaded", function () {
     var preTag = document.body.children.item(0),
         myNameJSON = JSON.parse(preTag.innerHTML);
-    alert
     if (myNameJSON.login) {
       var View = require('./view.js'), Config = require('./config.js');
       var configView = new View.Config({
