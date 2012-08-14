@@ -12,6 +12,10 @@ if (window.location.search === '?config') {
         model: new Config(Setting, myNameJSON),
         el: document.body
       });
+    } else {
+      // ask for login
+      window.location.href = 'https://www.hatena.ne.jp/login?'
+    	  + 'location=http%3A//b.hatena.ne.jp/my.name%3Fconfig';
     }
   }, false);
 } else {
