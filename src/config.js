@@ -4,6 +4,8 @@ var Kls = require('kls')
 var Config = module.exports = Kls.derive(function (local, response) {
   this.name = local.name || response.name;
   this.rks = local.rks || response.rks;
+  this.text = local.text || '';
+  this.password = local.password || '';
 });
 Config.mixin({
   setCondition: function (text) {

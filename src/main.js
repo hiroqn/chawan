@@ -1,14 +1,13 @@
 var HatenaClient = require('./hatena_client.js'),
     SettingJSON = localStorage.getItem('chawan');
 
-if (!SettingJSON) {
-  return window.location.href = '?config';
-}
-var Setting = JSON.parse(SettingJSON);
+
+var Setting = JSON.parse(SettingJSON || '{}');
 if (window.location.search === '?config') {
   document.addEventListener("DOMContentLoaded", function () {
     var preTag = document.body.children.item(0),
         myNameJSON = JSON.parse(preTag.innerHTML);
+    alert
     if (myNameJSON.login) {
       var View = require('./view.js'), Config = require('./config.js');
       var configView = new View.Config({
@@ -19,7 +18,7 @@ if (window.location.search === '?config') {
   }, false);
 } else {
   if (window.location.pathname === '/my.name') {
-    if (Setting.id && Setting.rks) {
+    if (Setting.name && Setting.rks) {
       var client = new HatenaClient(Setting.name, Setting.rks)
     } else {
       window.location.href = '?config';

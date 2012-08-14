@@ -39,6 +39,7 @@ task('gc', ['template'], function (params) {
   var code = gc.build(process.cwd() + '/src', {
     lf: '\r\n'
   });
-  fs.writeFileSync('bin.js', code);
+  var meta = fs.readFileSync('meta.js', 'utf8');
+  fs.writeFileSync('chawan.user.js', meta + code);
   console.log('script compiles');
 });
