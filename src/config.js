@@ -17,7 +17,8 @@ Config.mixin({
     return {
       name: this.name,
       rks: this.rks,
-      rule: this.rule
+      rule: this.rule,
+      text: teis.text
     }
   }
 });
