@@ -6,17 +6,18 @@ var Config = module.exports = Kls.derive(function (local, response) {
   this.rks = local.rks || response.rks;
   this.text = local.text || '';
   this.password = local.password || '';
+  this.rule = local.rule;
 });
 Config.mixin({
   setCondition: function (text) {
     this.text = text;
-    this.folder = this._parser(text);// todo rename
+    this.rule = this._parser(text);// todo rename
   },
   getSaveData: function () {
     return {
       name: this.name,
       rks: this.rks,
-      folder: this.folder
+      rule: this.rule
     }
   }
 });
@@ -61,6 +62,9 @@ function parser(text, dir, depth) {
     if (count === depth + 1) {
       text = parser(text, dir[dir.length - 1].children, depth + 1);
       continue;
+    }
+    if(count > depth + 1){
+      throw new Error('parse error');
     }
     condition = new Condition(line);
     if (count === depth) {
