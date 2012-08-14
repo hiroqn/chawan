@@ -16,7 +16,8 @@ Config.mixin({
     return {
       name: this.name,
       rks: this.rks,
-      folder: this.folder
+      folder: this.folder,
+      text: teis.text
     }
   }
 });
