@@ -34,7 +34,10 @@ if (window.location.search === '?config') {
         if (!myNameJSON.login) {
           askLogin('http%3A//b.hatena.ne.jp/my.name%3Fconfig',
               Setting.name, Setting.password);
+          return null;
         }
+        var Ctrlr = require('./controller.js'),
+            ctrlr = new Ctrlr(client, Setting);
       });
       var client = new HatenaClient(Setting.name, Setting.rks);
     } else {

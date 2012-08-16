@@ -1,7 +1,6 @@
 var Kls = require('kls'),
     reqwest = require('reqwest');
 var BASE_URL = 'http://b.hatena.ne.jp/';
-var MY_NAME_URL = 'http://b.hatena.ne.jp/my.name';
 var HatenaClient = Kls.derive(function (id, rks) {
   this.id = id;
   this.rks = rks;
@@ -20,21 +19,21 @@ HatenaClient.mixin({
       method: 'post',
       data: postData,
       type: 'json',
-      success: function(json){
-        if(json.success){
+      success: function (json) {
+        if (json.success) {
           callback(null, json.comment_raw)
         }
       }
     });
   },
-  deleteBookmark: function (bookmarkUrl,callback) {
+  deleteBookmark: function (bookmarkUrl, callback) {
     reqwest({
       url: BASE_URL + this.id + '/add.delete',
       method: 'post',
       data: {url: bookmarkUrl, rks: this.rks},
       type: 'json',
-      success: function(json){
-        if(json.success){
+      success: function (json) {
+        if (json.success) {
           callback(null, json)
         }
       }
@@ -45,18 +44,18 @@ HatenaClient.mixin({
       url: BASE_URL + this.id + '/search.data',
       method: 'post',
       type: 'text',
-      success: function(text){
+      success: function (text) {
         callback(null, text)
       }
     });
   },
   myName: function (callback) {
     reqwest({
-      url: MY_NAME_URL,
+      url: BASE_URL + '/my.name',
       method: 'get',
       type: 'json',
-      success: function(json){
-        if(json.login){
+      success: function (json) {
+        if (json.login) {
           callback(null, json)
         }
       }
