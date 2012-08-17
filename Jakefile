@@ -3,7 +3,7 @@ var exec = require('child_process').exec,
     less = require('less'),
     gc = require('GCtrl');
 desc('This is the default task.');
-task('default', [], function (params) {
+task('default', ['less', 'gc'], function (params) {
 });
 
 desc('This is the compile less');

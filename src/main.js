@@ -1,15 +1,7 @@
 var HatenaClient = require('./hatena_client.js'),
-    SettingJSON = localStorage.getItem('chawan');
+    CSS = require('./css.js').css;
 
-
-function askLogin(escapedLocation, name, password) {
-  window.location.href = 'https://www.hatena.ne.jp/login?'
-                             + 'location=' + escapedLocation +
-                         (name ? ('&name=' + name) : '')
-      + (password ? ('&password=' + password) : '');
-}
-
-var Setting = JSON.parse(SettingJSON || '{}');
+var Setting = JSON.parse(localStorage.getItem('chawan') || '{}');
 if (window.location.search === '?config') {
   document.addEventListener("DOMContentLoaded", function () {
     var preTag = document.body.children.item(0),
@@ -27,7 +19,6 @@ if (window.location.search === '?config') {
 } else {
   if (window.location.pathname === '/my.name') {
     if (Setting.name && Setting.rks) {
-
       document.addEventListener("DOMContentLoaded", function () {
         var preTag = document.body.children.item(0),
             myNameJSON = JSON.parse(preTag.innerHTML);
@@ -36,15 +27,35 @@ if (window.location.search === '?config') {
               Setting.name, Setting.password);
           return null;
         }
-        var Ctrlr = require('./controller.js'),
-            ctrlr = new Ctrlr(client, Setting);
+        addStyle(CSS);
+        var Ctrlr = require('./controller.js');
+        window.ctrlr = new Ctrlr(client, Setting);
       });
       var client = new HatenaClient(Setting.name, Setting.rks);
+      client.searchData(function (err, text) {
+        document.addEventListener("DOMContentLoaded", function () {
+          window.ctrlr
+        })
+      });
     } else {
       window.location.href = '?config';
     }
   }
 }
+/**
+ * @param escapedLocation
+ * @param [name]
+ * @param [password]
+ */
+function askLogin(escapedLocation, name, password) {
+  window.location.href = 'https://www.hatena.ne.jp/login?'
+                             + 'location=' + escapedLocation +
+                         (name ? ('&name=' + name) : '')
+      + (password ? ('&password=' + password) : '');
+}
+/**
+ * @param css
+ */
 function addStyle(css) {
   if (GM_addStyle) {
     GM_addStyle(css);
