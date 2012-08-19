@@ -29,6 +29,67 @@ exports.Config = Backbone.View.extend({
   }
 });
 
-exports.App = Backbone.View.extend({
+var FolderView = Backbone.View.extend({
+  tagName: 'article',
+  initialize: function (attr) {
+    this.app = attr.app;
+  },
+  template: template.folder,
+  events: {
+    "click .delete-icon": "_delete",
+    "click .edit-icon": "_edit"
+  },
+  render: function () {
+    var folder = this.model.filter(this.app.get('searchWord')),
+        html = this.template({
+          folders: folder.folders,
+          bookmarks: folder.bookmarks,
+          path: this.app.get('path').join('/') + '/'
+        });
+    this.$el.html(html);
+    return this;
+  },
+  _delete: function () {
+  },
+  _edit: function () {
+  }
+});
+
+var NavView = Backbone.View.extend({
+  tagName: 'nav',
+  template: template.nav,
+  initialize: function () {
+    this.model.on('change:path', this.render, this);
+    this.render();
+  },
+  render: function () {
+    this.$el.html(this.template({
+      list: this.model.get('path'),
+      length: this.model.get('path').length
+    }));
+    return this;
+  }
+});
+
+exports.App = Backbone.View.extend({// this element is body
+  initialize: function () {
+    var app = this.model;
+    app.on('change:path', this.render, this);
+    app.on('change:tree', this.render, this);
+    app.on('change:modal', function () {
+    }, this);
+    this.navView = new NavView({model: app});
+    this.folderView = new FolderView({app: app});
+    this.$el.empty().append(this.navView.el, this.folderView.el);
+  },
+  render: function () {
+    var app = this.model;
+    var folder = app.getFolderModel();
+    if (folder) {
+      this.folderView.model = folder;
+      this.folderView.render();
+    }
+    return this;
+  }
 
 });
