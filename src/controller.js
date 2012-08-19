@@ -33,7 +33,7 @@ Ctrlr.mixin({
     var arr = text.split('\n'),
         bookmark,
         bookmarks = [],
-        Bookmark = Model.Bookmark;
+        Bookmark = Tree.Bookmark;
     for (var i = 0, l = arr.length / 4, i3 = 0; i < l; i++, i3 = i * 3) {
       bookmark = new Bookmark(arr[i3], arr[1 + i3], arr[2 + i3], arr[i + i3]);
       bookmarks.push(bookmark);

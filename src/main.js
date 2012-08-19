@@ -30,11 +30,12 @@ if (window.location.search === '?config') {
         addStyle(CSS);
         var Ctrlr = require('./controller.js');
         window.ctrlr = new Ctrlr(client, Setting);
+        document.fireEvent("dataLoaded");
       });
       var client = new HatenaClient(Setting.name, Setting.rks);
       client.searchData(function (err, text) {
-        document.addEventListener("DOMContentLoaded", function () {
-          window.ctrlr
+        document.addEventListener("dataLoaded", function () {
+          window.ctrlr.addBookmarkByText(text);
         })
       });
     } else {

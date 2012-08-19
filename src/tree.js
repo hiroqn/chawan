@@ -3,7 +3,7 @@ var Kls = require('kls'),
 
 var counter = 0,
     tagParam = /\[[^%\/\?\[\]]+?\]/g;
-var Bookmark = exports.Bookmark = Kls.derive(function (title, comment, url,
+var Bookmark = Kls.derive(function (title, comment, url,
     other) {
   this.title = title;
   this.url = url;
@@ -31,7 +31,7 @@ Bookmark.mixin({
     this.comment = comment.replace(tagParam, '');
   }
 });
-var Folder = exports.Folder = Kls.derive(function (name) {
+var Folder = Kls.derive(function (name) {
   this.name = name;
   this.bookmarks = [];
   this.folders = [];
@@ -98,7 +98,7 @@ function checkCondition(tags, condition) {
   }
   return or;
 }
-var Tree = exports.Tree = Kls.derive(function (configs) {
+var Tree = module.exports = Kls.derive(function (configs) {
   this.root = new Folder('root');
   this.allBookmarks = [];
   this.rule = configs;
@@ -121,6 +121,7 @@ Tree.mixin({
     this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
     //    this.classifyFolder(conditions, this.root, bookmarkArray);
     //    this.setBookmarkCount(this.root);
+    this.classify(this.rule, this.root, bookmarkArray)
     this.root.setBookmarkCount();
     this.sortAllFolder(this.root);
   },
@@ -148,3 +149,5 @@ Tree.mixin({
     }, this);
   }
 });
+Tree.Bookmark = Bookmark;
+Tree.Folder = Folder;
