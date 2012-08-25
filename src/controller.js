@@ -27,6 +27,7 @@ var Ctrlr = Kls.derive(function (client, Setting) {
     model: this.app,
     el: document.body
   });
+  appView.render();
 });
 Ctrlr.mixin({
   addBookmarkByText: function (text) {

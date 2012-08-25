@@ -1,20 +1,22 @@
-var Backbone = require('backbone');
+var Backbone = require('backbone'),
+    _ = require('underscore');
 
 var FolderModel = Backbone.Model.extend({
   initialize: function () {
 
   },
   filter: function (word) {
-    if(!word){
-      return this.model
+    var folder = this.get('folder');
+    if (!word) {
+      return folder;
     }
-    var folders = _.filter(this.model.folders,
+    var folders = _.filter(folder.folders,
         function (folder) { return ~folder.name.indexOf(word);});
-    var bookmarks = _.filter(this.model.bookmarks,
-        function (bookmark) {return bookmark.title.indexOf(word);});
+    var bookmarks = _.filter(folder.bookmarks,
+        function (bookmark) {return ~bookmark.title.indexOf(word);});
     return {
       folders: folders,
-      bookmarks:bookmarks
+      bookmarks: bookmarks
     };
   }
 });
@@ -35,7 +37,7 @@ exports.App = Backbone.Model.extend({
     var path = this.get('path');
     var folder = this.get('tree').findFolder(path);
     return new FolderModel({
-      model: folder
+      folder: folder
     });
   },
   clearWord: function () {

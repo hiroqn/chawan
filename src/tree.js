@@ -121,7 +121,7 @@ Tree.mixin({
     this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
     //    this.classifyFolder(conditions, this.root, bookmarkArray);
     //    this.setBookmarkCount(this.root);
-    this.classify(this.rule, this.root, bookmarkArray)
+    this.classify(this.rule, this.root, bookmarkArray);
     this.root.setBookmarkCount();
     this.sortAllFolder(this.root);
   },
