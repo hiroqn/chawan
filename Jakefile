@@ -1,9 +1,9 @@
 var exec = require('child_process').exec,
     fs = require('fs'),
     less = require('less'),
-    gc = require('GCtrl');
+    gc = require('zbzb');
 desc('This is the default task.');
-task('default', ['less', 'gc'], function (params) {
+task('default', ['less', 'zbzb'], function (params) {
 });
 
 desc('This is the compile less');
@@ -35,7 +35,7 @@ task('template', [], function (params) {
 });
 
 desc('This is the task build javascript');
-task('gc', ['template'], function (params) {
+task('zbzb', ['template'], function (params) {
   var code = gc.build(process.cwd() + '/src', {
     lf: '\r\n'
   });
