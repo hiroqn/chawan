@@ -1,13 +1,19 @@
 var ObjectCreate,
+    Kls = function () {},
     _extend = function (dest, src) {
       for (var prop in src) {
         dest[prop] = src[prop];
       }
       return dest;
-    },
-    slice = Array.prototype.slice;
-function Kls() {}
-if (!Object.create) {
+    };
+if (Object.create) {
+  ObjectCreate = Object.create;
+  Kls._statics = ObjectCreate(null, {
+    statics: {value: statics, enumerable: true},
+    derive: {value: derive, enumerable: true},
+    mixin: {value: mixin, enumerable: true}
+  });
+} else {
   ObjectCreate = function (o) {
     function F() {}
 
@@ -18,16 +24,7 @@ if (!Object.create) {
     statics: statics,
     derive: derive,
     mixin: mixin
-    // ,override: override
-  }
-} else {
-  ObjectCreate = Object.create;
-  Kls._statics = ObjectCreate(null, {
-    statics: {value: statics, enumerable: true},
-    derive: {value: derive, enumerable: true},
-    mixin: {value: mixin, enumerable: true}
-    //,    override: {value: override, enumerable: true}//?need
-  });
+  };
 }
 
 function mixin(source, other) {
@@ -44,7 +41,6 @@ function mixin(source, other) {
   return this;
 }
 
-
 function statics(prop, value) {
   var _static = this._statics;
   if (value) {
@@ -58,13 +54,11 @@ function statics(prop, value) {
 }
 
 function derive(_init) {
-  var Super = this;
-  (Sub.prototype = ObjectCreate(Sub.Super = Super.prototype)).constructor = Sub;
+  var Super = Sub.Super = this;
+  (Sub.prototype = ObjectCreate(Super.prototype)).constructor = Sub;
   _extend(Sub, Sub._statics = ObjectCreate(Super._statics));
-  Sub._init = _init;
   function Sub() {
     if (_init) {
-
       this._super = Super;
       return  _init.apply(this, arguments) || this;
     }
@@ -73,16 +67,4 @@ function derive(_init) {
 
   return Sub;
 }
-
-var exports = module.exports = derive.call(Kls, Kls);
-exports.inherits = function (ctor, superCtor) {// this is Node util.inherits
-  ctor.super_ = superCtor;
-  ctor.prototype = ObjectCreate(superCtor.prototype, {
-    constructor: {
-      value: ctor,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-};
+module.exports = derive.call(Kls);
