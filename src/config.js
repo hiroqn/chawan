@@ -1,25 +1,38 @@
-var Kls = require('kls')
-
-
-var Config = module.exports = Kls.derive(function (local, response) {
-  this.name = local.name || response.name;
-  this.rks = local.rks || response.rks;
-  this.text = local.text || '';
-  this.password = local.password || '';
+var Kls = require('kls');
+/**
+ * manage localStorage and classify rule
+ * @type {*}
+ */
+var Config = module.exports = Kls.derive(function () {
+  var local = JSON.parse(localStorage.chawan || '{}');
+  this.name = local.name;
+  this.rks = local.rks;
+  this.text = local.text;
+  this.password = local.password;
   this.rule = local.rule;
 });
 Config.mixin({
+  isSatisfied: function () {
+    return !!(this.name && this.rks);
+  },
   setCondition: function (text) {
     this.text = text;
     this.rule = this._parser(text);// todo rename
   },
-  getSaveData: function () {
-    return {
-      name: this.name,
-      rks: this.rks,
-      rule: this.rule,
-      text: this.text
+  setByJSON: function (json) {
+    if (!(this.name && this.rks)) {
+      this.name = json.name;
+      this.rks = json.rks;
     }
+  },
+  save: function () {
+    localStorage.chawan = JSON.stringify(this);
+  },
+  askLogin: function (redirectURL) {
+    var param = 'location=' + encodeURIComponent(redirectURL) +
+                (this.name ? ('&name=' + this.name) : '') +
+                (this.password ? ('&password=' + this.password) : '');
+    window.location.href = 'https://www.hatena.ne.jp/login?' + param;
   }
 });
 var configParam = /^\[[^%\/\?\[\]]+\](?:(?:\*|\+)\[[^%\/\?\[\]]+\])*$/;
@@ -64,7 +77,7 @@ function parser(text, dir, depth) {
       text = parser(text, dir[dir.length - 1].children, depth + 1);
       continue;
     }
-    if(count > depth + 1){
+    if (count > depth + 1) {
       throw new Error('parse error');
     }
     condition = new Condition(line);

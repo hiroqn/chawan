@@ -19,9 +19,7 @@ exports.Config = Backbone.View.extend({
   save: function () {
     var text = this.$('.config-input').val();
     this.model.setCondition(text);
-    localStorage.chawan = JSON.stringify(this.model.getSaveData());
-    //      this.model.set('config')
-
+    this.model.save();
     console.log('saved'); // TODO add save notification
   },
   cancel: function () {
@@ -41,10 +39,11 @@ var FolderView = Backbone.View.extend({
   },
   render: function () {
     var folder = this.model.filter(this.app.get('searchWord')),
+        path = this.app.get('path'),
         html = this.template({
           folders: folder.folders,
           bookmarks: folder.bookmarks,
-          path: this.app.get('path').join('/') + '/'
+          path: path.length ? path.join('/') + '/' : ''
         });
     this.$el.html(html);
     return this;

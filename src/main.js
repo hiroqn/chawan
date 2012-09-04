@@ -1,58 +1,39 @@
-var HatenaClient = require('./hatena_client.js'),
+var Config = require('./config.js'),
+    config = new Config(),
     CSS = require('./css.js').css;
 
-var Setting = JSON.parse(localStorage.getItem('chawan') || '{}');
 if (window.location.search === '?config') {
   document.addEventListener("DOMContentLoaded", function () {
     var preTag = document.body.children.item(0),
         myNameJSON = JSON.parse(preTag.innerHTML);
-    if (myNameJSON.login) {
-      var View = require('./view.js'), Config = require('./config.js');
-      var configView = new View.Config({
-        model: new Config(Setting, myNameJSON),
-        el: document.body
-      });
-    } else {
-      askLogin('http%3A//b.hatena.ne.jp/my.name%3Fconfig');
+    if (!myNameJSON.login) {
+      return config.askLogin('http://b.hatena.ne.jp/my.name?config');
     }
-  }, false);
+    var View = require('./view.js');
+    config.setByJSON(myNameJSON);
+    new View.Config({
+      model: config,
+      el: document.body
+    });
+  });
 } else {
   if (window.location.pathname === '/my.name') {
-    if (Setting.name && Setting.rks) {
+    if (config.isSatisfied()) {
       document.addEventListener("DOMContentLoaded", function () {
         var preTag = document.body.children.item(0),
             myNameJSON = JSON.parse(preTag.innerHTML);
         if (!myNameJSON.login) {
-          askLogin('http%3A//b.hatena.ne.jp/my.name%3Fconfig',
-              Setting.name, Setting.password);
-          return null;
+          return config.askLogin('http://b.hatena.ne.jp/my.name');
         }
         addStyle(CSS);
         var Ctrlr = require('./controller.js');
-        window.ctrlr = new Ctrlr(client, Setting);
-        //        document.createEvent("dataLoaded");
-      });
-      var client = new HatenaClient(Setting.name, Setting.rks);
-      client.searchData(function (err, text) {
-        document.addEventListener("dataLoaded", function () {
-          window.ctrlr.addBookmarkByText(text);
-        })
+        new Ctrlr(config);
+
       });
     } else {
       window.location.href = '?config';
     }
   }
-}
-/**
- * @param escapedLocation
- * @param [name]
- * @param [password]
- */
-function askLogin(escapedLocation, name, password) {
-  window.location.href = 'https://www.hatena.ne.jp/login?'
-                             + 'location=' + escapedLocation +
-                         (name ? ('&name=' + name) : '')
-      + (password ? ('&password=' + password) : '');
 }
 /**
  * @param css
