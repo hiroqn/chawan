@@ -1,33 +1,38 @@
 var Kls = require('kls'),
     Backbone = require('backbone'),
+    HatenaClient = require('./hatena_client.js'),
+    View = require('./view.js'),
     Model = require('./model.js'),
     Tree = require('./tree.js');
 
-var Ctrlr = Kls.derive(function (client, Setting) {
+var Ctrlr = Kls.derive(function (config) {
   var self = this,
-      View = require('./view.js'),
-      routes = {
-        "": function () {
-          self.router.navigate('!');
+      Router = Backbone.Router.extend({
+        routes: {
+          "": 'path',
+          "!": 'path',
+          "!*path": 'path'
         },
-        "!": this.moveTo.bind(this, []),
-        "!*path": function (str) {
-          var path = path.split('/').map(decodeURIComponent);
+        path: function (str) {
+          if (!str) {
+            return self.moveTo([]);
+          }
+          var path = str.split('/').map(decodeURIComponent);
           self.moveTo(path);
         }
-      };
-  this.client = client;
-  this.setting = Setting;
-  this.router = new (Backbone.Router.extend({routes: routes}))();
-  Backbone.history.start();
+      });
+  this.client = new HatenaClient(config.name, config.rks);
+  this.getBookmarks();
+  this.setting = config;
   this.app = new Model.App({
-    tree: new Tree(Setting.rule)
+    tree: new Tree(config.rule)
   });
   var appView = new View.App({
     model: this.app,
     el: document.body
   });
-  appView.render();
+  this.router = new Router();
+  Backbone.history.start();
 });
 Ctrlr.mixin({
   addBookmarkByText: function (text) {
@@ -43,7 +48,12 @@ Ctrlr.mixin({
   },
   moveTo: function (path) {
     this.app.set('path', path);
-    //    this.router.navigate
+  },
+  getBookmarks: function () {
+    var self = this;
+    this.client.searchData().then(function (text) {
+      self.addBookmarkByText(text);//todo if over 1000 bookmarks
+    })
   }
 });
 module.exports = Ctrlr;
