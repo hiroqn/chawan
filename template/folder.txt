@@ -1,15 +1,19 @@
 <%
-_(folders).each(function(folder){%><section class="folder" data-name="<%- folder.name %>">
-  <a href="#!<%- path + folder.name %>" target="_blank"><div class="dummy"></div></a>
+_(folders).each(function(folder){
+%><section class="folder" data-name="<%- folder.name %>">
+  <a href="#!<%- path + folder.name %>"><div class="dummy" /></a>
   <h2><%- folder.name %></h2>
   <h3><%- folder.count %></h3>
-</section><% });
-_(bookmarks).each(function(bookmark){%><section class="bookmark" <%-bookmark.comment?'title="' + bookmark.comment +'"':''%> >
-  <div class="icons">
-    <div class="edit-icon" data-bid="<%- bookmark.bid %>"></div><div class="delete-icon" data-bid="<%- bookmark.bid %>"></div>
-  </div>
-  <div class="title">
-      <%- bookmark.title %>
-  </div>
-  <a href="<%- bookmark.url %>" target="_blank" title="<%- bookmark.title || 'No comment' %>"><div class="dummy"></div></a>
-</section><% }); %>
+</section><% });%><br /><%
+_(bookmarks).each(function(bookmark){
+%><section class="bookmark">
+  <ul class="icons">
+    <li class="icon-pencil" data-bid="<%- bookmark.bid %>"></li>
+    <li class="icon-remove" data-bid="<%- bookmark.bid %>"></li>
+  </ul>
+  <h2><%- bookmark.title %></h2>
+  <a href="<%- bookmark.url %>" target="_blank">
+    <div class="dummy" />
+  </a>
+</section><%
+}); %>

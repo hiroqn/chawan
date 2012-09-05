@@ -1,0 +1,168 @@
+@import "reset.less";
+
+/*
+* my style
+*/
+
+@blue: #1BA1E2;
+@lime: #8CBF26;
+@orange: #F09609;
+@teal: #00ABA9;
+@green: #339933;
+@grey: #353535;
+@light-grey: #575757;
+@white: #FFFFFF;
+@black: #000000;
+
+@bgcolor-nav: #030219;
+
+.fit(@d: 0){
+    left: @d;
+    top: @d;
+    right: @d;
+    bottom: @d;
+}
+
+@fontsize: 20px;
+@margin: 5px;
+@min-width: 640px;
+body {
+    background-color: @grey;
+    font-family: 'Segoe UI', 'Meiryo', helvetica, sans-serif;
+    color: @white;
+    font-size: @fontsize;
+}
+
+article {
+    margin: @margin;
+    min-width: @min-width;
+}
+
+#config {
+    overflow: hidden;
+    background: none repeat scroll 0 0 @lime;
+    display: none;
+    position: fixed;
+    .fit(@margin);
+    .condig-input {
+        line-height: @fontsize;
+        font-size: @fontsize * 5 / 6;
+        border-radius: 4px 4px 4px 4px;
+        border: solid 1px @white;
+        display: block;
+        width: inherit;
+        resize: vertical;
+    }
+}
+
+nav {
+    background-color: @bgcolor-nav;
+    text-shadow: 0 -1px 0 #888888;
+    position: relative;
+    height: @fontsize * 3;
+    ul {
+        position: absolute;
+        top: @fontsize;
+        left: @fontsize;
+        white-space: nowrap;
+        #searchWord {
+            color: @white;
+            border-style: none;
+            background-color: @light-grey;
+        }
+        li {
+            display: inline-block;
+        }
+    }
+    h1 {
+        position: absolute;
+        top: @fontsize / 2;
+        right: @fontsize;
+        font-size: @fontsize * 2;
+    }
+}
+
+section {
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+    margin: @margin;
+    .dummy {
+        z-index: 1;
+        position: absolute;
+        .fit(@margin);
+    }
+}
+
+.folder {
+    background-color: #1BA1E2;
+    width: @fontsize * 10;
+    height: @fontsize * 5;
+    text-shadow: 1px -1px 0 #888888;
+    h2 { // folder title
+        position: absolute;
+        bottom: @margin;
+        left: @margin;
+        font-size: @fontsize * 1.5;
+    }
+    h3 { // folder count
+        position: absolute;
+        top: @margin;
+        right: @margin;
+        font-size: @fontsize * 1.5;
+    }
+}
+
+.bookmark {
+    background-color: #00ABA9;
+    text-shadow: 1px -1px 1px #444444;
+    width: @fontsize * 20;
+    height: @fontsize * 5;
+    .icons {
+        position: absolute;
+        top: @margin;
+        left: @margin;
+        //visibility: hidden;
+        z-index: 2;
+    }
+    &:hover .icons {
+        visibility: visible;
+    }
+    h2 { //bookmark title
+        position: absolute;
+        left: @margin;
+        right: @margin;
+        bottom: @margin;
+        max-height: @fontsize * 3;
+        overflow: hidden;
+    }
+}
+
+@font-face {
+    font-family: 'icomoon';
+    src: url(data:font/svg;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiID4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8bWV0YWRhdGE+ClRoaXMgaXMgYSBjdXN0b20gU1ZHIGZvbnQgZ2VuZXJhdGVkIGJ5IEljb01vb24uCjEKPC9tZXRhZGF0YT4KPGRlZnM+Cjxmb250IGlkPSJpY29tb29uIiBob3Jpei1hZHYteD0iNTEyIiA+Cjxmb250LWZhY2UgdW5pdHMtcGVyLWVtPSI1MTIiIGFzY2VudD0iNDgwIiBkZXNjZW50PSItMzIiIC8+CjxtaXNzaW5nLWdseXBoIGhvcml6LWFkdi14PSI1MTIiIC8+CjxnbHlwaCB1bmljb2RlPSImI3gyMTsiIGQ9Ik0gNDg4LjAwLDQ1Ni4wMGMtMzIuMDAsMzIuMDAtNjQuMDAsMzIuMDAtOTYuMDAsMC4wMGwtOC4wMC04LjAwbCA5Ni4wMC05Ni4wMGwgOC4wMCw4LjAwQyA1MjAuMDAsMzkyLjAwLCA1MjAuMDAsNDI0LjAwLCA0ODguMDAsNDU2LjAwek0gMzIuMDAsOTYuMDBMMC4wMC0zMi4wMGwgMTI4LjAwLDMyLjAwbCAzMjAuMDAsMzIwLjAwbC05Ni4wMCw5Ni4wMEwgMzIuMDAsOTYuMDB6IE0gMTI4LjAwLDY0LjAwbC0zMi4wMCwzMi4wMGwgMjU2LjAwLDI1Ni4wMGwgMzIuMDAtMzIuMDBMIDEyOC4wMCw2NC4wMHoiIC8+CjxnbHlwaCB1bmljb2RlPSImI3gyMjsiIGQ9Ik0gNDgwLjAwLDQxNi4wMEwgMzIwLjAwLDQxNi4wMCBMIDMyMC4wMCw0NjQuMDAgYzAuMDAsOC44MzYtNy4xNjMsMTYuMDAtMTYuMDAsMTYuMDBsLTk2LjAwLDAuMDAgYy04LjgzNiwwLjAwLTE2LjAwLTcuMTY0LTE2LjAwLTE2LjAwbDAuMDAtNDguMDAgTCAzMi4wMCw0MTYuMDAgTDAuMDAsMzUyLjAwbCA2NC4wMCwwLjAwIGwgMzIuMDAtMzg0LjAwbCAzMjAuMDAsMC4wMCBsIDMyLjAwLDM4NC4wMGwgNjQuMDAsMC4wMCBMIDQ4MC4wMCw0MTYuMDB6IE0gMjI0LjAwLDMyLjAwCglsLTY0LjAwLDAuMDAgTCAxNjAuMDAsMzIwLjAwIGwgNjQuMDAsMC4wMCBMIDIyNC4wMCwzMi4wMCB6IE0gMjI0LjAwLDQ0OC4wMGwgNjQuMDAsMC4wMCBsMC4wMC0zMi4wMCBsLTY0LjAwLDAuMDAgTCAyMjQuMDAsNDQ4LjAwIHogTSAzNTIuMDAsMzIuMDBsLTY0LjAwLDAuMDAgTCAyODguMDAsMzIwLjAwIGwgNjQuMDAsMC4wMCBMIDM1Mi4wMCwzMi4wMCB6IiAvPgo8Z2x5cGggdW5pY29kZT0iJiN4MjM7IiBkPSJNIDUwNy4zMzEsNjguNjdjLTAuMDAyLDAuMDAyLTAuMDA0LDAuMDA0LTAuMDA2LDAuMDA1TCAzNTIuMDAzLDIyNC4wMGwgMTU1LjMyMiwxNTUuMzI1YyAwLjAwMiwwLjAwMiwgMC4wMDQsMC4wMDMsIDAuMDA2LDAuMDA1CgkJYyAxLjY3MiwxLjY3MywgMi44ODEsMy42MjcsIDMuNjU2LDUuNzA4YyAyLjEyMyw1LjY4OCwgMC45MTIsMTIuMzQxLTMuNjYyLDE2LjkxNUwgNDMzLjk1Miw0NzUuMzI2Yy00LjU3NCw0LjU3My0xMS4yMjUsNS43ODMtMTYuOTE0LDMuNjYKCQljLTIuMDgtMC43NzUtNC4wMzUtMS45ODQtNS43MDktMy42NTVjMC4wMC0wLjAwMi0wLjAwMi0wLjAwMy0wLjAwNC0wLjAwNUwgMjU2LjAwMSwzMjAuMDBMIDEwMC42NzcsNDc1LjMyNQoJCWMtMC4wMDIsMC4wMDItMC4wMDMsMC4wMDMtMC4wMDUsMC4wMDVjLTEuNjczLDEuNjcxLTMuNjI3LDIuODgtNS43MDcsMy42NTVjLTUuNjksMi4xMjQtMTIuMzQxLDAuOTEzLTE2LjkxNS0zLjY2TCA0LjY3Niw0MDEuOTUxCgkJYy00LjU3NC00LjU3NC01Ljc4NC0xMS4yMjYtMy42NjEtMTYuOTE0YyAwLjc3Ni0yLjA4LCAxLjk4NS00LjAzNiwgMy42NTYtNS43MDhjIDAuMDAyLTAuMDAxLCAwLjAwMy0wLjAwMywgMC4wMDUtMC4wMDVMIDE2MC4wMDEsMjI0LjAwCgkJTCA0LjY3Niw2OC42NzRjLTAuMDAxLTAuMDAyLTAuMDAzLTAuMDAzLTAuMDA0LTAuMDA1Yy0xLjY3MS0xLjY3My0yLjg4LTMuNjI3LTMuNjU3LTUuNzA3Yy0yLjEyNC01LjY4OC0wLjkxMy0xMi4zNDEsIDMuNjYxLTE2LjkxNQoJCWwgNzMuMzc0LTczLjM3M2MgNC41NzUtNC41NzQsIDExLjIyNi01Ljc4NCwgMTYuOTE1LTMuNjYxYyAyLjA4LDAuNzc2LCA0LjAzNSwxLjk4NSwgNS43MDgsMy42NTZjIDAuMDAxLDAuMDAyLCAwLjAwMywwLjAwMywgMC4wMDUsMC4wMDUKCQlsIDE1NS4zMjQsMTU1LjMyNWwgMTU1LjMyNC0xNTUuMzI1YyAwLjAwMi0wLjAwMSwgMC4wMDQtMC4wMDMsIDAuMDA2LTAuMDA0YyAxLjY3NC0xLjY3MiwgMy42MjctMi44ODEsIDUuNzA3LTMuNjU3CgkJYyA1LjY4OS0yLjEyMywgMTIuMzQyLTAuOTEzLCAxNi45MTQsMy42NjFsIDczLjM3Myw3My4zNzRjIDQuNTc0LDQuNTc0LCA1Ljc4NSwxMS4yMjcsIDMuNjYyLDE2LjkxNQoJCUMgNTEwLjIxMiw2NS4wNDMsIDUwOS4wMDMsNjYuOTk3LCA1MDcuMzMxLDY4LjY3eiIgLz48L2ZvbnQ+PC9kZWZzPjwvc3ZnPg==) format('svg'), url(data:font/woff;charset=utf-8;base64,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) format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Use the following CSS code if you want to have a class per icon */
+[class^="icon-"]:before, [class*=" icon-"]:before {
+    font-family: 'icomoon';
+    font-style: normal;
+    speak: none;
+    font-weight: normal;
+    -webkit-font-smoothing: antialiased;
+}
+
+.icon-pencil:before {
+    content: "\21";
+}
+
+.icon-remove:before {
+    content: "\22";
+}
+
+.icon-cancel:before {
+    content: "\23";
+}
+

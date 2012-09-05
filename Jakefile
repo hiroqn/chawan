@@ -10,9 +10,9 @@ desc('This is the compile less');
 task('less', [], function (params) {
   var parser = new (less.Parser)({
     paths: ['./less'], // Specify search paths for @import directives
-    filename: 'chawan.less'
+    filename: 'styles.less'
   });
-  parser.parse(fs.readFileSync('./less/chawan.less', 'utf8'),
+  parser.parse(fs.readFileSync('./less/styles.less', 'utf8'),
       function (err, tree) {
         if (err) { return console.error(err) }
         var script = 'exports.css = ';
