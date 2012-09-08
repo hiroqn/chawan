@@ -4,12 +4,12 @@ _(folders).each(function(folder){
   <a href="#!<%- path + folder.name %>"><div class="dummy" /></a>
   <h2><%- folder.name %></h2>
   <h3><%- folder.count %></h3>
-</section><% });%><br /><%
+</section><% });%><br><%
 _(bookmarks).each(function(bookmark){
 %><section class="bookmark">
   <ul class="icons">
-    <li class="icon-pencil" data-bid="<%- bookmark.bid %>"></li>
-    <li class="icon-remove" data-bid="<%- bookmark.bid %>"></li>
+    <li class="icon-pencil icon" data-bid="<%- bookmark.bid %>"></li>
+    <li class="icon-remove icon" data-bid="<%- bookmark.bid %>"></li>
   </ul>
   <h2><%- bookmark.title %></h2>
   <a href="<%- bookmark.url %>" target="_blank">

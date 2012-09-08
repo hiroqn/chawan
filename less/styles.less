@@ -1,18 +1,36 @@
 @import "reset.less";
+@import "css3.less";
+
+// Grays
+// -------------------------
+@black: #000;
+@grayDarker: #222;
+@grayDark: #333;
+@gray: #555;
+@grayLight: #999;
+@grayLighter: #eee;
+@white: #fff;
+
+// Accent colors
+// -------------------------
+@blue: #049cdb;
+@blueDark: #0064cd;
+@green: #46a546;
+@red: #9d261d;
+@yellow: #ffc40d;
+@orange: #f89406;
+@pink: #c3325f;
+@purple: #7a43b6;
 
 /*
 * my style
 */
 
-@blue: #1BA1E2;
+@blue2: #1BA1E2;
 @lime: #8CBF26;
 @orange: #F09609;
 @teal: #00ABA9;
-@green: #339933;
-@grey: #353535;
-@light-grey: #575757;
-@white: #FFFFFF;
-@black: #000000;
+@greenDark: #339933;
 
 @bgcolor-nav: #030219;
 
@@ -27,7 +45,7 @@
 @margin: 5px;
 @min-width: 640px;
 body {
-    background-color: @grey;
+    background-color: @grayLighter;
     font-family: 'Segoe UI', 'Meiryo', helvetica, sans-serif;
     color: @white;
     font-size: @fontsize;
@@ -56,8 +74,7 @@ article {
 }
 
 nav {
-    background-color: @bgcolor-nav;
-    text-shadow: 0 -1px 0 #888888;
+    background-color: @gray; // text-shadow: 0 -1px 0 #888888;
     position: relative;
     height: @fontsize * 3;
     ul {
@@ -68,10 +85,7 @@ nav {
         #searchWord {
             color: @white;
             border-style: none;
-            background-color: @light-grey;
-        }
-        li {
-            display: inline-block;
+            background-color: @grayDark;
         }
     }
     h1 {
@@ -86,7 +100,11 @@ section {
     display: inline-block;
     overflow: hidden;
     position: relative;
+    border-radius: 5px;
+    .box-sizing(border-box);
+    color: @grayLighter;
     margin: @margin;
+    text-shadow: 0px 0px 5px @grayDarker;
     .dummy {
         z-index: 1;
         position: absolute;
@@ -95,15 +113,15 @@ section {
 }
 
 .folder {
-    background-color: #1BA1E2;
-    width: @fontsize * 10;
-    height: @fontsize * 5;
-    text-shadow: 1px -1px 0 #888888;
+    background-color: @blue2;
+    box-shadow: 0px 0px 5px 0px fade(@blue2, 50%);
+    width: @fontsize * 6;
+    height: @fontsize * 6; //   text-shadow: 1px -1px 0 #888888;
     h2 { // folder title
         position: absolute;
         bottom: @margin;
         left: @margin;
-        font-size: @fontsize * 1.5;
+        font-size: @fontsize;
     }
     h3 { // folder count
         position: absolute;
@@ -114,15 +132,15 @@ section {
 }
 
 .bookmark {
-    background-color: #00ABA9;
-    text-shadow: 1px -1px 1px #444444;
-    width: @fontsize * 20;
-    height: @fontsize * 5;
+    background-color: @teal; //  text-shadow: 1px -1px 1px #444444;
+    box-shadow: 0px 0px 5px 0px fade(@teal, 50%);
+    width: @fontsize * 16;
+    height: @fontsize * 6;
     .icons {
         position: absolute;
-        top: @margin;
-        left: @margin;
-        //visibility: hidden;
+        top: @margin * 2;
+        right: @margin * 2;
+        visibility: hidden;
         z-index: 2;
     }
     &:hover .icons {
@@ -146,7 +164,14 @@ section {
 }
 
 /* Use the following CSS code if you want to have a class per icon */
-[class^="icon-"]:before, [class*=" icon-"]:before {
+//[class^="icon-"]:before, [class*=" icon-"]:before {
+//    font-family: 'icomoon';
+//    font-style: normal;
+//    speak: none;
+//    font-weight: normal;
+//    -webkit-font-smoothing: antialiased;
+//}
+.icon:before {
     font-family: 'icomoon';
     font-style: normal;
     speak: none;
