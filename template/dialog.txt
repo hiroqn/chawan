@@ -1,4 +1,4 @@
 <h2><%- title %></h2>
 <h3><a href="<%- url %>" target="_blank"><%- url %></a></h3>
-<textarea class="editor-input"><%- rawComment %></textarea>
+<p>削除しますか？</p>
 <div class="buttons"><a class="submit">submit</a> <a class="cancel">cancel</a></div>

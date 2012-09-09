@@ -1,8 +1,7 @@
-<div id="name">?Chawan</div>
-<div id="breadcrumbs">
-  <span data-position="<%- length %>">?Chawan:</span>
-  <% _(list).each(function(d,n){%> / <span data-position="<%-length-n-1 %>"><%- d %></span>  <% }); %>
-  <form id="incremental-infolder-search-parent">
-    <input type="text" id="incremental-infolder-search" />
-  </form>
-</div>
+<h1>?Chawan</h1>
+<ul class="breadcrumbs">
+  <li>?Chawan:</li><%
+_(list).each(function(d,n){
+%> / <li><%- d %></li><%
+});%><li><input type="text" id="searchWord" /></li>
+</ul>
