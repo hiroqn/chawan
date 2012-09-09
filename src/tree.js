@@ -3,8 +3,7 @@ var Kls = require('kls'),
 
 var counter = 0,
     tagParam = /\[[^%\/\?\[\]]+?\]/g;
-var Bookmark = Kls.derive(function (title, comment, url,
-    other) {
+var Bookmark = Kls.derive(function (title, comment, url, other) {
   this.title = title;
   this.url = url;
   this.rawComment = comment;
@@ -31,10 +30,10 @@ Bookmark.mixin({
     this.comment = comment.replace(tagParam, '');
   }
 });
-var Folder = Kls.derive(function (name) {
+var Folder = Kls.derive(function (name, folders, bookmarks) {
   this.name = name;
-  this.bookmarks = [];
-  this.folders = [];
+  this.bookmarks = bookmarks || [];
+  this.folders = folders || [];
 });
 
 Folder.mixin({
@@ -44,11 +43,20 @@ Folder.mixin({
     });
   },
   addFolder: function (folder) {
-    this.folders.push(folder);
-    return folder;
+    if (Array.isArray(folder)) {
+      this.folders = this.folders.concat(folder);
+    } else {
+      this.folders.push(folder);
+    }
+    return this;
   },
   addBookmark: function (bookmark) {
-    this.bookmarks.push(bookmark);
+    if (Array.isArray(bookmark)) {
+      this.bookmarks = this.bookmarks.concat(bookmark);
+    } else {
+      this.bookmarks.push(bookmark);
+    }
+    return this;
   },
   makeFolder: function (name) {
     var folder = new Folder(name);
@@ -119,11 +127,13 @@ Tree.mixin({
   },
   addBookmarks: function (bookmarkArray) {
     this.allBookmarks = this.allBookmarks.concat(bookmarkArray);
-    //    this.classifyFolder(conditions, this.root, bookmarkArray);
-    //    this.setBookmarkCount(this.root);
-    this.classify(this.rule, this.root, bookmarkArray);
-    this.root.setBookmarkCount();
-    this.sortAllFolder(this.root);
+    this.refresh();
+  },
+  removeBookmark: function (bookmark) {
+    var all = this.allBookmarks,
+        index = all.indexOf(bookmark);
+    all.splice(index, 1);
+    this.refresh();
   },
   sortAllFolder: function sortFolder(folder) {
     folder.folders.forEach(function (folder) {
@@ -131,22 +141,29 @@ Tree.mixin({
       folder.sortFolder();
     });
   },
+  refresh: function () {
+    this.root = new Folder('root');
+    this.classify(this.rule, this.root, this.allBookmarks);
+    this.root.setBookmarkCount();
+    this.sortAllFolder(this.root);
+  },
   classify: function (configs, folder, bookmarks) {
     var copied = bookmarks.slice(0);
     configs.forEach(function (config) {
       var name = config.name,
-          fldr = folder.getFolder(name) || folder.makeFolder(name);
-      copied.forEach(function (bookmark) {
-        if (checkCondition(bookmark.tags, config.condition)) {
-          fldr.addBookmark(bookmark);
-          var index = bookmarks.indexOf(bookmark);
-          if (~index) {
-            bookmarks.splice(index, 1);
-          }
-        }
-      });
-      this.classify(config.children, fldr, fldr.bookmarks);
+          fldr = folder.getFolder(name) || folder.makeFolder(name),
+          filterdBookmarks = _.filter(bookmarks, function (bookmark) {
+            if (checkCondition(bookmark.tags, config.condition)) {
+              fldr.addBookmark(bookmark);
+              var index = copied.indexOf(bookmark);
+              if (~index) {
+                copied.splice(index, 1);
+              }
+            }
+          });
+      this.classify(config.children, fldr, filterdBookmarks);
     }, this);
+    folder.addBookmark(copied);
   }
 });
 Tree.Bookmark = Bookmark;
