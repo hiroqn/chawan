@@ -32,8 +32,6 @@
 @teal: #00ABA9;
 @greenDark: #339933;
 
-@bgcolor-nav: #030219;
-
 .fit(@d: 0){
     left: @d;
     top: @d;
@@ -43,17 +41,15 @@
 
 @fontsize: 20px;
 @margin: 5px;
-@min-width: 640px;
+@minWidth: 640px;
+@editorWidth: 480px;
+@editorHeight: 480px;
+
 body {
     background-color: @grayLighter;
     font-family: 'Segoe UI', 'Meiryo', helvetica, sans-serif;
     color: @white;
     font-size: @fontsize;
-}
-
-article {
-    margin: @margin;
-    min-width: @min-width;
 }
 
 #config {
@@ -82,6 +78,9 @@ nav {
         top: @fontsize;
         left: @fontsize;
         white-space: nowrap;
+        li {
+            display: inline;
+        }
         #searchWord {
             color: @white;
             border-style: none;
@@ -96,11 +95,24 @@ nav {
     }
 }
 
+article {
+    margin: @margin;
+    min-width: @minWidth;
+}
+
+.modal-backdrop {
+    z-index: 10;
+    opacity: 0.8;
+    display: none;
+    position: fixed;
+    background: none repeat scroll 0 0 @gray;
+    .fit();
+}
+
 section {
-    display: inline-block;
     overflow: hidden;
     position: relative;
-    border-radius: 5px;
+    border-radius: 5px 5px 5px 5px;
     .box-sizing(border-box);
     color: @grayLighter;
     margin: @margin;
@@ -112,16 +124,43 @@ section {
     }
 }
 
+.editor {
+    z-index: 11;
+    width: @editorWidth;
+    height: @editorHeight;
+    left: 50%;
+    top: 50%;
+    overflow: auto;
+    position: fixed;
+    margin: -@editorHeight / 2 0 0 -@editorWidth / 2;
+    background-color: @lime;
+    box-shadow: 0px 0px 5px 0px fade(@lime, 50%);
+
+}
+
+.dialog {
+    z-index: 11;
+    width: @editorWidth;
+    height: @editorHeight;
+    left: 50%;
+    top: 50%;
+    overflow: auto;
+    position: fixed;
+    margin: -@editorHeight / 2 0 0 -@editorWidth / 2;
+    background-color: @lime;
+    box-shadow: 0px 0px 5px 0px fade(@lime, 50%);
+}
+
 .folder {
+    display: inline-block;
     background-color: @blue2;
     box-shadow: 0px 0px 5px 0px fade(@blue2, 50%);
     width: @fontsize * 6;
-    height: @fontsize * 6; //   text-shadow: 1px -1px 0 #888888;
+    height: @fontsize * 6;
     h2 { // folder title
         position: absolute;
         bottom: @margin;
         left: @margin;
-        font-size: @fontsize;
     }
     h3 { // folder count
         position: absolute;
@@ -132,7 +171,8 @@ section {
 }
 
 .bookmark {
-    background-color: @teal; //  text-shadow: 1px -1px 1px #444444;
+    display: inline-block;
+    background-color: @teal;
     box-shadow: 0px 0px 5px 0px fade(@teal, 50%);
     width: @fontsize * 16;
     height: @fontsize * 6;

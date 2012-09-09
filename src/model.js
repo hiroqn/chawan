@@ -1,5 +1,6 @@
 var Backbone = require('backbone'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    Tree = require('./tree.js');
 
 var FolderModel = Backbone.Model.extend({
   initialize: function () {
@@ -14,10 +15,7 @@ var FolderModel = Backbone.Model.extend({
         function (folder) { return ~folder.name.indexOf(word);});
     var bookmarks = _.filter(folder.bookmarks,
         function (bookmark) {return ~bookmark.title.indexOf(word);});
-    return {
-      folders: folders,
-      bookmarks: bookmarks
-    };
+    return new Tree.Folder(folder.name, folders, bookmarks);
   }
 });
 
@@ -25,12 +23,21 @@ exports.App = Backbone.Model.extend({
   defaults: {
     "path": [],
     "modal": false,
+    "state": 'normal',
     "searchWord": ''
   },
   initialize: function () {
   },
   addBookmark: function (bArray) {
     this.get('tree').addBookmarks(bArray);
+    this.trigger('change:tree');
+  },
+  removeBookmark: function (bookmark) {
+    this.get('tree').removeBookmark(bookmark);
+    this.trigger('change:tree');
+  },
+  refreshTree: function () {
+    this.get('tree').refresh();
     this.trigger('change:tree');
   },
   getFolderModel: function () {

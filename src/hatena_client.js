@@ -18,7 +18,7 @@ HatenaClient.mixin({
   },
   deleteBookmark: function (bookmarkUrl) {
     var data = {url: bookmarkUrl, rks: this.rks};
-    return $.post(BASE_URL + this.id + '/add.edit.json', data, null, 'json');
+    return $.post(BASE_URL + this.id + '/add.delete', data, null, 'json');
   },
   searchData: function () {
     return $.post(BASE_URL + this.id + '/search.data', null, null, 'text');

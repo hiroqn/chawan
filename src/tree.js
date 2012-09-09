@@ -154,11 +154,11 @@ Tree.mixin({
           fldr = folder.getFolder(name) || folder.makeFolder(name),
           filterdBookmarks = _.filter(bookmarks, function (bookmark) {
             if (checkCondition(bookmark.tags, config.condition)) {
-              fldr.addBookmark(bookmark);
               var index = copied.indexOf(bookmark);
               if (~index) {
                 copied.splice(index, 1);
               }
+              return true;
             }
           });
       this.classify(config.children, fldr, filterdBookmarks);

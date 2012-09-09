@@ -31,6 +31,8 @@ var Ctrlr = Kls.derive(function (config) {
     model: this.app,
     el: document.body
   });
+  appView.on('submit:edit', this.editComment, this);
+  appView.on('submit:remove', this.removeBookmark, this);
   this.router = new Router();
   Backbone.history.start();
 });
@@ -48,6 +50,22 @@ Ctrlr.mixin({
   },
   moveTo: function (path) {
     this.app.set('path', path);
+  },
+  editComment: function (bookmark, comment) {
+    var app = this.app;
+    this.client.editComment(bookmark.url, comment)
+        .then(function (json) {//success
+          bookmark.updateComment(comment);
+          app.refreshTree();
+          console.log('update comment');
+        }, function () {});
+  },
+  removeBookmark: function (bookmark) {
+    this.client.deleteBookmark(bookmark.url)
+        .then(function (json) {//success
+          app.removeBookmark(bookmark);
+          console.log('delete bookmark');
+        }, function () {});
   },
   getBookmarks: function () {
     var self = this;
