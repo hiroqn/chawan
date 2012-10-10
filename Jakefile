@@ -1,41 +1,45 @@
 var exec = require('child_process').exec,
-    fs = require('fs');
+    fs = require('fs'),
+    less = require('less'),
+    gc = require('zbzb');
 desc('This is the default task.');
-task('default', ['us'], function (params) {
-  fs.unlinkSync('./build/compress.css');
-  fs.unlinkSync('./build/file.js');
+task('default', ['less', 'zbzb'], function (params) {
 });
 
 desc('This is the compile less');
 task('less', [], function (params) {
-  exec('lessc chawan.less -x',
-      {timeout: 2000},
-      function (error, stdout, stderr) {
-        fs.writeFileSync('build/compress.css', stdout);
+  var parser = new (less.Parser)({
+    paths: ['./less'], // Specify search paths for @import directives
+    filename: 'styles.less'
+  });
+  parser.parse(fs.readFileSync('./less/styles.less', 'utf8'),
+      function (err, tree) {
+        if (err) { return console.error(err) }
+        var script = 'exports.css = ';
+        script += JSON.stringify(tree.toCSS({ compress: true })) + ';';
+        fs.writeFileSync('src/css.js', script);
+        console.log('compile less');
         complete();
       });
 }, true);
+
 desc('This is the task template file 2 json');
 task('template', [], function (params) {
-  exec('node build/file2json',
-      {timeout: 2000},
-      function (error, stdout, stderr) {
-        if (error !== null) {
-          console.log('exec error: ' + error);
-        }
-        console.log('end');
-        complete();
-      });
-}, true);
-desc('This is the build userscript');
-task('us', ['less','template'], function (params) {
-  exec('node build/builder.js ../package.us.json',
-      {timeout: 2000},
-      function (error, stdout, stderr) {
-        if (error !== null) {
-          console.log('exec error: ' + error);
-        }
-        console.log('end');
-        complete();
-      });
-}, true);
+  var map = {};
+  fs.readdirSync('./template').forEach(function (p) {
+    map[p.slice(0, -4)] = fs.readFileSync('template/' + p, 'utf8');
+  });
+  fs.writeFileSync('src/file.js',
+      'module.exports = ' + JSON.stringify(map) + ';');
+  console.log('template end');
+});
+
+desc('This is the task build javascript');
+task('zbzb', ['template'], function (params) {
+  var code = gc.build(process.cwd() + '/src', {
+    lf: '\r\n'
+  });
+  var meta = fs.readFileSync('meta.js', 'utf8');
+  fs.writeFileSync('chawan.user.js', meta + code);
+  console.log('script compiles');
+});
