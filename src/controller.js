@@ -61,11 +61,15 @@ Ctrlr.mixin({
         }, function () {});
   },
   removeBookmark: function (bookmark) {
+    var app = this.app;
     this.client.deleteBookmark(bookmark.url)
         .then(function (json) {//success
           app.removeBookmark(bookmark);
           console.log('delete bookmark');
-        }, function () {});
+        }, function (json) {
+          app.removeBookmark(bookmark);
+          console.log('delete bookmark');
+        });
   },
   getBookmarks: function () {
     var self = this;
