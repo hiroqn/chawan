@@ -26,6 +26,7 @@ if (window.location.search === '?config') {
           return config.askLogin('http://b.hatena.ne.jp/my.name');
         }
         addStyle(CSS);
+        document.title = '?Chawan';
         var Ctrlr = require('./controller.js');
         new Ctrlr(config);
 
