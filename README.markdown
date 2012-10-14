@@ -11,6 +11,12 @@ Install
 
 Install -> [click](https://github.com/hiroqn/chawan/raw/master/chawan.user.js)
 
+(Note: if you use latest Google Chrome, you cannot install external script directory. Instead, you can do:
+1. download script from the link above
+2. open chrome://chrome/extensions/ in your browser
+3. drag & drop Script file
+)
+
 and
 
 Go to -> [here](http://b.hatena.ne.jp/my.name) and write config
