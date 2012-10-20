@@ -1,3 +1,5 @@
+[Project github page](http://hiroqn.github.com/chawan/)
+===========
 ?Chawan
 ===========
 ゆーざすくりぷとで作られたはてなブックマーククライアント、です
@@ -21,8 +23,6 @@ and
 
 Go to -> [here](http://b.hatena.ne.jp/my.name) and write config
 
-現在クロームのいんすとーるが外部サイトから出来ない、は？
-
 How to use
 ==========
 ルールの書き方
@@ -45,13 +45,6 @@ tag2フォルダの中に入ったブックマークはtag1フォルダの中に
     [tag3]
 
 そのブックマークはtag1/tag2 , tag1/tag3, tag3のすべてに入る
-
-例
-
-\[javascript\]
- \[lib\]
-\[git\]
-\[css\]
 
 LICENSE
 =======

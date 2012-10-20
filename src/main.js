@@ -33,7 +33,7 @@ if (window.location.search === '?config') {
 
       });
     } else {
-      window.location.href = '?config';
+      window.location.href += '?config';
     }
   }
 }
