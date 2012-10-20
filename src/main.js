@@ -40,7 +40,7 @@ if (window.location.search === '?config') {
  * @param css
  */
 function addStyle(css) {
-  if (GM_addStyle) {
+  if (typeof GM_addStyle != "undefined") {
     GM_addStyle(css);
   } else {
     var style = document.createElement('style');
