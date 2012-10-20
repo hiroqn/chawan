@@ -1,9 +1,26 @@
-<h1>Chawan?: config</h1>
-<div id="configBox">
-<div class="config"><label>ID:</label>
-<input type='text' value='<%- name %>' id="user-name"></input></div>
-<div class="config"><label>Password:</label><input type="password" id="password"></input></div>
-<div class="config"><label>Transformation rules:</label>
-<textarea class="config-input"><%- text || ''%></textarea></div>
-<div class="buttons"><a class="save">save</a> <a class="cancel">cancel</a></div>
+<div id="config-view">
+  <h1><a href="http://b.hatena.ne.jp/my.name">Chawan?</a>: config</h1>
+  <div id="config-box">
+    <div class="config"><label>ID:</label>
+    <input type='text' value='<%- name %>' id="user-name"></input></div>
+    <div class="config"><label>Password
+      <span class="help" title="任意入力．入力されていると，はてなブックマークにログインしてないときに自動でログインします．
+入力されたパスワードがChawan開発者や外部サーバに送信されることはありません．">[?]</span>
+      :</label><input type="password" id="password"></input></div>
+    <div class="config"><label>Transformation rules:</label>
+    <a href="https://github.com/hiroqn/chawan#how-to-use" title="ルールの書き方？">rule?</a>
+    <textarea class="config-input"><%- text || ''%></textarea></div> 
+    <div class="buttons">
+      <a class="save button">save</a> <a class="cancel button">cancel</a>
+    </div>
+    <div id="notification"></div>
+  </div>
+  <div id="tag-list">
+    <h3>Tags <% if (typeof(name) != "undefined") { %> id:<%= name %> is <% } else { %>you are <% } %> using in Hatena bookmark</h3>
+    <div id="tags">
+      Loading list of tags you are using...</div>
+    <div class="clear buttons"><span class="button add-all-tags">
+      Use all tags as top-level folders
+    </span></div>
+  </div>
 </div>
