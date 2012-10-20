@@ -13,6 +13,7 @@
     <div class="buttons">
       <a class="save button">save</a> <a class="cancel button">cancel</a>
     </div>
+    <div id="notification"></div>
   </div>
   <div id="tag-list">
     <h3>Tags <% if (typeof(name) != "undefined") { %> id:<%= name %> is <% } else { %>you are <% } %> using in Hatena bookmark</h3>
