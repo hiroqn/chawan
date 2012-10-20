@@ -1,5 +1,5 @@
 <div id="config-view">
-  <h1>Chawan?: config</h1>
+  <h1><a href="http://b.hatena.ne.jp/my.name">Chawan?</a>: config</h1>
   <div id="config-box">
     <div class="config"><label>ID:</label>
     <input type='text' value='<%- name %>' id="user-name"></input></div>
