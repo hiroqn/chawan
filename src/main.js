@@ -9,6 +9,7 @@ if (window.location.search === '?config') {
     if (!myNameJSON.login) {
       return config.askLogin('http://b.hatena.ne.jp/my.name?config');
     }
+    addStyle(CSS);
     var View = require('./view.js');
     config.setByJSON(myNameJSON);
     new View.Config({
