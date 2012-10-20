@@ -23,7 +23,11 @@ exports.Config = Backbone.View.extend({
     var text = this.$('.config-input').val();
     this.model.setCondition(text);
     this.model.save();
-    console.log('saved'); // TODO add save notification
+    // TODO add better save notification
+    var notification = this.$("#notification");
+    notification.text("saved!");
+    notification.show();
+    notification.fadeOut(2000);
   },
   cancel: function () {
     //    this.render();
