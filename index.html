@@ -13,60 +13,76 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <title>Chawan by hiroqn</title>
+    <title>Chawan by daisy1754</title>
   </head>
 
   <body>
     <header>
       <div class="inner">
         <h1>Chawan</h1>
-        <h2>Hatena us</h2>
-        <a href="https://github.com/hiroqn/chawan" class="button"><small>View project on</small>GitHub</a>
+        <h2>UserScript for Hatena bookmark</h2>
+        <a href="https://github.com/daisy1754/chawan" class="button"><small>View project on</small>GitHub</a>
       </div>
     </header>
 
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h3>Welcome to GitHub Pages.</h3>
+          <h2>Chawan: はてなブックマーククライアント for Firefox and Chrome</h2>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p>Chawanは，以下の様な特徴を持つ<a href="http://b.hatena.ne.jp">はてなブックマーク</a>クライアントです．</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<ul>
+<li>シンプルかつ洗練されたデザイン</li>
+<li>独自のルール記法でフォルダ階層を定義することで，階層付けたブックマークの管理が可能</li>
+<li>FirefoxグリースモンキーまたはGoogle Chrome拡張として動作(ブラウザ上で利用可能)</li>
+<li>インクリメンタルサーチ機能によって，キーボードだけでブックマーク先へ移動可能</li>
+<li>既存のはてなブックマークと共存可能(別々のURLを利用)</li>
+</ul><h2>インストール</h2>
+
+<ol>
+<li>
+<a href="">Chawan 最新安定版</a>をクリックしてインストール</li>
+<li>(Google Chromeユーザのみ) (chrome://chrome/extensions/)へアクセスし，ダウンロードしたスクリプトファイルをドラッグ＆ドロップ</li>
+<li>
+<a href="http://b.hatena.ne.jp/my.name">Chawan 設定ページ</a>へアクセスし，設定を行う</li>
+</ol><h2>ルールについて</h2>
+
+<p>通常のはてなブックマークでは，タグを用いてブックマークの管理を行いますが，Chawanでは，それらタグに対してフォルダ階層を指定し，フォルダによってブックマークを管理できます．</p>
+
+<p>あるタグに対してフォルダを定義するには，以下のようにタグ名を[]で囲みます．</p>
+
+<pre><code>\[JavaScript\]
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>上記の様に記述した場合， <em>JavaScript</em> タグのついたブックマークが <em>JavaScript</em> フォルダの中に配置されます．</p>
 
-<h3>Designer Templates</h3>
+<p>OSなどにおけるフォルダシステムと異なり，ひとつのブックマークは複数のフォルダの中に存在することが出来ます．例えば <em>JavaScript</em> ,  <em>CSS</em> というようなタグの付けられたブックマークが存在する時に，以下のように <em>JavaScript</em> フォルダ， <em>CSS</em> フォルダを定義すると，そのブックマークは <em>JavaScript</em> フォルダ直下， <em>CSS</em> フォルダ直下の両方からアクセス可能です．</p>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<pre><code>\[JavaScript\]
+\[CSS\]
+</code></pre>
 
-<h3>Rather Drive Stick?</h3>
+<p>また， <em>JavaScript</em> タグのついたエントリの中でも，特に <em>jQuery</em> タグがついたブックマークをサブフォルダとして管理したい，というような場合は，以下の様に，改行して2つ先頭にスペースを加えることで，サブフォルダを定義可能です．</p>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<pre><code>\[JavaScript\]
+  \[jQuery\]
+</code></pre>
 
-<h3>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p><em>JavaScript</em> フォルダの中に <em>jQuery</em> フォルダが作られ， <em>JavaScript</em> ,  <em>jQuery</em> 両方のタグを持つブックマークが， <em>JavaScript/jQuery</em> フォルダの中に格納されます．この際，それらのブックマークは <em>JavaScript</em> フォルダの直下からは消えることに注意してください．</p>
         </section>
 
         <aside id="sidebar">
-          <a href="https://github.com/hiroqn/chawan/zipball/master" class="button">
+          <a href="https://github.com/daisy1754/chawan/zipball/master" class="button">
             <small>Download</small>
             .zip file
           </a>
-          <a href="https://github.com/hiroqn/chawan/tarball/master" class="button">
+          <a href="https://github.com/daisy1754/chawan/tarball/master" class="button">
             <small>Download</small>
             .tar.gz file
           </a>
 
-          <p class="repo-owner"><a href="https://github.com/hiroqn/chawan"></a> is maintained by <a href="https://github.com/hiroqn">hiroqn</a>.</p>
+          <p class="repo-owner"><a href="https://github.com/daisy1754/chawan"></a> is maintained by <a href="https://github.com/daisy1754">daisy1754</a>.</p>
 
           <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.</p>
         </aside>
