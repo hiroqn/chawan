@@ -5,11 +5,14 @@ Backbone.$ = require('jQuery');
 exports.Config = Backbone.View.extend({
   events: {
     "click .save": "save",
-    "click .cancel": "cancel"
+    "click .cancel": "cancel",
+    "click .add-all-tags": "addAllTags"
   },
   template: template.config,
   initialize: function () {
+    document.title = "Chawan?: config"
     this.render();
+    this.model.loadTags(this.showTags.bind(this));
   },
   render: function () {
     this.$el.html(this.template(this.model));
@@ -24,6 +27,33 @@ exports.Config = Backbone.View.extend({
   },
   cancel: function () {
     //    this.render();
+  },
+  addAllTags: function () {
+    var tagsStr = '';
+    this.$(".tag-item").each(function(index, tag){
+      tagsStr += '[' + Backbone.$(tag).text() + ']\n';
+    });
+    this.insertToConfig(tagsStr);
+  },
+  showTags: function (tags) {
+    var $tags = this.$("#tags");
+    $tags.text("");
+    for (var i = 0; i < tags.length; i++) {
+      tag = tags[i];
+      var tagButton = Backbone.$("<div>");
+      tagButton.addClass("tag-item");
+      tagButton.text(tag);
+      tagButton.click(this.insertToConfig.bind(this, '[' + tag + ']'));
+      $tags.append(tagButton);
+    }
+  },
+  insertToConfig: function (str) {
+    var input = Backbone.$(".config-input");
+    var position = input[0].selectionStart || 0;
+    var val = input.val();
+    var newPosition = position + str.length;
+    input.val(val.substring(0, position) + str + val.substring(position));
+    input[0].setSelectionRange(newPosition, newPosition);
   }
 });
 
