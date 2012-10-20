@@ -8,12 +8,13 @@
 入力されたパスワードがChawan開発者や外部サーバに送信されることはありません．">[?]</span>
       :</label><input type="password" id="password"></input></div>
     <div class="config"><label>Transformation rules:</label>
-    <a href="https://github.com/hiroqn/chawan#how-to-use" title="ルールの書き方？">rule?</a>
+    <a href="http://hiroqn.github.com/chawan/" title="ルールの書き方？">rule?</a>
     <textarea class="config-input"><%- text || ''%></textarea></div> 
     <div class="buttons">
       <a class="save button">save</a> <a class="cancel button">cancel</a>
     </div>
     <div id="notification"></div>
+    <div class="start"><a href="http://b.hatena.ne.jp/my.name">Start using　Chawan</a></div>
   </div>
   <div id="tag-list">
     <h3>Tags <% if (typeof(name) != "undefined") { %> id:<%= name %> is <% } else { %>you are <% } %> using in Hatena bookmark</h3>
