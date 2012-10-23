@@ -10,6 +10,7 @@ var Config = module.exports = Kls.derive(function () {
   this.text = local.text;
   this.password = local.password;
   this.rule = local.rule;
+  this.tags = [];
 });
 Config.mixin({
   isSatisfied: function () {
@@ -33,6 +34,18 @@ Config.mixin({
                 (this.name ? ('&name=' + this.name) : '') +
                 (this.password ? ('&password=' + this.password) : '');
     window.location.href = 'https://www.hatena.ne.jp/login?' + param;
+  },
+  loadTags: function (onloaded) {
+    var $ = require('jQuery');
+    $.getJSON('http://b.hatena.ne.jp/my/tags.json', null, 
+        (function (onloaded, response) {
+          var tagsJson = response.tags;
+          this.tags = [];
+          for (var tag in tagsJson) {
+            this.tags.push(tag);
+          }
+          onloaded(this.tags);
+        }).bind(this, onloaded));
   }
 });
 var configParam = /^\[[^%\/\?\[\]]+\](?:(?:\*|\+)\[[^%\/\?\[\]]+\])*$/;
