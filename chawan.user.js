@@ -4,7 +4,7 @@
 // @description make HatenaBookmark more and more convenient ! maybe...
 // @match http://b.hatena.ne.jp/my.name*
 // @run-at document-start
-// @version 0.5.0
+// @version 0.5.1
 // ==/UserScript==
 
 (function (topName, callback) {
@@ -11991,6 +11991,7 @@
           this.text = local.text;
           this.password = local.password;
           this.rule = local.rule;
+          this.tags = [];
         });
         Config.mixin({
           isSatisfied: function () {
@@ -12014,6 +12015,18 @@
                         (this.name ? ('&name=' + this.name) : '') +
                         (this.password ? ('&password=' + this.password) : '');
             window.location.href = 'https://www.hatena.ne.jp/login?' + param;
+          },
+          loadTags: function (onloaded) {
+            var $ = require('jQuery');
+            $.getJSON('http://b.hatena.ne.jp/my/tags.json', null, 
+                (function (onloaded, response) {
+                  var tagsJson = response.tags;
+                  this.tags = [];
+                  for (var tag in tagsJson) {
+                    this.tags.push(tag);
+                  }
+                  onloaded(this.tags);
+                }).bind(this, onloaded));
           }
         });
         var configParam = /^\[[^%\/\?\[\]]+\](?:(?:\*|\+)\[[^%\/\?\[\]]+\])*$/;
@@ -12165,10 +12178,10 @@
         
      });
     register("css.js", function (module, exports, require) { 
-        exports.css = "html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent;}\nbody{line-height:1;}\nol,ul{list-style:none;}\nblockquote,q{quotes:none;}\nblockquote:before,blockquote:after,q:before,q:after{content:'';content:none;}\n:focus{outline:0;}\nins{text-decoration:none;}\ndel{text-decoration:line-through;}\ntable{border-collapse:collapse;border-spacing:0;}\nbody{background-color:#eeeeee;font-family:'Segoe UI','Meiryo',helvetica,sans-serif;color:#ffffff;font-size:20px;}\n#config{overflow:hidden;background:none repeat scroll 0 0 #8cbf26;display:none;position:fixed;left:5px;top:5px;right:5px;bottom:5px;}#config .condig-input{line-height:20px;font-size:16.666666666666668px;border-radius:4px 4px 4px 4px;border:solid 1px #ffffff;display:block;width:inherit;resize:vertical;}\nnav{background-color:#555555;position:relative;height:60px;}nav ul{position:absolute;top:20px;left:20px;white-space:nowrap;}nav ul li{display:inline;}\nnav ul #searchWord{color:#ffffff;border-style:none;background-color:#333333;}\nnav h1{position:absolute;top:10px;right:20px;font-size:40px;}\narticle{margin:5px;min-width:640px;}\n.modal-backdrop{z-index:10;opacity:0.8;display:none;position:fixed;background:none repeat scroll 0 0 #555555;left:0;top:0;right:0;bottom:0;}\nsection{overflow:hidden;position:relative;border-radius:5px 5px 5px 5px;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;-ms-box-sizing:border-box;-o-box-sizing:border-box;box-sizing:border-box;color:#eeeeee;margin:5px;text-shadow:0px 0px 5px #222222;}section .dummy{z-index:1;position:absolute;left:5px;top:5px;right:5px;bottom:5px;}\n.editor{z-index:11;width:480px;height:480px;left:50%;top:50%;overflow:auto;position:fixed;margin:-240px 0 0 -240px;background-color:#8cbf26;box-shadow:0px 0px 5px 0px rgba(140, 191, 38, 0.5);}\n.dialog{z-index:11;width:480px;height:480px;left:50%;top:50%;overflow:auto;position:fixed;margin:-240px 0 0 -240px;background-color:#8cbf26;box-shadow:0px 0px 5px 0px rgba(140, 191, 38, 0.5);}\n.folder{display:inline-block;background-color:#1ba1e2;box-shadow:0px 0px 5px 0px rgba(27, 161, 226, 0.5);width:120px;height:120px;}.folder h2{position:absolute;bottom:5px;left:5px;}\n.folder h3{position:absolute;top:5px;right:5px;font-size:30px;}\n.bookmark{display:inline-block;background-color:#00aba9;box-shadow:0px 0px 5px 0px rgba(0, 171, 169, 0.5);width:320px;height:120px;}.bookmark .icons{position:absolute;top:10px;right:10px;visibility:hidden;z-index:2;}\n.bookmark:hover .icons{visibility:visible;}\n.bookmark h2{position:absolute;left:5px;right:5px;bottom:5px;max-height:60px;overflow:hidden;}\n@font-face{font-family:'icomoon';src:url(data:font/svg;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiID4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8bWV0YWRhdGE+ClRoaXMgaXMgYSBjdXN0b20gU1ZHIGZvbnQgZ2VuZXJhdGVkIGJ5IEljb01vb24uCjEKPC9tZXRhZGF0YT4KPGRlZnM+Cjxmb250IGlkPSJpY29tb29uIiBob3Jpei1hZHYteD0iNTEyIiA+Cjxmb250LWZhY2UgdW5pdHMtcGVyLWVtPSI1MTIiIGFzY2VudD0iNDgwIiBkZXNjZW50PSItMzIiIC8+CjxtaXNzaW5nLWdseXBoIGhvcml6LWFkdi14PSI1MTIiIC8+CjxnbHlwaCB1bmljb2RlPSImI3gyMTsiIGQ9Ik0gNDg4LjAwLDQ1Ni4wMGMtMzIuMDAsMzIuMDAtNjQuMDAsMzIuMDAtOTYuMDAsMC4wMGwtOC4wMC04LjAwbCA5Ni4wMC05Ni4wMGwgOC4wMCw4LjAwQyA1MjAuMDAsMzkyLjAwLCA1MjAuMDAsNDI0LjAwLCA0ODguMDAsNDU2LjAwek0gMzIuMDAsOTYuMDBMMC4wMC0zMi4wMGwgMTI4LjAwLDMyLjAwbCAzMjAuMDAsMzIwLjAwbC05Ni4wMCw5Ni4wMEwgMzIuMDAsOTYuMDB6IE0gMTI4LjAwLDY0LjAwbC0zMi4wMCwzMi4wMGwgMjU2LjAwLDI1Ni4wMGwgMzIuMDAtMzIuMDBMIDEyOC4wMCw2NC4wMHoiIC8+CjxnbHlwaCB1bmljb2RlPSImI3gyMjsiIGQ9Ik0gNDgwLjAwLDQxNi4wMEwgMzIwLjAwLDQxNi4wMCBMIDMyMC4wMCw0NjQuMDAgYzAuMDAsOC44MzYtNy4xNjMsMTYuMDAtMTYuMDAsMTYuMDBsLTk2LjAwLDAuMDAgYy04LjgzNiwwLjAwLTE2LjAwLTcuMTY0LTE2LjAwLTE2LjAwbDAuMDAtNDguMDAgTCAzMi4wMCw0MTYuMDAgTDAuMDAsMzUyLjAwbCA2NC4wMCwwLjAwIGwgMzIuMDAtMzg0LjAwbCAzMjAuMDAsMC4wMCBsIDMyLjAwLDM4NC4wMGwgNjQuMDAsMC4wMCBMIDQ4MC4wMCw0MTYuMDB6IE0gMjI0LjAwLDMyLjAwCglsLTY0LjAwLDAuMDAgTCAxNjAuMDAsMzIwLjAwIGwgNjQuMDAsMC4wMCBMIDIyNC4wMCwzMi4wMCB6IE0gMjI0LjAwLDQ0OC4wMGwgNjQuMDAsMC4wMCBsMC4wMC0zMi4wMCBsLTY0LjAwLDAuMDAgTCAyMjQuMDAsNDQ4LjAwIHogTSAzNTIuMDAsMzIuMDBsLTY0LjAwLDAuMDAgTCAyODguMDAsMzIwLjAwIGwgNjQuMDAsMC4wMCBMIDM1Mi4wMCwzMi4wMCB6IiAvPgo8Z2x5cGggdW5pY29kZT0iJiN4MjM7IiBkPSJNIDUwNy4zMzEsNjguNjdjLTAuMDAyLDAuMDAyLTAuMDA0LDAuMDA0LTAuMDA2LDAuMDA1TCAzNTIuMDAzLDIyNC4wMGwgMTU1LjMyMiwxNTUuMzI1YyAwLjAwMiwwLjAwMiwgMC4wMDQsMC4wMDMsIDAuMDA2LDAuMDA1CgkJYyAxLjY3MiwxLjY3MywgMi44ODEsMy42MjcsIDMuNjU2LDUuNzA4YyAyLjEyMyw1LjY4OCwgMC45MTIsMTIuMzQxLTMuNjYyLDE2LjkxNUwgNDMzLjk1Miw0NzUuMzI2Yy00LjU3NCw0LjU3My0xMS4yMjUsNS43ODMtMTYuOTE0LDMuNjYKCQljLTIuMDgtMC43NzUtNC4wMzUtMS45ODQtNS43MDktMy42NTVjMC4wMC0wLjAwMi0wLjAwMi0wLjAwMy0wLjAwNC0wLjAwNUwgMjU2LjAwMSwzMjAuMDBMIDEwMC42NzcsNDc1LjMyNQoJCWMtMC4wMDIsMC4wMDItMC4wMDMsMC4wMDMtMC4wMDUsMC4wMDVjLTEuNjczLDEuNjcxLTMuNjI3LDIuODgtNS43MDcsMy42NTVjLTUuNjksMi4xMjQtMTIuMzQxLDAuOTEzLTE2LjkxNS0zLjY2TCA0LjY3Niw0MDEuOTUxCgkJYy00LjU3NC00LjU3NC01Ljc4NC0xMS4yMjYtMy42NjEtMTYuOTE0YyAwLjc3Ni0yLjA4LCAxLjk4NS00LjAzNiwgMy42NTYtNS43MDhjIDAuMDAyLTAuMDAxLCAwLjAwMy0wLjAwMywgMC4wMDUtMC4wMDVMIDE2MC4wMDEsMjI0LjAwCgkJTCA0LjY3Niw2OC42NzRjLTAuMDAxLTAuMDAyLTAuMDAzLTAuMDAzLTAuMDA0LTAuMDA1Yy0xLjY3MS0xLjY3My0yLjg4LTMuNjI3LTMuNjU3LTUuNzA3Yy0yLjEyNC01LjY4OC0wLjkxMy0xMi4zNDEsIDMuNjYxLTE2LjkxNQoJCWwgNzMuMzc0LTczLjM3M2MgNC41NzUtNC41NzQsIDExLjIyNi01Ljc4NCwgMTYuOTE1LTMuNjYxYyAyLjA4LDAuNzc2LCA0LjAzNSwxLjk4NSwgNS43MDgsMy42NTZjIDAuMDAxLDAuMDAyLCAwLjAwMywwLjAwMywgMC4wMDUsMC4wMDUKCQlsIDE1NS4zMjQsMTU1LjMyNWwgMTU1LjMyNC0xNTUuMzI1YyAwLjAwMi0wLjAwMSwgMC4wMDQtMC4wMDMsIDAuMDA2LTAuMDA0YyAxLjY3NC0xLjY3MiwgMy42MjctMi44ODEsIDUuNzA3LTMuNjU3CgkJYyA1LjY4OS0yLjEyMywgMTIuMzQyLTAuOTEzLCAxNi45MTQsMy42NjFsIDczLjM3Myw3My4zNzRjIDQuNTc0LDQuNTc0LCA1Ljc4NSwxMS4yMjcsIDMuNjYyLDE2LjkxNQoJCUMgNTEwLjIxMiw2NS4wNDMsIDUwOS4wMDMsNjYuOTk3LCA1MDcuMzMxLDY4LjY3eiIgLz48L2ZvbnQ+PC9kZWZzPjwvc3ZnPg==) format('svg'),url(data:font/woff;charset=utf-8;base64,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) format('woff');font-weight:normal;font-style:normal;}.icon:before{font-family:'icomoon';font-style:normal;speak:none;font-weight:normal;-webkit-font-smoothing:antialiased;}\n.icon-pencil:before{content:\"\\21\";}\n.icon-remove:before{content:\"\\22\";}\n.icon-cancel:before{content:\"\\23\";}\n";
+        exports.css = "html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent;}\nbody{line-height:1;}\nol,ul{list-style:none;}\nblockquote,q{quotes:none;}\nblockquote:before,blockquote:after,q:before,q:after{content:'';content:none;}\n:focus{outline:0;}\nins{text-decoration:none;}\ndel{text-decoration:line-through;}\ntable{border-collapse:collapse;border-spacing:0;}\nbody{background-color:#eeeeee;font-family:'Segoe UI','Meiryo',helvetica,sans-serif;color:#ffffff;font-size:20px;}\n#config{overflow:hidden;background:none repeat scroll 0 0 #8cbf26;display:none;position:fixed;left:5px;top:5px;right:5px;bottom:5px;}#config .condig-input{line-height:20px;font-size:16.666666666666668px;border-radius:4px 4px 4px 4px;border:solid 1px #ffffff;display:block;width:inherit;resize:vertical;}\nnav{background-color:#555555;position:relative;height:60px;}nav ul{position:absolute;top:20px;left:20px;white-space:nowrap;}nav ul li{display:inline;}\nnav ul #searchWord{color:#ffffff;border-style:none;background-color:#333333;}\nnav h1{position:absolute;top:10px;right:20px;font-size:40px;}\narticle{margin:5px;min-width:640px;}\n.modal-backdrop{z-index:10;opacity:0.8;display:none;position:fixed;background:none repeat scroll 0 0 #555555;left:0;top:0;right:0;bottom:0;}\nsection{overflow:hidden;position:relative;border-radius:5px 5px 5px 5px;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;-ms-box-sizing:border-box;-o-box-sizing:border-box;box-sizing:border-box;color:#eeeeee;margin:5px;text-shadow:0px 0px 5px #222222;}section .dummy{z-index:1;position:absolute;left:5px;top:5px;right:5px;bottom:5px;}\n.editor{z-index:11;width:480px;height:480px;left:50%;top:50%;overflow:auto;position:fixed;margin:-240px 0 0 -240px;background-color:#8cbf26;box-shadow:0px 0px 5px 0px rgba(140, 191, 38, 0.5);}\n.dialog{z-index:11;width:480px;height:480px;left:50%;top:50%;overflow:auto;position:fixed;margin:-240px 0 0 -240px;background-color:#8cbf26;box-shadow:0px 0px 5px 0px rgba(140, 191, 38, 0.5);}\n.folder{display:inline-block;background-color:#1ba1e2;box-shadow:0px 0px 5px 0px rgba(27, 161, 226, 0.5);width:120px;height:120px;}.folder h2{position:absolute;bottom:5px;left:5px;}\n.folder h3{position:absolute;top:5px;right:5px;font-size:30px;}\n.bookmark{display:inline-block;background-color:#00aba9;box-shadow:0px 0px 5px 0px rgba(0, 171, 169, 0.5);width:320px;height:120px;}.bookmark .icons{position:absolute;min-width:20px;top:10px;right:10px;visibility:hidden;z-index:2;}\n.bookmark:hover .icons{visibility:visible;}\n.bookmark h2{position:absolute;left:5px;right:5px;bottom:5px;max-height:60px;overflow:hidden;}\n@font-face{font-family:'icomoon';src:url(data:font/svg;charset=utf-8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiID4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8bWV0YWRhdGE+ClRoaXMgaXMgYSBjdXN0b20gU1ZHIGZvbnQgZ2VuZXJhdGVkIGJ5IEljb01vb24uCjEKPC9tZXRhZGF0YT4KPGRlZnM+Cjxmb250IGlkPSJpY29tb29uIiBob3Jpei1hZHYteD0iNTEyIiA+Cjxmb250LWZhY2UgdW5pdHMtcGVyLWVtPSI1MTIiIGFzY2VudD0iNDgwIiBkZXNjZW50PSItMzIiIC8+CjxtaXNzaW5nLWdseXBoIGhvcml6LWFkdi14PSI1MTIiIC8+CjxnbHlwaCB1bmljb2RlPSImI3gyMTsiIGQ9Ik0gNDg4LjAwLDQ1Ni4wMGMtMzIuMDAsMzIuMDAtNjQuMDAsMzIuMDAtOTYuMDAsMC4wMGwtOC4wMC04LjAwbCA5Ni4wMC05Ni4wMGwgOC4wMCw4LjAwQyA1MjAuMDAsMzkyLjAwLCA1MjAuMDAsNDI0LjAwLCA0ODguMDAsNDU2LjAwek0gMzIuMDAsOTYuMDBMMC4wMC0zMi4wMGwgMTI4LjAwLDMyLjAwbCAzMjAuMDAsMzIwLjAwbC05Ni4wMCw5Ni4wMEwgMzIuMDAsOTYuMDB6IE0gMTI4LjAwLDY0LjAwbC0zMi4wMCwzMi4wMGwgMjU2LjAwLDI1Ni4wMGwgMzIuMDAtMzIuMDBMIDEyOC4wMCw2NC4wMHoiIC8+CjxnbHlwaCB1bmljb2RlPSImI3gyMjsiIGQ9Ik0gNDgwLjAwLDQxNi4wMEwgMzIwLjAwLDQxNi4wMCBMIDMyMC4wMCw0NjQuMDAgYzAuMDAsOC44MzYtNy4xNjMsMTYuMDAtMTYuMDAsMTYuMDBsLTk2LjAwLDAuMDAgYy04LjgzNiwwLjAwLTE2LjAwLTcuMTY0LTE2LjAwLTE2LjAwbDAuMDAtNDguMDAgTCAzMi4wMCw0MTYuMDAgTDAuMDAsMzUyLjAwbCA2NC4wMCwwLjAwIGwgMzIuMDAtMzg0LjAwbCAzMjAuMDAsMC4wMCBsIDMyLjAwLDM4NC4wMGwgNjQuMDAsMC4wMCBMIDQ4MC4wMCw0MTYuMDB6IE0gMjI0LjAwLDMyLjAwCglsLTY0LjAwLDAuMDAgTCAxNjAuMDAsMzIwLjAwIGwgNjQuMDAsMC4wMCBMIDIyNC4wMCwzMi4wMCB6IE0gMjI0LjAwLDQ0OC4wMGwgNjQuMDAsMC4wMCBsMC4wMC0zMi4wMCBsLTY0LjAwLDAuMDAgTCAyMjQuMDAsNDQ4LjAwIHogTSAzNTIuMDAsMzIuMDBsLTY0LjAwLDAuMDAgTCAyODguMDAsMzIwLjAwIGwgNjQuMDAsMC4wMCBMIDM1Mi4wMCwzMi4wMCB6IiAvPgo8Z2x5cGggdW5pY29kZT0iJiN4MjM7IiBkPSJNIDUwNy4zMzEsNjguNjdjLTAuMDAyLDAuMDAyLTAuMDA0LDAuMDA0LTAuMDA2LDAuMDA1TCAzNTIuMDAzLDIyNC4wMGwgMTU1LjMyMiwxNTUuMzI1YyAwLjAwMiwwLjAwMiwgMC4wMDQsMC4wMDMsIDAuMDA2LDAuMDA1CgkJYyAxLjY3MiwxLjY3MywgMi44ODEsMy42MjcsIDMuNjU2LDUuNzA4YyAyLjEyMyw1LjY4OCwgMC45MTIsMTIuMzQxLTMuNjYyLDE2LjkxNUwgNDMzLjk1Miw0NzUuMzI2Yy00LjU3NCw0LjU3My0xMS4yMjUsNS43ODMtMTYuOTE0LDMuNjYKCQljLTIuMDgtMC43NzUtNC4wMzUtMS45ODQtNS43MDktMy42NTVjMC4wMC0wLjAwMi0wLjAwMi0wLjAwMy0wLjAwNC0wLjAwNUwgMjU2LjAwMSwzMjAuMDBMIDEwMC42NzcsNDc1LjMyNQoJCWMtMC4wMDIsMC4wMDItMC4wMDMsMC4wMDMtMC4wMDUsMC4wMDVjLTEuNjczLDEuNjcxLTMuNjI3LDIuODgtNS43MDcsMy42NTVjLTUuNjksMi4xMjQtMTIuMzQxLDAuOTEzLTE2LjkxNS0zLjY2TCA0LjY3Niw0MDEuOTUxCgkJYy00LjU3NC00LjU3NC01Ljc4NC0xMS4yMjYtMy42NjEtMTYuOTE0YyAwLjc3Ni0yLjA4LCAxLjk4NS00LjAzNiwgMy42NTYtNS43MDhjIDAuMDAyLTAuMDAxLCAwLjAwMy0wLjAwMywgMC4wMDUtMC4wMDVMIDE2MC4wMDEsMjI0LjAwCgkJTCA0LjY3Niw2OC42NzRjLTAuMDAxLTAuMDAyLTAuMDAzLTAuMDAzLTAuMDA0LTAuMDA1Yy0xLjY3MS0xLjY3My0yLjg4LTMuNjI3LTMuNjU3LTUuNzA3Yy0yLjEyNC01LjY4OC0wLjkxMy0xMi4zNDEsIDMuNjYxLTE2LjkxNQoJCWwgNzMuMzc0LTczLjM3M2MgNC41NzUtNC41NzQsIDExLjIyNi01Ljc4NCwgMTYuOTE1LTMuNjYxYyAyLjA4LDAuNzc2LCA0LjAzNSwxLjk4NSwgNS43MDgsMy42NTZjIDAuMDAxLDAuMDAyLCAwLjAwMywwLjAwMywgMC4wMDUsMC4wMDUKCQlsIDE1NS4zMjQsMTU1LjMyNWwgMTU1LjMyNC0xNTUuMzI1YyAwLjAwMi0wLjAwMSwgMC4wMDQtMC4wMDMsIDAuMDA2LTAuMDA0YyAxLjY3NC0xLjY3MiwgMy42MjctMi44ODEsIDUuNzA3LTMuNjU3CgkJYyA1LjY4OS0yLjEyMywgMTIuMzQyLTAuOTEzLCAxNi45MTQsMy42NjFsIDczLjM3Myw3My4zNzRjIDQuNTc0LDQuNTc0LCA1Ljc4NSwxMS4yMjcsIDMuNjYyLDE2LjkxNQoJCUMgNTEwLjIxMiw2NS4wNDMsIDUwOS4wMDMsNjYuOTk3LCA1MDcuMzMxLDY4LjY3eiIgLz48L2ZvbnQ+PC9kZWZzPjwvc3ZnPg==) format('svg'),url(data:font/woff;charset=utf-8;base64,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) format('woff');font-weight:normal;font-style:normal;}.icon:before{font-family:'icomoon';font-style:normal;speak:none;font-weight:normal;-webkit-font-smoothing:antialiased;}\n.icon-pencil:before{content:\"\\21\";}\n.icon-remove:before{content:\"\\22\";}\n.icon-cancel:before{content:\"\\23\";}\n#config-view h1{background-color:#555555;padding:5px;margin-bottom:15px;}#config-view h1 a{color:#ffffff;}\n#config-view .buttons{margin-top:10px;margin-bottom:10px;}\n#config-view .button{color:white;background-color:#04C;padding:2px 7px;border:0;-webkit-border-radius:3px;-moz-border-radius:3px;-webkit-box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.1),0 1px 3px rgba(0, 0, 0, 0.25);-moz-box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.1),0 1px 3px rgba(0, 0, 0, 0.25);-webkit-transition:none;-moz-transition:none;}\n#config-view #notification{color:red;}\n#config-view .start{margin-top:30px;}\n#config-view #config-box{color:#000000;width:400px;float:left;padding-left:10px;}#config-view #config-box textarea{min-height:300px;width:90%;}\n#config-view #tag-list{color:#000000;width:450px;float:left;border:1px solid #999999;}#config-view #tag-list h3{color:#ffffff;background-color:#999999;padding-bottom:8px;padding-left:2px;}\n#config-view #tag-list #tags{line-height:1.1em;margin-top:6px;margin-left:2px;margin-right:1px;font-size:26px;}#config-view #tag-list #tags .tag-item{font-size:16px;margin:4px;float:left;}\n#config-view #tag-list .clear{clear:both;}\n#config-view #tag-list .buttons{margin-left:10px;}\n";
      });
     register("file.js", function (module, exports, require) { 
-        module.exports = {"config":"<h1>Chawan?: config</h1>\r\n<div id=\"configBox\">\r\n<div class=\"config\"><label>ID:</label>\r\n<input type='text' value='<%- name %>' id=\"user-name\"></input></div>\r\n<div class=\"config\"><label>Password:</label><input type=\"password\" id=\"password\"></input></div>\r\n<div class=\"config\"><label>Transformation rules:</label>\r\n<textarea class=\"config-input\"><%- text || ''%></textarea></div>\r\n<div class=\"buttons\"><a class=\"save\">save</a> <a class=\"cancel\">cancel</a></div>\r\n</div>","dialog":"<h2><%- title %></h2>\r\n<h3><a href=\"<%- url %>\" target=\"_blank\"><%- url %></a></h3>\r\n<p>削除しますか？</p>\r\n<div class=\"buttons\"><a class=\"submit\">submit</a> <a class=\"cancel\">cancel</a></div>\r\n","editor":"<h2><%- title %></h2>\r\n<h3><a href=\"<%- url %>\" target=\"_blank\"><%- url %></a></h3>\r\n<textarea class=\"editor-input\"><%- rawComment %></textarea>\r\n<div class=\"buttons\"><a class=\"submit\">submit</a> <a class=\"cancel\">cancel</a></div>\r\n","folder":"<%\r\n_(folders).each(function(folder){\r\n%><section class=\"folder\" data-name=\"<%- folder.name %>\">\r\n  <a href=\"#!<%- path + folder.name %>\"><div class=\"dummy\" /></a>\r\n  <h2><%- folder.name %></h2>\r\n  <h3><%- folder.count %></h3>\r\n</section><% });%><br><%\r\n_(bookmarks).each(function(bookmark){\r\n%><section class=\"bookmark\">\r\n  <ul class=\"icons\">\r\n    <li class=\"icon-pencil icon\" data-bid=\"<%- bookmark.bid %>\"></li>\r\n    <li class=\"icon-remove icon\" data-bid=\"<%- bookmark.bid %>\"></li>\r\n  </ul>\r\n  <h2><%- bookmark.title %></h2>\r\n  <a href=\"<%- bookmark.url %>\" target=\"_blank\">\r\n    <div class=\"dummy\" />\r\n  </a>\r\n</section><%\r\n}); %>\r\n","nav":"<h1>?Chawan</h1>\r\n<ul class=\"breadcrumbs\">\r\n  <li>?Chawan:</li><%\r\n_(list).each(function(d,n){\r\n%> / <li><%- d %></li><%\r\n});%><li><input type=\"text\" id=\"searchWord\" /></li>\r\n</ul>\r\n"};
+        module.exports = {"config":"<div id=\"config-view\">\r\n  <h1><a href=\"http://b.hatena.ne.jp/my.name\">Chawan?</a>: config</h1>\r\n  <div id=\"config-box\">\r\n    <div class=\"config\"><label>ID:</label>\r\n    <input type='text' value='<%- name %>' id=\"user-name\"></input></div>\r\n    <div class=\"config\"><label>Password\r\n      <span class=\"help\" title=\"任意入力．入力されていると，はてなブックマークにログインしてないときに自動でログインします．\r\n入力されたパスワードがChawan開発者や外部サーバに送信されることはありません．\">[?]</span>\r\n      :</label><input type=\"password\" id=\"password\"></input></div>\r\n    <div class=\"config\"><label>Transformation rules:</label>\r\n    <a href=\"http://hiroqn.github.com/chawan/\" title=\"ルールの書き方？\">rule?</a>\r\n    <textarea class=\"config-input\"><%- text || ''%></textarea></div> \r\n    <div class=\"buttons\">\r\n      <a class=\"save button\">save</a> <a class=\"cancel button\">cancel</a>\r\n    </div>\r\n    <div id=\"notification\"></div>\r\n    <div class=\"start\"><a href=\"http://b.hatena.ne.jp/my.name\">Start using　Chawan</a></div>\r\n  </div>\r\n  <div id=\"tag-list\">\r\n    <h3>Tags <% if (typeof(name) != \"undefined\") { %> id:<%= name %> is <% } else { %>you are <% } %> using in Hatena bookmark</h3>\r\n    <div id=\"tags\">\r\n      Loading list of tags you are using...</div>\r\n    <div class=\"clear buttons\"><span class=\"button add-all-tags\">\r\n      Use all tags as top-level folders\r\n    </span></div>\r\n  </div>\r\n</div>","dialog":"<h2><%- title %></h2>\r\n<h3><a href=\"<%- url %>\" target=\"_blank\"><%- url %></a></h3>\r\n<p>削除しますか？</p>\r\n<div class=\"buttons\"><a class=\"submit\">submit</a> <a class=\"cancel\">cancel</a></div>\r\n","editor":"<h2><%- title %></h2>\r\n<h3><a href=\"<%- url %>\" target=\"_blank\"><%- url %></a></h3>\r\n<textarea class=\"editor-input\"><%- rawComment %></textarea>\r\n<div class=\"buttons\"><a class=\"submit\">submit</a> <a class=\"cancel\">cancel</a></div>\r\n","folder":"<%\r\n_(folders).each(function(folder){\r\n%><section class=\"folder\" data-name=\"<%- folder.name %>\">\r\n  <a href=\"#!<%- path + folder.name %>\"><div class=\"dummy\" /></a>\r\n  <h2><%- folder.name %></h2>\r\n  <h3><%- folder.count %></h3>\r\n</section><% });%><br><%\r\n_(bookmarks).each(function(bookmark){\r\n%><section class=\"bookmark\">\r\n  <ul class=\"icons\">\r\n    <li class=\"icon-pencil icon\" data-bid=\"<%- bookmark.bid %>\"></li>\r\n    <li class=\"icon-remove icon\" data-bid=\"<%- bookmark.bid %>\"></li>\r\n  </ul>\r\n  <h2><%- bookmark.title %></h2>\r\n  <a href=\"<%- bookmark.url %>\" target=\"_blank\">\r\n    <div class=\"dummy\" />\r\n  </a>\r\n</section><%\r\n}); %>\r\n","nav":"<h1>?Chawan</h1>\r\n<ul class=\"breadcrumbs\">\r\n  <li>?Chawan:</li><%\r\n_(list).each(function(d,n){\r\n%> / <li><%- d %></li><%\r\n});%><li><input type=\"text\" id=\"searchWord\" /></li>\r\n</ul>\r\n"};
      });
     register("hatena_client.js", function (module, exports, require) { 
         var Kls = require('kls'),
@@ -12452,11 +12465,14 @@
         exports.Config = Backbone.View.extend({
           events: {
             "click .save": "save",
-            "click .cancel": "cancel"
+            "click .cancel": "cancel",
+            "click .add-all-tags": "addAllTags"
           },
           template: template.config,
           initialize: function () {
+            document.title = "Chawan?: config"
             this.render();
+            this.model.loadTags(this.showTags.bind(this));
           },
           render: function () {
             this.$el.html(this.template(this.model));
@@ -12467,10 +12483,41 @@
             var text = this.$('.config-input').val();
             this.model.setCondition(text);
             this.model.save();
-            console.log('saved'); // TODO add save notification
+            // TODO add better save notification
+            var notification = this.$("#notification");
+            notification.text("saved!");
+            notification.show();
+            notification.fadeOut(2000);
           },
           cancel: function () {
             //    this.render();
+          },
+          addAllTags: function () {
+            var tagsStr = '';
+            this.$(".tag-item").each(function(index, tag){
+              tagsStr += '[' + Backbone.$(tag).text() + ']\n';
+            });
+            this.insertToConfig(tagsStr);
+          },
+          showTags: function (tags) {
+            var $tags = this.$("#tags");
+            $tags.text("");
+            for (var i = 0; i < tags.length; i++) {
+              tag = tags[i];
+              var tagButton = Backbone.$("<div>");
+              tagButton.addClass("tag-item");
+              tagButton.text(tag);
+              tagButton.click(this.insertToConfig.bind(this, '[' + tag + ']'));
+              $tags.append(tagButton);
+            }
+          },
+          insertToConfig: function (str) {
+            var input = Backbone.$(".config-input");
+            var position = input[0].selectionStart || 0;
+            var val = input.val();
+            var newPosition = position + str.length;
+            input.val(val.substring(0, position) + str + val.substring(position));
+            input[0].setSelectionRange(newPosition, newPosition);
           }
         });
         
@@ -12550,7 +12597,8 @@
           watchInterval: 500,
           events: {
             "focus #searchWord": 'startWatch',
-            "blur #searchWord": 'stopWatch'
+            "blur #searchWord": 'stopWatch',
+            "keydown #searchWord": 'keydownHandler'
           },
           initialize: function () {
             this.model.on('change:path', this.render, this);
@@ -12577,6 +12625,11 @@
             clearTimeout(this.timer);
             this.timer = null;
           },
+          keydownHandler: function(event) {
+            if (event.keyCode == 13) { // when enter key is pressed
+              this.trigger('mayMove');
+            }
+          },
           watchSearchWord: function () {
             this.model.set('searchWord', this.$('#searchWord').val());
           }
@@ -12588,6 +12641,7 @@
             app.on('change:path', this.render, this);
             app.on('change:tree', this.render, this);
             this.navView = new NavView({model: app});
+            this.navView.on('mayMove', this.mayMoveLocation, this);
             this.folderView = new FolderView({app: app});
             this.folderView.on('edit', this.openEditor, this);
             this.folderView.on('remove', this.openDialog, this);
@@ -12627,6 +12681,21 @@
             this.model.set('state', 'dialog');
             this.$el.append(dialogView.render().el);
           },
+          mayMoveLocation: function () {
+            var app = this.model;
+            var folder = app.getFolderModel().filter(app.get('searchWord'));
+            if (folder.folders.length == 0 && folder.bookmarks.length == 1) {
+              location.href = folder.bookmarks[0].url;
+            } else if (folder.folders.length == 1 && folder.bookmarks.length == 0) {
+              var separator;
+              if (location.href.indexOf("]") == location.href.length - 1) {
+                separator = "/";
+              } else {
+                separator = "#!";
+              }
+              location.href = location.href + separator + folder.folders[0].name;
+            }
+          },
           close: function () {
             switch (this.model.get('state')) {
             case 'editing':
@@ -12657,6 +12726,7 @@
             if (!myNameJSON.login) {
               return config.askLogin('http://b.hatena.ne.jp/my.name?config');
             }
+            addStyle(CSS);
             var View = require('./view.js');
             config.setByJSON(myNameJSON);
             new View.Config({
@@ -12680,7 +12750,7 @@
         
               });
             } else {
-              window.location.href = '?config';
+              window.location.href += '?config';
             }
           }
         }
@@ -12688,7 +12758,7 @@
          * @param css
          */
         function addStyle(css) {
-          if (GM_addStyle) {
+          if (typeof GM_addStyle != "undefined") {
             GM_addStyle(css);
           } else {
             var style = document.createElement('style');

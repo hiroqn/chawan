@@ -5,11 +5,14 @@ Backbone.$ = require('jQuery');
 exports.Config = Backbone.View.extend({
   events: {
     "click .save": "save",
-    "click .cancel": "cancel"
+    "click .cancel": "cancel",
+    "click .add-all-tags": "addAllTags"
   },
   template: template.config,
   initialize: function () {
+    document.title = "Chawan?: config"
     this.render();
+    this.model.loadTags(this.showTags.bind(this));
   },
   render: function () {
     this.$el.html(this.template(this.model));
@@ -20,10 +23,41 @@ exports.Config = Backbone.View.extend({
     var text = this.$('.config-input').val();
     this.model.setCondition(text);
     this.model.save();
-    console.log('saved'); // TODO add save notification
+    // TODO add better save notification
+    var notification = this.$("#notification");
+    notification.text("saved!");
+    notification.show();
+    notification.fadeOut(2000);
   },
   cancel: function () {
     //    this.render();
+  },
+  addAllTags: function () {
+    var tagsStr = '';
+    this.$(".tag-item").each(function(index, tag){
+      tagsStr += '[' + Backbone.$(tag).text() + ']\n';
+    });
+    this.insertToConfig(tagsStr);
+  },
+  showTags: function (tags) {
+    var $tags = this.$("#tags");
+    $tags.text("");
+    for (var i = 0; i < tags.length; i++) {
+      tag = tags[i];
+      var tagButton = Backbone.$("<div>");
+      tagButton.addClass("tag-item");
+      tagButton.text(tag);
+      tagButton.click(this.insertToConfig.bind(this, '[' + tag + ']'));
+      $tags.append(tagButton);
+    }
+  },
+  insertToConfig: function (str) {
+    var input = Backbone.$(".config-input");
+    var position = input[0].selectionStart || 0;
+    var val = input.val();
+    var newPosition = position + str.length;
+    input.val(val.substring(0, position) + str + val.substring(position));
+    input[0].setSelectionRange(newPosition, newPosition);
   }
 });
 
@@ -103,7 +137,8 @@ var NavView = Backbone.View.extend({
   watchInterval: 500,
   events: {
     "focus #searchWord": 'startWatch',
-    "blur #searchWord": 'stopWatch'
+    "blur #searchWord": 'stopWatch',
+    "keydown #searchWord": 'keydownHandler'
   },
   initialize: function () {
     this.model.on('change:path', this.render, this);
@@ -130,6 +165,11 @@ var NavView = Backbone.View.extend({
     clearTimeout(this.timer);
     this.timer = null;
   },
+  keydownHandler: function(event) {
+    if (event.keyCode == 13) { // when enter key is pressed
+      this.trigger('mayMove');
+    }
+  },
   watchSearchWord: function () {
     this.model.set('searchWord', this.$('#searchWord').val());
   }
@@ -141,6 +181,7 @@ exports.App = Backbone.View.extend({// this element is body
     app.on('change:path', this.render, this);
     app.on('change:tree', this.render, this);
     this.navView = new NavView({model: app});
+    this.navView.on('mayMove', this.mayMoveLocation, this);
     this.folderView = new FolderView({app: app});
     this.folderView.on('edit', this.openEditor, this);
     this.folderView.on('remove', this.openDialog, this);
@@ -179,6 +220,21 @@ exports.App = Backbone.View.extend({// this element is body
     this.modal(true);
     this.model.set('state', 'dialog');
     this.$el.append(dialogView.render().el);
+  },
+  mayMoveLocation: function () {
+    var app = this.model;
+    var folder = app.getFolderModel().filter(app.get('searchWord'));
+    if (folder.folders.length == 0 && folder.bookmarks.length == 1) {
+      location.href = folder.bookmarks[0].url;
+    } else if (folder.folders.length == 1 && folder.bookmarks.length == 0) {
+      var separator;
+      if (location.href.indexOf("]") == location.href.length - 1) {
+        separator = "/";
+      } else {
+        separator = "#!";
+      }
+      location.href = location.href + separator + folder.folders[0].name;
+    }
   },
   close: function () {
     switch (this.model.get('state')) {
